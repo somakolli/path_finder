@@ -7,7 +7,7 @@
 
 #include "Graph.h"
 
-namespace algEng{
+namespace pathFinder{
 struct CHNode : Node {
     Level level;
 };

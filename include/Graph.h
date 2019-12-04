@@ -17,7 +17,7 @@
     #define Debug(x) std::cout << x << '\n';
 #endif
 
-namespace algEng{
+namespace pathFinder{
 using NodeId = uint32_t ;
 using Lat = float;
 using Lng = float;

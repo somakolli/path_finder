@@ -8,7 +8,7 @@
 #include "../include/CHDijkstra.h"
 #include "algorithm"
 
-algEng::HubLabels::HubLabels(algEng::CHGraph &graph) : graph(graph) {
+pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph) : graph(graph) {
     hubLabels.reserve(graph.getNodes().size());
     backHubLabels.reserve(graph.getNodes().size());
 
@@ -47,10 +47,10 @@ algEng::HubLabels::HubLabels(algEng::CHGraph &graph) : graph(graph) {
 }
 
 void
-algEng::HubLabels::constructAllLabels(int maxThreads, const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges,
-                              const algEng::EdgeDirection &direction) {
+pathFinder::HubLabels::constructAllLabels(int maxThreads, const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges,
+                                          const pathFinder::EdgeDirection &direction) {
     for(const auto& sameLevelRange : sameLevelRanges) {
-        if(direction == algEng::EdgeDirection::FORWARD) {
+        if(direction == pathFinder::EdgeDirection::FORWARD) {
             std:: cout << "Forward  progress: " <<  sameLevelRange.first << "/" << graph.getNodes().size() << std::endl;
         } else {
             std:: cout << "Backward progress: " <<  sameLevelRange.first << "/" << graph.getNodes().size() << std::endl;
@@ -60,7 +60,7 @@ algEng::HubLabels::constructAllLabels(int maxThreads, const std::vector<std::pai
 
 }
 
-std::vector<algEng::CostNode> &algEng::HubLabels::getLabels(algEng::NodeId nodeId, algEng::EdgeDirection direction) {
+std::vector<pathFinder::CostNode> &pathFinder::HubLabels::getLabels(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
     switch (direction) {
         case EdgeDirection::FORWARD:
             return hubLabels[nodeId];
@@ -70,7 +70,7 @@ std::vector<algEng::CostNode> &algEng::HubLabels::getLabels(algEng::NodeId nodeI
     return hubLabels[nodeId];
 }
 
-std::optional<algEng::Distance> algEng::HubLabels::getShortestDistance(algEng::NodeId source, algEng::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
     if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
         return std::nullopt;
     auto& forwardLabels = getLabels(source, EdgeDirection::FORWARD);
@@ -79,8 +79,8 @@ std::optional<algEng::Distance> algEng::HubLabels::getShortestDistance(algEng::N
     return getDistance(forwardLabels, backwardLabels, topNode);
 }
 
-algEng::Distance
-algEng::HubLabels::getDistance(std::vector<CostNode> &forwardLabels, std::vector<CostNode> &backwardLabels, NodeId& topNode) {
+pathFinder::Distance
+pathFinder::HubLabels::getDistance(std::vector<CostNode> &forwardLabels, std::vector<CostNode> &backwardLabels, NodeId& topNode) {
     Distance shortestDistance = MAX_DISTANCE;
     topNode = forwardLabels[0].id;
     for(int i = 0, j = 0; i < forwardLabels.size()&& j < backwardLabels.size();) {
@@ -102,7 +102,7 @@ algEng::HubLabels::getDistance(std::vector<CostNode> &forwardLabels, std::vector
     return shortestDistance;
 }
 
-void algEng::HubLabels::setLabel(algEng::NodeId nodeId, algEng::EdgeDirection direction) {
+void pathFinder::HubLabels::setLabel(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
     Level level = graph.getLevel(nodeId);
     auto& label = getLabels(nodeId, direction);
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
@@ -132,13 +132,13 @@ void algEng::HubLabels::setLabel(algEng::NodeId nodeId, algEng::EdgeDirection di
     sortLabel(label);
 }
 
-void algEng::HubLabels::sortLabel(std::vector<CostNode> &label) {
+void pathFinder::HubLabels::sortLabel(std::vector<CostNode> &label) {
     std::sort(label.begin(), label.end(), [](const CostNode& node1, const CostNode& node2) {
         return node1.id == node2.id ? node1.cost < node2.cost : node1.id < node2.id;
     });
 }
 
-void algEng::HubLabels::processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction){
+void pathFinder::HubLabels::processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction){
     for(auto i = range.first; i < range.second; ++i) {
         setLabel(sortedNodes[i].id, direction);
     }
@@ -146,7 +146,7 @@ void algEng::HubLabels::processRange(std::pair<uint32_t, uint32_t> range, EdgeDi
 
 
 
-void algEng::HubLabels::setLabelAsync(NodeId& begin, const NodeId& end, std::mutex &mutex, EdgeDirection direction) {
+void pathFinder::HubLabels::setLabelAsync(NodeId& begin, const NodeId& end, std::mutex &mutex, EdgeDirection direction) {
     while (true) {
         std::unique_lock<std::mutex> l{mutex};
         if(begin >= end)
@@ -160,7 +160,7 @@ void algEng::HubLabels::setLabelAsync(NodeId& begin, const NodeId& end, std::mut
     }
 }
 
-void algEng::HubLabels::processRangeAsync(std::pair<uint32_t, uint32_t> range, algEng::EdgeDirection direction, const uint32_t maxNumberOfThreads) {
+void pathFinder::HubLabels::processRangeAsync(std::pair<uint32_t, uint32_t> range, pathFinder::EdgeDirection direction, const uint32_t maxNumberOfThreads) {
     std::queue<NodeId> q;
     std::vector<std::thread> threads;
     std::mutex mutex;
@@ -175,14 +175,14 @@ void algEng::HubLabels::processRangeAsync(std::pair<uint32_t, uint32_t> range, a
     }
 }
 
-void algEng::HubLabels::constructAllLabelsAsync(int maxThreads,
-                                                const std::vector<std::pair<uint32_t, uint32_t >> &sameLevelRanges,
-                                                const algEng::EdgeDirection &direction) {
+void pathFinder::HubLabels::constructAllLabelsAsync(int maxThreads,
+                                                    const std::vector<std::pair<uint32_t, uint32_t >> &sameLevelRanges,
+                                                    const pathFinder::EdgeDirection &direction) {
     for(auto& sameLevelRange : sameLevelRanges)
         processRangeAsync(sameLevelRange, direction, maxThreads);
 }
 
-void algEng::HubLabels::selfPrune(algEng::NodeId labelId, algEng::EdgeDirection direction) {
+void pathFinder::HubLabels::selfPrune(pathFinder::NodeId labelId, pathFinder::EdgeDirection direction) {
     auto& labels = getLabels(labelId, direction);
     auto it = labels.begin();
     while(it != labels.end()) {
@@ -195,6 +195,6 @@ void algEng::HubLabels::selfPrune(algEng::NodeId labelId, algEng::EdgeDirection 
     }
 }
 
-std::vector<algEng::LatLng> algEng::HubLabels::getShortestPath(algEng::NodeId source, algEng::NodeId target) {
+std::vector<pathFinder::LatLng> pathFinder::HubLabels::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
     return std::vector<LatLng>();
 }

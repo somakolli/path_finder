@@ -16,7 +16,7 @@
 #include "mutex"
 #include "PathFinderBase.h"
 
-namespace algEng {
+namespace pathFinder {
 class HubLabels : public PathFinderBase{
 private:
     std::vector<std::vector<CostNode>> hubLabels;

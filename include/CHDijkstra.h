@@ -9,7 +9,7 @@
 #include "CHGraph.h"
 #include "PathFinderBase.h"
 
-namespace algEng {
+namespace pathFinder {
 class CHDijkstra : public PathFinderBase{
 public:
     CHDijkstra(CHGraph &graph);

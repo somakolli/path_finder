@@ -9,7 +9,7 @@
 #include "string"
 #include "CHGraph.h"
 
-namespace algEng{
+namespace pathFinder{
 class GraphReader{
 public:
 	static void readFmiFile(Graph& graph, const std::string& filepath);

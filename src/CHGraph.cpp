@@ -6,7 +6,7 @@
 #include "../include/CHGraph.h"
 
 
-void algEng::CHGraph::sortByLevel(std::vector<CHNode> &sortedNodes) {
+void pathFinder::CHGraph::sortByLevel(std::vector<CHNode> &sortedNodes) {
     sortedNodes.reserve(nodes.size());
     for(const auto& node : nodes)
         sortedNodes.emplace_back(node);
@@ -15,14 +15,14 @@ void algEng::CHGraph::sortByLevel(std::vector<CHNode> &sortedNodes) {
     });
 }
 
-std::vector<algEng::CHNode>& algEng::CHGraph::getNodes() {
+std::vector<pathFinder::CHNode>& pathFinder::CHGraph::getNodes() {
     return nodes;
 }
 
-std::vector<algEng::Edge> &algEng::CHGraph::getBackEdges() {
+std::vector<pathFinder::Edge> &pathFinder::CHGraph::getBackEdges() {
     return backEdges;
 }
 
-std::vector<algEng::NodeId> &algEng::CHGraph::getBackOffset() {
+std::vector<pathFinder::NodeId> &pathFinder::CHGraph::getBackOffset() {
     return backOffset;
 }

@@ -8,7 +8,7 @@
 #include "Graph.h"
 #include <optional>
 
-namespace algEng{
+namespace pathFinder{
 class PathFinderBase {
 public:
     virtual std::optional<Distance> getShortestDistance(NodeId source, NodeId target) = 0;

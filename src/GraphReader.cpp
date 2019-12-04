@@ -9,7 +9,7 @@
 #include <boost/algorithm/string.hpp>
 
 namespace io = boost::iostreams;
-void algEng::GraphReader::readFmiFile(algEng::Graph &graph, const std::string& filepath) {
+void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::string& filepath) {
 	uint32_t numberOfEdges{};
 	int fdr = open(filepath.data(), O_RDONLY);
 	if (fdr >= 0) {
@@ -43,7 +43,7 @@ void algEng::GraphReader::readFmiFile(algEng::Graph &graph, const std::string& f
 	buildOffset(graph.edges, graph.offset);
 }
 
-void algEng::GraphReader::buildOffset(const std::vector<Edge>& edges, std::vector<NodeId>& offset) {
+void pathFinder::GraphReader::buildOffset(const std::vector<Edge>& edges, std::vector<NodeId>& offset) {
 	offset.clear();
 	if(edges.empty() )
 		return;
@@ -77,7 +77,7 @@ void algEng::GraphReader::buildOffset(const std::vector<Edge>& edges, std::vecto
 	offset[offset.size()-1] = edges.size();
 }
 
-void algEng::GraphReader::readCHFmiFile(algEng::CHGraph &graph, const std::string &filepath) {
+void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const std::string &filepath) {
     uint32_t numberOfEdges{};
     int fdr = open(filepath.data(), O_RDONLY);
     if (fdr >= 0) {
@@ -117,7 +117,7 @@ void algEng::GraphReader::readCHFmiFile(algEng::CHGraph &graph, const std::strin
     buildOffset(graph.getBackEdges(), graph.getBackOffset());
 }
 
-void algEng::GraphReader::buildBackEdges(const std::vector<Edge> &forwardEdges, std::vector<Edge> &backEdges) {
+void pathFinder::GraphReader::buildBackEdges(const std::vector<Edge> &forwardEdges, std::vector<Edge> &backEdges) {
     for(const auto& edge: forwardEdges) {
         Edge backWardEdge = edge;
         backWardEdge.source = edge.target;
@@ -127,7 +127,7 @@ void algEng::GraphReader::buildBackEdges(const std::vector<Edge> &forwardEdges, 
     sortEdges(backEdges);
 }
 
-void algEng::GraphReader::sortEdges(std::vector<Edge> &edges) {
+void pathFinder::GraphReader::sortEdges(std::vector<Edge> &edges) {
     std::sort(edges.begin(), edges.end(), [](const auto& edge1,const auto& edge2) -> bool{
         return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
     });
