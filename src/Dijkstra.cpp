@@ -13,7 +13,7 @@ algEng::Dijkstra::Dijkstra(const algEng::Graph &graph) : graph(graph) {
     }
 }
 
-std::optional<Distance> algEng::Dijkstra::getShortestDistance(algEng::NodeId source, algEng::NodeId target) {
+std::optional<algEng::Distance> algEng::Dijkstra::getShortestDistance(algEng::NodeId source, algEng::NodeId target) {
     if(source >= graph.numberOfNodes || target >= graph.numberOfNodes)
         return std::nullopt;
 	//clean up distances

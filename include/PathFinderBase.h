@@ -6,6 +6,7 @@
 #define ALG_ENG_PROJECT_PATHFINDERBASE_H
 
 #include "Graph.h"
+#include <optional>
 
 namespace algEng{
 class PathFinderBase {
