@@ -1,4 +1,1 @@
 
-[submodule "vendor/stxxl"]
-	path = vendor/stxxl
-	url = http://github.com/stxxl/stxxl.git
