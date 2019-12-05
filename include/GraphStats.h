@@ -7,7 +7,7 @@
 
 #include "CHGraph.h"
 
-namespace algEng {
+namespace pathFinder {
     class GraphStats {
         CHGraph& graph;
     public:

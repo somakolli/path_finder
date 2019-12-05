@@ -10,7 +10,7 @@
 #include "set"
 #include "PathFinderBase.h"
 
-namespace algEng{
+namespace pathFinder{
 class Dijkstra : public PathFinderBase{
 private:
 	std::vector<std::optional<Distance>> costs;

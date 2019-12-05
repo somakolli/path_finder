@@ -4,7 +4,7 @@
 #include <queue>
 #include "../include/Dijkstra.h"
 
-algEng::Dijkstra::Dijkstra(const algEng::Graph &graph) : graph(graph) {
+pathFinder::Dijkstra::Dijkstra(const pathFinder::Graph &graph) : graph(graph) {
 	costs.reserve(graph.numberOfNodes);
 	previousNode.reserve(graph.numberOfNodes);
 	while (costs.size() < graph.numberOfNodes){
@@ -13,7 +13,7 @@ algEng::Dijkstra::Dijkstra(const algEng::Graph &graph) : graph(graph) {
     }
 }
 
-std::optional<algEng::Distance> algEng::Dijkstra::getShortestDistance(algEng::NodeId source, algEng::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::Dijkstra::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
     if(source >= graph.numberOfNodes || target >= graph.numberOfNodes)
         return std::nullopt;
 	//clean up distances
@@ -43,6 +43,6 @@ std::optional<algEng::Distance> algEng::Dijkstra::getShortestDistance(algEng::No
 	return costs[target];
 }
 
-std::vector<algEng::LatLng> algEng::Dijkstra::getShortestPath(algEng::NodeId source, algEng::NodeId target) {
+std::vector<pathFinder::LatLng> pathFinder::Dijkstra::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
     return std::vector<LatLng>();
 }

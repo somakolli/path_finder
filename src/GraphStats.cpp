@@ -5,14 +5,14 @@
 #include "../include/GraphStats.h"
 #include "../include/CHDijkstra.h"
 
-algEng::GraphStats::GraphStats(algEng::CHGraph &graph) : graph(graph) {}
+pathFinder::GraphStats::GraphStats(pathFinder::CHGraph &graph) : graph(graph) {}
 
-std::uint32_t algEng::GraphStats::getDegree(algEng::NodeId id) {
+std::uint32_t pathFinder::GraphStats::getDegree(pathFinder::NodeId id) {
     return graph.edgesFor(id, EdgeDirection::BACKWARD).size()
                 + graph.edgesFor(id, EdgeDirection::FORWARD).size();
 }
 
-float algEng::GraphStats::getAverageDegree() {
+float pathFinder::GraphStats::getAverageDegree() {
     size_t accumulator = 0;
     for(auto node: graph.getNodes()) {
         accumulator += getDegree(node.id);
@@ -20,7 +20,7 @@ float algEng::GraphStats::getAverageDegree() {
     return (float)accumulator / graph.numberOfNodes;
 }
 
-std::uint32_t algEng::GraphStats::getNodeCountWithLevelSmallerThan(algEng::Level level) {
+std::uint32_t pathFinder::GraphStats::getNodeCountWithLevelSmallerThan(pathFinder::Level level) {
     size_t count = 0;
     for(auto node : graph.getNodes()) {
         if(node.level < level)
@@ -29,7 +29,7 @@ std::uint32_t algEng::GraphStats::getNodeCountWithLevelSmallerThan(algEng::Level
     return count;
 }
 
-float algEng::GraphStats::getAverageHopCountUntilLevel(algEng::Level level, EdgeDirection direction) {
+float pathFinder::GraphStats::getAverageHopCountUntilLevel(pathFinder::Level level, EdgeDirection direction) {
     CHDijkstra dijkstra = CHDijkstra(graph);
     size_t totalHopCount = 0;
     for(const auto& node : graph.getNodes()) {
@@ -38,7 +38,7 @@ float algEng::GraphStats::getAverageHopCountUntilLevel(algEng::Level level, Edge
     return (float)totalHopCount / graph.numberOfNodes;
 }
 
-algEng::Level algEng::GraphStats::getHighestLevel() {
+pathFinder::Level pathFinder::GraphStats::getHighestLevel() {
     Level highestLevel = 0;
     for(const auto& node : graph.getNodes())
         if(node.level > highestLevel)
@@ -46,7 +46,7 @@ algEng::Level algEng::GraphStats::getHighestLevel() {
     return highestLevel;
 }
 
-void algEng::GraphStats::printStats(std::ostream& ss) {
+void pathFinder::GraphStats::printStats(std::ostream& ss) {
     ss << "total node size: " << graph.numberOfNodes << "\n";
     ss << "total edge size: " << graph.edges.size() << "\n";
     ss << "average degree: " << getAverageDegree() << "\n";
