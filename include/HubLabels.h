@@ -15,6 +15,8 @@
 #include "queue"
 #include "mutex"
 #include "PathFinderBase.h"
+#include <boost/filesystem/fstream.hpp>
+#include <iostream>
 
 namespace pathFinder {
 
@@ -36,6 +38,8 @@ private:
     void selfPrune(NodeId labelId, EdgeDirection direction);
     costNodeVec_t calcLabel(NodeId source, EdgeDirection direction);
     void mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance edgeDistance);
+    std::optional<Distance> getShortestDistancePrep(NodeId source, NodeId target);
+
 public:
     pathFinder::costNodeVec_t& getLabels(NodeId nodeId, EdgeDirection direction);
     HubLabels(CHGraph &graph, Level level);
@@ -44,6 +48,7 @@ public:
     static std::optional<Distance> getShortestDistance(costNodeVec_t &forwardLabels, costNodeVec_t &backwardLabels, NodeId& nodeId);
     static void sortLabel(costNodeVec_t &label);
     std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
+    void writeToFile(boost::filesystem::path filePath);
 };
 }
 #endif //ALG_ENG_PROJECT_HUBLABELS_H

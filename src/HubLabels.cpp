@@ -8,6 +8,7 @@
 #include "../include/CHDijkstra.h"
 #include "algorithm"
 
+
 pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph, Level level) : graph(graph), labelsUntilLevel(level) {
     cost.reserve(graph.getNodes().size());
     while(cost.size() < graph.getNodes().size())
@@ -79,6 +80,15 @@ std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistance(p
     return getShortestDistance(forwardLabels, backwardLabels, topNode);
 }
 
+std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistancePrep(pathFinder::NodeId source, pathFinder::NodeId target) {
+    if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
+        return std::nullopt;
+    auto forwardLabels = getLabels(source, EdgeDirection::FORWARD);
+    auto backwardLabels = getLabels(target, EdgeDirection::BACKWARD);
+    NodeId topNode;
+    return getShortestDistance(forwardLabels, backwardLabels, topNode);
+}
+
 std::optional<pathFinder::Distance>
 pathFinder::HubLabels::getShortestDistance(costNodeVec_t &forwardLabels, costNodeVec_t &backwardLabels, NodeId& nodeId) {
     Distance shortestDistance = MAX_DISTANCE;
@@ -110,7 +120,7 @@ void pathFinder::HubLabels::setLabel(pathFinder::NodeId nodeId, pathFinder::Edge
             mergeLabels(label, targetLabel, edge.distance);
         }
     }
-    label.push_back(CostNode(nodeId, 0));
+    label.emplace_back(nodeId, 0);
     sortLabel(label);
     selfPrune(nodeId, direction);
     sortLabel(label);
@@ -134,7 +144,7 @@ void pathFinder::HubLabels::selfPrune(pathFinder::NodeId labelId, pathFinder::Ed
     for(int i = labels.size()-1; i > 0; --i) {
         auto& [id, cost] = labels[i];
         auto& otherLabels = getLabels(id, (EdgeDirection) !direction);
-        auto d = forward ? getShortestDistance(labelId, id) : getShortestDistance(id, labelId);
+        auto d = forward ? getShortestDistancePrep(labelId, id) : getShortestDistancePrep(id, labelId);
         if(d < cost){
             labels[i] = labels[labels.size()-1];
             labels.pop_back();
@@ -158,17 +168,16 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
     std::priority_queue<CostNode> q;
     q.emplace(source, 0);
     cost[source] = 0;
-    settledNodes.emplace_back(source , 0);
     visited.emplace_back(source);
     while(!q.empty()) {
         auto costNode = q.top();
         q.pop();
         if(costNode.cost > cost[costNode.id])
             continue;
-        settledNodes.push_back(costNode);
+        settledNodes.emplace_back(costNode.id, costNode.cost);
         auto currentNode = graph.getNodes()[costNode.id];
         if(currentNode.level >= labelsUntilLevel){
-            labelsToCollect.push_back(costNode);
+            labelsToCollect.emplace_back(costNode.id, costNode.cost);
             continue;
         }
         for(const auto& edge: graph.edgesFor(costNode.id, direction)) {
@@ -182,17 +191,29 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
             }
         }
     }
-    std::vector<std::vector<CostNode>> collectedLabels;
+    sortLabel(settledNodes);
     for(auto [id, cost] : labelsToCollect) {
         mergeLabels(settledNodes, getLabels(id, direction), cost);
+        sortLabel(settledNodes);
     }
+    std::cout << source << " [";
+    auto first = true;
+    for(const auto& [id, cost] : settledNodes){
+        if(!first)
+            std::cout << ",";
+        first = false;
+        std::cout << "{" <<  id << "," << cost << "}";
+    }
+    std::cout << "]\n";
+
     return settledNodes;
-    return costNodeVec_t();
 }
 
 void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
+    // TODO
+    // fix merge
     size_t i = 0;
-    for(const auto& [idTarget, distanceTarget] : label2) {
+    for(const auto [idTarget, distanceTarget] : label2) {
         bool found = false;
         const auto addedDistance = distanceTarget + distanceToLabel;
         for(;i < label1.size(); ++i) {
@@ -205,11 +226,26 @@ void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std
             }
         }
         if(!found) {
-            label1.push_back(CostNode(idTarget, addedDistance));
+            label1.emplace_back(idTarget, addedDistance);
         }
     }
 }
 
 void pathFinder::HubLabels::setMinLevel(pathFinder::Level level) {
     this->labelsUntilLevel = level;
+}
+
+void pathFinder::HubLabels::writeToFile(boost::filesystem::path filePath){
+    boost::filesystem::ofstream ofs{filePath};
+    for(int i = 0; i < hubLabels.size(); ++i) {
+        ofs << i << " [";
+        bool first = true;
+        for(auto [id, cost] : hubLabels[i]){
+            if(!first)
+                ofs << ",";
+            ofs << "{" << id << "," << cost << "}";
+            first = false;
+        }
+        ofs << "]\n";
+    }
 }
