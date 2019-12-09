@@ -51,11 +51,11 @@ pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph, Level level) : grap
 void pathFinder::HubLabels::constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel) {
     int currentLevel = maxLevel;
     for(const auto& sameLevelRange : sameLevelRanges) {
-        if(--currentLevel < minLevel)
-            break;
         std:: cout << "constructing level: " << currentLevel << std::endl;
         processRange(sameLevelRange, EdgeDirection::FORWARD);
         processRange(sameLevelRange, EdgeDirection::BACKWARD);
+        if(--currentLevel < minLevel)
+            break;
     }
 }
 
@@ -191,11 +191,10 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
             }
         }
     }
-    sortLabel(settledNodes);
-    for(auto [id, cost] : labelsToCollect) {
-        mergeLabels(settledNodes, getLabels(id, direction), cost);
-        sortLabel(settledNodes);
+    for(auto [id, m_cost] : labelsToCollect) {
+        mergeLabels(settledNodes, getLabels(id, direction), cost[id]);
     }
+    sortLabel(settledNodes);
     std::cout << source << " [";
     auto first = true;
     for(const auto& [id, cost] : settledNodes){
@@ -212,12 +211,10 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
 void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
     // TODO
     // fix merge
-    size_t i = 0;
     for(const auto [idTarget, distanceTarget] : label2) {
         bool found = false;
         const auto addedDistance = distanceTarget + distanceToLabel;
-        for(;i < label1.size(); ++i) {
-            auto&& [id, distance] = label1[i];
+        for(auto&& [id, distance] : label1) {
             if(id == idTarget) {
                 found = true;
                 if(addedDistance < distance)
