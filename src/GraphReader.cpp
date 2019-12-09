@@ -30,12 +30,12 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::s
             long id2;
             double elevation;
 			while (--i > 0 && in >> node.id >> id2 >> node.latLng.lat >> node.latLng.lng >> elevation){
-				graph.nodes.emplace_back(node);
+				graph.nodes.push_back(node);
 			}
 			i = numberOfEdges + 1;
 			Edge edge{};
 			while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >> type >> maxSpeed) {
-				graph.edges.emplace_back(edge);
+				graph.edges.push_back(edge);
 			}
 			fdDevice.close();
 		}
@@ -43,7 +43,7 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::s
 	buildOffset(graph.edges, graph.offset);
 }
 
-void pathFinder::GraphReader::buildOffset(const std::vector<Edge>& edges, std::vector<NodeId>& offset) {
+void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::vector<NodeId>& offset) {
 	offset.clear();
 	if(edges.empty() )
 		return;
@@ -107,7 +107,7 @@ void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const st
             i = numberOfEdges + 1;
             Edge edge{};
             while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >> type >> maxSpeed >> child1 >> child2) {
-                graph.edges.emplace_back(edge);
+                graph.edges.push_back(edge);
             }
             fdDevice.close();
         }
@@ -117,17 +117,17 @@ void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const st
     buildOffset(graph.getBackEdges(), graph.getBackOffset());
 }
 
-void pathFinder::GraphReader::buildBackEdges(const std::vector<Edge> &forwardEdges, std::vector<Edge> &backEdges) {
+void pathFinder::GraphReader::buildBackEdges(const Graph::edgeVector &forwardEdges, Graph::edgeVector &backEdges) {
     for(const auto& edge: forwardEdges) {
         Edge backWardEdge = edge;
         backWardEdge.source = edge.target;
         backWardEdge.target = edge.source;
-        backEdges.emplace_back(backWardEdge);
+        backEdges.push_back(backWardEdge);
     }
     sortEdges(backEdges);
 }
 
-void pathFinder::GraphReader::sortEdges(std::vector<Edge> &edges) {
+void pathFinder::GraphReader::sortEdges(Graph::edgeVector &edges) {
     std::sort(edges.begin(), edges.end(), [](const auto& edge1,const auto& edge2) -> bool{
         return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
     });

@@ -17,26 +17,28 @@
 #include "PathFinderBase.h"
 
 namespace pathFinder {
-class HubLabels : public PathFinderBase{
+
+typedef std::vector<CostNode> costNodeVec_t;
+
+class HubLabels : public PathFinderBase {
+
 private:
-    std::vector<std::vector<CostNode>> hubLabels;
-    std::vector<std::vector<CostNode>> backHubLabels;
+    static const size_t labelsUntilLevel = 20;
+    std::vector<costNodeVec_t> hubLabels;
+    std::vector<costNodeVec_t> backHubLabels;
     std::vector<CHNode> sortedNodes;
     CHGraph& graph;
     void setLabel(NodeId nodeId, EdgeDirection direction);
     void processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction);
-    void processRangeAsync(std::pair<uint32_t, uint32_t> range, EdgeDirection direction, uint32_t maxNumberOfThreads);
-public:
-    std::vector<CostNode>& getLabels(NodeId nodeId, EdgeDirection direction);
-    explicit HubLabels(CHGraph &graph);
-    std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
-    [[nodiscard]]static Distance getDistance(std::vector<CostNode> &forwardLabels, std::vector<CostNode> &backwardLabels, NodeId& nodeId);
-    static void sortLabel(std::vector<CostNode> &label);
-    void constructAllLabels(int maxThreads, const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, const EdgeDirection &direction);
+    void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel);
     void selfPrune(NodeId labelId, EdgeDirection direction);
-    void constructAllLabelsAsync(int maxThreads, const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, const EdgeDirection &direction);
-    void setLabelAsync(NodeId& begin, const NodeId& end, std::mutex& mutex, EdgeDirection direction);
-    std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
+public:
+    costNodeVec_t& getLabels(NodeId nodeId, EdgeDirection direction);
+    explicit HubLabels(CHGraph &graph);
+    std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
+    static std::optional<Distance> getShortestDistance(costNodeVec_t &forwardLabels, costNodeVec_t &backwardLabels, NodeId& nodeId);
+    static void sortLabel(costNodeVec_t &label);
+    std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
 };
 }
 #endif //ALG_ENG_PROJECT_HUBLABELS_H

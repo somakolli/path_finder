@@ -14,11 +14,9 @@ struct CHNode : Node {
 class CHGraph : public Graph {
 private:
     std::vector<CHNode> nodes;
-    std::vector<Edge> backEdges;
+    Graph::edgeVector backEdges;
     std::vector<NodeId> backOffset;
 public:
-
-
     [[nodiscard]] MyIterator<const Edge *> edgesFor(NodeId node, EdgeDirection direction) const {
         switch (direction) {
             case FORWARD:
@@ -33,7 +31,7 @@ public:
     }
     void sortByLevel(std::vector<CHNode>& sortedNodes);
     std::vector<CHNode>& getNodes();
-    std::vector<Edge>& getBackEdges();
+    Graph::edgeVector & getBackEdges();
     std::vector<NodeId>& getBackOffset();
 };
 

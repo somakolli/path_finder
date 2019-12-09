@@ -7,6 +7,8 @@ if( NOT CMAKE_BUILD_TYPE )
     set( CMAKE_BUILD_TYPE Release)
 endif()
 
+find_package(STXXL REQUIRED)
+
 set(SOURCES
         src/Graph.cpp
         src/GraphReader.cpp
@@ -28,7 +30,11 @@ set(INCLUDES
         include/PathFinderBase.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
-include_directories(${Boost_INCLUDE_DIRS})
-add_subdirectory("vendor/stxxl")
-add_library(${PROJECT_NAME} ${SOURCES})
+
+include_directories(${Boost_INCLUDE_DIRS} )
+include_directories(${STXXL_INCLUDE_DIRS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES})
 set(CMAKE_CXX_FLAGS "-pthread")
+set(CMAKE_CXX_FLAGS "-fPIC")

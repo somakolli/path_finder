@@ -8,15 +8,15 @@
 #include <set>
 #include "CHGraph.h"
 #include "PathFinderBase.h"
+#include "HubLabels.h"
 
 namespace pathFinder {
 class CHDijkstra : public PathFinderBase{
 public:
-    CHDijkstra(CHGraph &graph);
-    std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
+    explicit CHDijkstra(CHGraph &graph);
+    std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     std::vector<CostNode> shortestDistance(NodeId source, EdgeDirection direction);
-    uint32_t hopCountUntilLevel(NodeId source, Level level, EdgeDirection direction);
-    std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
+    std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
 private:
     std::vector<Distance> cost;
     std::vector<NodeId> visited;

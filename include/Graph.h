@@ -8,8 +8,10 @@
 #include <cstdint>
 #include <limits>
 #include <iostream>
+#include <stxxl/vector>
 #include "vector"
 #include "ostream"
+
 #define Print(x) std::cout << x << '\n';
 #ifndef NDEBUG
     #define Debug(x);
@@ -23,6 +25,8 @@ using Lat = float;
 using Lng = float;
 using Distance = uint32_t ;
 using Level = uint16_t ;
+
+
 struct LatLng {
     Lat lat;
     Lng lng;
@@ -65,10 +69,14 @@ public:
 };
 class Graph {
 public:
+    //typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
+    //typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
+    typedef std::vector<Node> nodeVector;
+    typedef std::vector<Edge> edgeVector;
     uint32_t numberOfNodes{};
-    std::vector<Edge> edges;
+    edgeVector edges;
 	std::vector<uint32_t> offset;
-	std::vector<Node> nodes;
+	nodeVector nodes;
 	Graph() = default;
 	~Graph() = default;
 	const friend std::ostream &operator<<(std::ostream & Str, Graph graph) {
@@ -96,8 +104,9 @@ class CostNode {
 public:
 	NodeId id;
 	Distance cost;
+    CostNode() = default;
 
-	bool operator<(const CostNode& rhs) const {
+    bool operator<(const CostNode& rhs) const {
 		return cost > rhs.cost;
 	}
 	CostNode(size_t id, size_t cost): id(id), cost(cost) {}

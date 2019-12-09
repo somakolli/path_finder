@@ -19,7 +19,7 @@ std::vector<pathFinder::CHNode>& pathFinder::CHGraph::getNodes() {
     return nodes;
 }
 
-std::vector<pathFinder::Edge> &pathFinder::CHGraph::getBackEdges() {
+pathFinder::Graph::edgeVector &pathFinder::CHGraph::getBackEdges() {
     return backEdges;
 }
 

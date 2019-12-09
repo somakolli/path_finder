@@ -15,7 +15,6 @@ namespace pathFinder {
         std::uint32_t getDegree(NodeId id);
         float getAverageDegree();
         std::uint32_t getNodeCountWithLevelSmallerThan(Level level);
-        float getAverageHopCountUntilLevel(Level level, EdgeDirection direction);
         Level getHighestLevel();
         void printStats(std::ostream& ss);
     };

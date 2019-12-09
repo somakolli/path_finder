@@ -29,15 +29,6 @@ std::uint32_t pathFinder::GraphStats::getNodeCountWithLevelSmallerThan(pathFinde
     return count;
 }
 
-float pathFinder::GraphStats::getAverageHopCountUntilLevel(pathFinder::Level level, EdgeDirection direction) {
-    CHDijkstra dijkstra = CHDijkstra(graph);
-    size_t totalHopCount = 0;
-    for(const auto& node : graph.getNodes()) {
-        totalHopCount += dijkstra.hopCountUntilLevel(node.id, level, direction);
-    }
-    return (float)totalHopCount / graph.numberOfNodes;
-}
-
 pathFinder::Level pathFinder::GraphStats::getHighestLevel() {
     Level highestLevel = 0;
     for(const auto& node : graph.getNodes())
@@ -58,11 +49,6 @@ void pathFinder::GraphStats::printStats(std::ostream& ss) {
     for(Level level = 1; level < 50; ++level) {
         size_t nodeCount = getNodeCountWithLevelSmallerThan(level);
         ss << nodeCount << ',' << level << ',' << (float)nodeCount / graph.numberOfNodes <<  '\n';
-    }
-    ss << seperator << '\n';
-    ss << "average hopcount\n";
-    for(Level level = 1; level < 50; ++level) {
-        ss <<level << "," << getAverageHopCountUntilLevel(level, EdgeDirection::FORWARD) << "\n";
     }
 }
 

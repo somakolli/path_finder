@@ -15,9 +15,9 @@ public:
 	static void readFmiFile(Graph& graph, const std::string& filepath);
     static void readCHFmiFile(CHGraph& chGraph, const std::string& filepath);
 private:
-	static void buildOffset(const std::vector<Edge>& edges, std::vector<NodeId>& offset);
-	static void buildBackEdges(const std::vector<Edge>& forwardEdges, std::vector<Edge>& backEdges);
-	static void sortEdges(std::vector<Edge>& edges);
+	static void buildOffset(const Graph::edgeVector & edges, std::vector<NodeId>& offset);
+	static void buildBackEdges(const Graph::edgeVector & forwardEdges, Graph::edgeVector & backEdges);
+	static void sortEdges(Graph::edgeVector & edges);
 };
 }
 
