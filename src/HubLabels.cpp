@@ -9,6 +9,9 @@
 #include "algorithm"
 
 pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph) : graph(graph) {
+    cost.reserve(graph.getNodes().size());
+    while(cost.size() < graph.getNodes().size())
+        cost.push_back(MAX_DISTANCE);
     hubLabels.reserve(graph.getNodes().size());
     backHubLabels.reserve(graph.getNodes().size());
 
@@ -46,15 +49,17 @@ pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph) : graph(graph) {
 void pathFinder::HubLabels::constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel) {
     int currentLevel = maxLevel;
     for(const auto& sameLevelRange : sameLevelRanges) {
-        if(--maxLevel < minLevel)
+        if(--currentLevel < minLevel)
             break;
-        std:: cout << "constructing level: " << --currentLevel << std::endl;
+        std:: cout << "constructing level: " << currentLevel << std::endl;
         processRange(sameLevelRange, EdgeDirection::FORWARD);
         processRange(sameLevelRange, EdgeDirection::BACKWARD);
     }
 }
 
 pathFinder::costNodeVec_t& pathFinder::HubLabels::getLabels(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
+    auto node = graph.getNodes()[nodeId];
+
     switch (direction) {
         case EdgeDirection::FORWARD:
             return hubLabels[nodeId];
@@ -67,8 +72,8 @@ pathFinder::costNodeVec_t& pathFinder::HubLabels::getLabels(pathFinder::NodeId n
 std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
     if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
         return std::nullopt;
-    auto& forwardLabels = getLabels(source, EdgeDirection::FORWARD);
-    auto& backwardLabels = getLabels(target, EdgeDirection::BACKWARD);
+    auto forwardLabels = calcLabel(source, EdgeDirection::FORWARD);
+    auto backwardLabels = calcLabel(target, EdgeDirection::BACKWARD);
     NodeId topNode;
     return getShortestDistance(forwardLabels, backwardLabels, topNode);
 }
@@ -98,27 +103,10 @@ pathFinder::HubLabels::getShortestDistance(costNodeVec_t &forwardLabels, costNod
 void pathFinder::HubLabels::setLabel(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
     Level level = graph.getLevel(nodeId);
     auto& label = getLabels(nodeId, direction);
-    std::vector<CostNode> ramLabel;
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
         if(level < graph.getLevel(edge.target)) {
             const auto& targetLabel = getLabels(edge.target, direction);
-            size_t i = 0;
-            for(const auto& [idTarget, distanceTarget] : targetLabel) {
-                bool found = false;
-                const auto addedDistance = distanceTarget + edge.distance;
-                for(;i < label.size(); ++i) {
-                    auto&& [id, distance] = label[i];
-                    if(id == idTarget) {
-                        found = true;
-                        if(addedDistance < distance)
-                            distance = addedDistance;
-                        break;
-                    }
-                }
-                if(!found) {
-                    label.push_back(CostNode(idTarget, addedDistance));
-                }
-            }
+            mergeLabels(label, targetLabel, edge.distance);
         }
     }
     label.push_back(CostNode(nodeId, 0));
@@ -155,4 +143,68 @@ void pathFinder::HubLabels::selfPrune(pathFinder::NodeId labelId, pathFinder::Ed
 
 std::vector<pathFinder::LatLng> pathFinder::HubLabels::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
     return std::vector<LatLng>();
+}
+
+pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDirection direction){
+    auto& sourceLabel = getLabels(source, direction);
+    if(!sourceLabel.empty())
+        return sourceLabel;
+    std::vector<CostNode> settledNodes;
+    std::vector<CostNode> labelsToCollect;
+    for(auto nodeId: visited)
+        cost[nodeId] = MAX_DISTANCE;
+    visited.clear();
+    std::priority_queue<CostNode> q;
+    q.emplace(source, 0);
+    cost[source] = 0;
+    visited.emplace_back(source);
+    while(!q.empty()) {
+        auto costNode = q.top();
+        q.pop();
+        if(costNode.cost > cost[costNode.id])
+            continue;
+        settledNodes.push_back(costNode);
+        auto currentNode = graph.getNodes()[costNode.id];
+        if(currentNode.level >= labelsUntilLevel){
+            labelsToCollect.push_back(costNode);
+            continue;
+        }
+        for(const auto& edge: graph.edgesFor(costNode.id, direction)) {
+            if(graph.getLevel(edge.source) > graph.getLevel(edge.target))
+                continue;
+            auto addedCost = costNode.cost + edge.distance;
+            if(addedCost < cost[edge.target]) {
+                visited.emplace_back(edge.target);
+                cost[edge.target] = addedCost;
+                q.emplace(edge.target, addedCost);
+            }
+        }
+    }
+
+    std::vector<std::vector<CostNode>> collectedLabels;
+    for(auto [id, cost] : labelsToCollect) {
+        mergeLabels(settledNodes, getLabels(id, direction), cost);
+    }
+    return settledNodes;
+    return costNodeVec_t();
+}
+
+void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
+    size_t i = 0;
+    for(const auto& [idTarget, distanceTarget] : label2) {
+        bool found = false;
+        const auto addedDistance = distanceTarget + distanceToLabel;
+        for(;i < label1.size(); ++i) {
+            auto&& [id, distance] = label1[i];
+            if(id == idTarget) {
+                found = true;
+                if(addedDistance < distance)
+                    distance = addedDistance;
+                break;
+            }
+        }
+        if(!found) {
+            label1.push_back(CostNode(idTarget, addedDistance));
+        }
+    }
 }
