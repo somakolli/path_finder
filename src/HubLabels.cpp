@@ -8,7 +8,7 @@
 #include "../include/CHDijkstra.h"
 #include "algorithm"
 
-pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph) : graph(graph) {
+pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph, Level level) : graph(graph), labelsUntilLevel(level) {
     cost.reserve(graph.getNodes().size());
     while(cost.size() < graph.getNodes().size())
         cost.push_back(MAX_DISTANCE);
@@ -22,12 +22,13 @@ pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph) : graph(graph) {
     auto maxLevel = sortedNodes.begin()->level;
     auto currentLevel = sortedNodes.begin()->level;
     for(auto j = 0; j < sortedNodes.size(); ++j) {
+        std::cout << currentLevel << std::endl;
         auto i = j;
         while(sortedNodes[j].level == currentLevel && j < sortedNodes.size()){
             ++j;
         }
         sameLevelRanges.emplace_back(i, j+1);
-        currentLevel = sortedNodes[j+1].level;
+        currentLevel--;
     }
 
     //initialize vector for labels for each node
@@ -157,6 +158,7 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
     std::priority_queue<CostNode> q;
     q.emplace(source, 0);
     cost[source] = 0;
+    settledNodes.emplace_back(source , 0);
     visited.emplace_back(source);
     while(!q.empty()) {
         auto costNode = q.top();
@@ -180,7 +182,6 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
             }
         }
     }
-
     std::vector<std::vector<CostNode>> collectedLabels;
     for(auto [id, cost] : labelsToCollect) {
         mergeLabels(settledNodes, getLabels(id, direction), cost);
@@ -207,4 +208,8 @@ void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std
             label1.push_back(CostNode(idTarget, addedDistance));
         }
     }
+}
+
+void pathFinder::HubLabels::setMinLevel(pathFinder::Level level) {
+    this->labelsUntilLevel = level;
 }

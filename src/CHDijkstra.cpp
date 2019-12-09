@@ -16,6 +16,7 @@ std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathF
     q.emplace(source, 0);
     cost[source] = 0;
     visited.emplace_back(source);
+    settledNodes.emplace_back(source, 0);
     while(!q.empty()) {
         auto costNode = q.top();
         q.pop();
