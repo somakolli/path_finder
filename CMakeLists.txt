@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
+
 set(PROJECT_NAME path_finder)
 project(${PROJECT_NAME})
 
@@ -15,7 +16,8 @@ set(SOURCES
         src/CHDijkstra.cpp
         src/HubLabels.cpp
         src/GraphStats.cpp
-        src/PathFinderBase.cpp)
+        src/PathFinderBase.cpp
+        src/ChHlBenchmarker.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -25,14 +27,17 @@ set(INCLUDES
         include/GraphReader.h
         include/GraphStats.h
         include/HubLabels.h
-        include/PathFinderBase.h)
+        include/PathFinderBase.h
+        include/ChHlBenchmarker.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 
 include_directories(${Boost_INCLUDE_DIRS} )
 include_directories(${STXXL_INCLUDE_DIRS})
+include_directories(INCLUDES)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
+
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES})
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")
