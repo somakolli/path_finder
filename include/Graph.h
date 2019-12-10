@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <limits>
 #include <iostream>
-#include <stxxl/vector>
 #include "vector"
 #include "ostream"
 
