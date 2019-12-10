@@ -7,8 +7,6 @@ if( NOT CMAKE_BUILD_TYPE )
     set( CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(STXXL REQUIRED)
-
 set(SOURCES
         src/Graph.cpp
         src/GraphReader.cpp
