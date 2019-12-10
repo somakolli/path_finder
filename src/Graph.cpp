@@ -5,12 +5,12 @@
 #include <cmath>
 #include "../include/Graph.h"
 
-pathFinder::LatLng pathFinder::Graph::getLatLng(pathFinder::NodeId nodeId) {
+pathFinder::LatLng pathFinder::Graph::getLatLng(pathFinder::NodeId nodeId) const {
     auto& node = nodes[nodeId];
     return node.latLng;
 }
 
-pathFinder::NodeId pathFinder::Graph::getNodeId(pathFinder::LatLng latLng) {
+pathFinder::NodeId pathFinder::Graph::getNodeId(pathFinder::LatLng latLng) const {
     double smallestDistance = std::numeric_limits<double>::max();
     Node closestNode{};
     for(const auto& node : nodes) {

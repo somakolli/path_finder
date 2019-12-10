@@ -23,7 +23,6 @@ pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph, Level level) : grap
     auto maxLevel = sortedNodes.begin()->level;
     auto currentLevel = sortedNodes.begin()->level;
     for(auto j = 0; j < sortedNodes.size(); ++j) {
-        std::cout << currentLevel << std::endl;
         auto i = j;
         while(sortedNodes[j].level == currentLevel && j < sortedNodes.size()){
             ++j;
@@ -51,7 +50,7 @@ pathFinder::HubLabels::HubLabels(pathFinder::CHGraph &graph, Level level) : grap
 void pathFinder::HubLabels::constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel) {
     int currentLevel = maxLevel;
     for(const auto& sameLevelRange : sameLevelRanges) {
-        std:: cout << "constructing level: " << currentLevel << std::endl;
+        //std:: cout << "constructing level: " << currentLevel << std::endl;
         processRange(sameLevelRange, EdgeDirection::FORWARD);
         processRange(sameLevelRange, EdgeDirection::BACKWARD);
         if(--currentLevel < minLevel)
@@ -195,16 +194,6 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
         mergeLabels(settledNodes, getLabels(id, direction), cost[id]);
     }
     sortLabel(settledNodes);
-    std::cout << source << " [";
-    auto first = true;
-    for(const auto& [id, cost] : settledNodes){
-        if(!first)
-            std::cout << ",";
-        first = false;
-        std::cout << "{" <<  id << "," << cost << "}";
-    }
-    std::cout << "]\n";
-
     return settledNodes;
 }
 

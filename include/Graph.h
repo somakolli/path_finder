@@ -69,14 +69,17 @@ public:
 };
 class Graph {
 public:
-    //typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
-    //typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
     typedef std::vector<Node> nodeVector;
     typedef std::vector<Edge> edgeVector;
+private:
+
+public:
+    //typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
+    //typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
     uint32_t numberOfNodes{};
-    edgeVector edges;
 	std::vector<uint32_t> offset;
-	nodeVector nodes;
+    edgeVector edges;
+    nodeVector nodes;
 	Graph() = default;
 	~Graph() = default;
 	const friend std::ostream &operator<<(std::ostream & Str, Graph graph) {
@@ -96,8 +99,8 @@ public:
 	MyIterator<const Edge*> edgesFor(NodeId node) const {
 	    return {&edges[offset[node]], &edges[offset[node+1]]};
 	}
-	NodeId getNodeId(LatLng latLng);
-	LatLng getLatLng(NodeId nodeId);
+	NodeId getNodeId(LatLng latLng) const;
+	LatLng getLatLng(NodeId nodeId) const;
 };
 // used for dijkstra PQ
 class CostNode {
