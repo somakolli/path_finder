@@ -25,7 +25,7 @@ pathFinder::ChHlBenchmarker::compareSpeed(boost::filesystem::path benchFilePath)
             auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
             totalTime += elapsed.count();
         }
-        ofs << i << "," << totalTime/numberOfQueriesPerLevel << "\n";
+        ofs << i << "," << totalTime/numberOfQueriesPerLevel << "," << hubLabels.getSpaceConsumption() << std::endl;
         std::cout << "finished level: " << i << "with average time: " << totalTime/numberOfQueriesPerLevel << std::endl;
     }
 }

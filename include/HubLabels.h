@@ -49,6 +49,16 @@ public:
     static void sortLabel(costNodeVec_t &label);
     std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
     void writeToFile(boost::filesystem::path filePath);
+    size_t getSpaceConsumption(){
+        size_t spaceConsumption = 0;
+        for(const auto& label: hubLabels) {
+            spaceConsumption += sizeof(CostNode) * label.size();
+        }
+        for(const auto& label: backHubLabels) {
+            spaceConsumption += sizeof(CostNode) * label.size();
+        }
+        return spaceConsumption;
+    }
 };
 }
 #endif //ALG_ENG_PROJECT_HUBLABELS_H
