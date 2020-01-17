@@ -10,6 +10,7 @@
 #include <iostream>
 #include "vector"
 #include "ostream"
+#include "MmapVector.h"
 
 #define Print(x) std::cout << x << '\n';
 #ifndef NDEBUG
@@ -24,7 +25,6 @@ using Lat = float;
 using Lng = float;
 using Distance = uint32_t ;
 using Level = uint16_t ;
-
 
 struct LatLng {
     Lat lat;
@@ -47,13 +47,14 @@ public:
 		Str << "source: " << edge.source << ' ' << "target: " << edge.target << " distance: " << edge.distance;
 		return Str;
 	}
-};
+}__attribute__((packed));
 class Node {
 public:
     NodeId id;
-    LatLng latLng;
+    Lat lat;
+    Lng lng;
     double quickBeeLine(const LatLng& other) const;
-};
+}__attribute__((packed));
 template <typename MyPointerType>
 class MyIterator{
 private:
@@ -66,37 +67,35 @@ public:
     MyPointerType end() {return _end;};
     size_t size() {return _end - _begin;}
 };
+template <typename edgeVector, typename nodeVector, typename offsetVector>
 class Graph {
-public:
-    typedef std::vector<Node> nodeVector;
-    typedef std::vector<Edge> edgeVector;
 private:
-
+    edgeVector _edges;
+    nodeVector _nodes;
+    offsetVector _offset;
 public:
-    //typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
-    //typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
     uint32_t numberOfNodes{};
-	std::vector<uint32_t> offset;
-    edgeVector edges;
-    nodeVector nodes;
+    edgeVector& edges();
+    nodeVector& nodes();
+    offsetVector& offset();
 	Graph() = default;
 	~Graph() = default;
 	const friend std::ostream &operator<<(std::ostream & Str, Graph graph) {
 		auto i = 0;
 
-		for(auto edge: graph.edges) {
+		for(auto edge: graph.edges()) {
 			Str << edge << '\n';
 		}
-		for(i = 0; i < graph.offset.size(); ++i) {
-			Str << i << ":" << graph.offset[i] << std::endl;
+		for(i = 0; i < graph.offset().size(); ++i) {
+			Str << i << ":" << graph.offset()[i] << std::endl;
 		}
 		Str << "nodes: " << graph.numberOfNodes << std:: endl;
-		Str << "edges: " << graph.edges.size() << std::endl;
-		Str << "offset: " << graph.offset.size() << std::endl;
+		Str << "edges: " << graph.edges().size() << std::endl;
+		Str << "offset: " << graph.offset().size() << std::endl;
 		return Str;
 	}
-	MyIterator<const Edge*> edgesFor(NodeId node) const {
-	    return {&edges[offset[node]], &edges[offset[node+1]]};
+	MyIterator<Edge*> edgesFor(NodeId node) {
+	    return {&_edges[_offset[node]], &_edges[_offset[node+1]]};
 	}
 	NodeId getNodeId(LatLng latLng) const;
 	LatLng getLatLng(NodeId nodeId) const;

@@ -6,8 +6,8 @@
 #include "../include/CHDijkstra.h"
 #include "algorithm"
 #include "../include/HubLabels.h"
-
-std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathFinder::NodeId source, pathFinder::EdgeDirection direction) {
+template<typename Graph>
+std::vector<pathFinder::CostNode> pathFinder::CHDijkstra<Graph>::shortestDistance(pathFinder::NodeId source, pathFinder::EdgeDirection direction) {
     std::vector<CostNode> settledNodes;
     for(auto nodeId: visited)
         cost[nodeId] = MAX_DISTANCE;
@@ -36,25 +36,28 @@ std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathF
     }
     return settledNodes;
 }
-
-pathFinder::CHDijkstra::CHDijkstra(pathFinder::CHGraph &graph) : graph(graph) {
+template <typename Graph>
+pathFinder::CHDijkstra<Graph>::CHDijkstra(Graph &graph) : graph(graph) {
     cost.reserve(graph.numberOfNodes);
     while(cost.size() <= graph.numberOfNodes)
         cost.emplace_back(MAX_DISTANCE);
 }
-
-std::optional<pathFinder::Distance> pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
-    if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
+template<typename Graph>
+std::optional<pathFinder::Distance> pathFinder::CHDijkstra<Graph>::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
+    if(source >= graph.nodes().size() || target >= graph.nodes().size())
         return std::nullopt;
     auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
     auto backwardLabel = shortestDistance(target, EdgeDirection::BACKWARD);
 
-    HubLabels::sortLabel(forwardLabel);
-    HubLabels::sortLabel(backwardLabel);
+    HubLabels<Graph>::sortLabel(forwardLabel);
+    HubLabels<Graph>::sortLabel(backwardLabel);
     NodeId topNode;
-    return pathFinder::HubLabels::getShortestDistance(forwardLabel, backwardLabel, topNode);
+    return pathFinder::HubLabels<Graph>::getShortestDistance(forwardLabel, backwardLabel, topNode);
 }
 
-std::vector<pathFinder::LatLng> pathFinder::CHDijkstra::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
+template<typename Graph>
+std::vector<pathFinder::LatLng> pathFinder::CHDijkstra<Graph>::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
     return std::vector<LatLng>();
 }
+template class pathFinder::CHDijkstra<pathFinder::CHGraph<std::vector<pathFinder::Edge>, std::vector<pathFinder::CHNode>, std::vector<uint32_t>>>;
+template class pathFinder::CHDijkstra<pathFinder::DiskGraph> ;

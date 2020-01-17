@@ -11,16 +11,17 @@
 #include "HubLabels.h"
 
 namespace pathFinder {
+    template<typename Graph>
 class CHDijkstra : public PathFinderBase{
 public:
-    explicit CHDijkstra(CHGraph &graph);
+    explicit CHDijkstra(Graph &graph);
     std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     std::vector<CostNode> shortestDistance(NodeId source, EdgeDirection direction);
     std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
 private:
     std::vector<Distance> cost;
     std::vector<NodeId> visited;
-    CHGraph& graph;
+    Graph& graph;
 };
 }
 

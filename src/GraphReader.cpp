@@ -7,43 +7,9 @@
 #include <fcntl.h>
 #include <iostream>
 #include <boost/algorithm/string.hpp>
-
 namespace io = boost::iostreams;
-void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::string& filepath) {
-	uint32_t numberOfEdges{};
-	int fdr = open(filepath.data(), O_RDONLY);
-	if (fdr >= 0) {
-		io::file_descriptor_source fdDevice(fdr, io::file_descriptor_flags::close_handle);
-		io::stream <io::file_descriptor_source> in(fdDevice);
-		if (fdDevice.is_open()) {
-			std::string line;
-			// ignore first 5 lines
-			for(auto i = 0; i < 5; ++i) {
-				std::getline(in, line);
-			}
-			in >> graph.numberOfNodes;
-			in >> numberOfEdges;
-			uint32_t type;
-			uint32_t maxSpeed;
-            int i = graph.numberOfNodes + 1;
-            Node node{};
-            long id2;
-            double elevation;
-			while (--i > 0 && in >> node.id >> id2 >> node.latLng.lat >> node.latLng.lng >> elevation){
-				graph.nodes.push_back(node);
-			}
-			i = numberOfEdges + 1;
-			Edge edge{};
-			while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >> type >> maxSpeed) {
-				graph.edges.push_back(edge);
-			}
-			fdDevice.close();
-		}
-	}
-	buildOffset(graph.edges, graph.offset);
-}
 
-void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::vector<NodeId>& offset) {
+void pathFinder::GraphReader::buildOffset(const std::vector<Edge> & edges, std::vector<NodeId>& offset) {
 	offset.clear();
 	if(edges.empty() )
 		return;
@@ -76,8 +42,8 @@ void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::
 	offset[0] = 0;
 	offset[offset.size()-1] = edges.size();
 }
-
-void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const std::string &filepath) {
+void pathFinder::GraphReader::readCHFmiFile(RamGraph &graph, const std::string& filepath,
+        DiskGraph & diskGraph) {
     uint32_t numberOfEdges{};
     int fdr = open(filepath.data(), O_RDONLY);
     if (fdr >= 0) {
@@ -91,33 +57,60 @@ void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const st
             }
             in >> graph.numberOfNodes;
             in >> numberOfEdges;
+            NodeId id;
             uint32_t type;
             uint32_t maxSpeed;
             uint32_t child1;
             uint32_t child2;
             uint64_t osmId;
+            Level level;
             Lat lat;
             Lng lng;
             uint32_t el;
             int i = graph.numberOfNodes + 1;
             CHNode node{};
-            while(--i > 0 && in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
-                graph.getNodes().emplace_back(node);
+            while(--i > 0 && in >> id >> osmId >> lat >> lng >> el >> level) {
+                graph.nodes().emplace_back(CHNode{id, lat, lng, level});
             }
             i = numberOfEdges + 1;
-            Edge edge{};
-            while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >> type >> maxSpeed >> child1 >> child2) {
-                graph.edges.push_back(edge);
+            NodeId source;
+            NodeId target;
+            Distance distance;
+            while (--i > 0 && in >> source >> target >> distance >> type >> maxSpeed >> child1 >> child2) {
+                graph.edges().push_back(Edge{source, target, distance});
             }
             fdDevice.close();
         }
     }
-    buildOffset(graph.edges, graph.offset);
-    buildBackEdges(graph.edges, graph.getBackEdges());
-    buildOffset(graph.getBackEdges(), graph.getBackOffset());
+    buildOffset(graph.edges(), graph.offset());
+    buildBackEdges(graph.edges(), graph.backEdges());
+    buildOffset(graph.backEdges(), graph.backOffset());
+
+    MmapVector diskNodes(graph.nodes(), "nodes");
+    MmapVector diskEdges(graph.edges(), "edges");
+    MmapVector diskBackEdges(graph.backEdges(), "backEdges");
+    MmapVector diskOffset(graph.offset(), "offset");
+    MmapVector diskBackOffset(graph.backOffset(), "backOffset");
+
+    diskGraph.nodes() = diskNodes;
+    diskGraph.edges() = diskEdges;
+    diskGraph.offset() = diskOffset;
+    diskGraph.backEdges() = diskBackEdges;
+    diskGraph.backOffset() = diskBackOffset;
+    graph.nodes().clear();
+    graph.nodes().shrink_to_fit();
+    graph.edges().clear();
+    graph.edges().shrink_to_fit();
+    graph.offset().clear();
+    graph.backOffset().shrink_to_fit();
+    graph.backOffset().clear();
+    graph.backOffset().shrink_to_fit();
+    graph.backEdges().clear();
+    graph.backEdges().shrink_to_fit();
+    std::cout << diskGraph.nodes().size() << std::endl;
 }
 
-void pathFinder::GraphReader::buildBackEdges(const Graph::edgeVector &forwardEdges, Graph::edgeVector &backEdges) {
+void pathFinder::GraphReader::buildBackEdges(const std::vector<Edge> &forwardEdges, std::vector<Edge> &backEdges) {
     for(const auto& edge: forwardEdges) {
         Edge backWardEdge = edge;
         backWardEdge.source = edge.target;
@@ -127,8 +120,12 @@ void pathFinder::GraphReader::buildBackEdges(const Graph::edgeVector &forwardEdg
     sortEdges(backEdges);
 }
 
-void pathFinder::GraphReader::sortEdges(Graph::edgeVector &edges) {
+void pathFinder::GraphReader::sortEdges(std::vector<Edge> &edges) {
     std::sort(edges.begin(), edges.end(), [](const auto& edge1,const auto& edge2) -> bool{
         return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
     });
 }
+
+template class pathFinder::Graph<std::vector<pathFinder::Edge>, std::vector<pathFinder::Node>, std::vector<uint32_t>>;
+
+

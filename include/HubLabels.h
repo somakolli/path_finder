@@ -19,9 +19,12 @@
 #include <iostream>
 
 namespace pathFinder {
-
+struct OffsetInfo{
+    size_t position;
+    uint32_t size;
+};
 typedef std::vector<CostNode> costNodeVec_t;
-
+template <typename Graph>
 class HubLabels : public PathFinderBase {
 
 private:
@@ -31,7 +34,7 @@ private:
     std::vector<CHNode> sortedNodes;
     std::vector<Distance> cost;
     std::vector<NodeId> visited;
-    CHGraph& graph;
+    Graph& graph;
     void setLabel(NodeId nodeId, EdgeDirection direction);
     void processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction);
     void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel);
@@ -42,7 +45,7 @@ private:
 
 public:
     pathFinder::costNodeVec_t& getLabels(NodeId nodeId, EdgeDirection direction);
-    HubLabels(CHGraph &graph, Level level);
+    HubLabels(Graph &graph, Level level);
     void setMinLevel(Level level);
     std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     static std::optional<Distance> getShortestDistance(costNodeVec_t &forwardLabels, costNodeVec_t &backwardLabels, NodeId& nodeId);
