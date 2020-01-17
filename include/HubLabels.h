@@ -36,15 +36,16 @@ private:
     void processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction);
     void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel);
     void selfPrune(NodeId labelId, EdgeDirection direction);
-    costNodeVec_t calcLabel(NodeId source, EdgeDirection direction);
+    costNodeVec_t calcLabel(NodeId source, EdgeDirection direction, double& searchTime, double& mergeTime);
     void mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance edgeDistance);
     std::optional<Distance> getShortestDistancePrep(NodeId source, NodeId target);
 
 public:
+    std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
     pathFinder::costNodeVec_t& getLabels(NodeId nodeId, EdgeDirection direction);
     HubLabels(CHGraph &graph, Level level);
     void setMinLevel(Level level);
-    std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
+    std::optional<Distance> getShortestDistance(NodeId source, NodeId target, double& searchTime, double& mergeTime, double& lookUpTime);
     static std::optional<Distance> getShortestDistance(costNodeVec_t &forwardLabels, costNodeVec_t &backwardLabels, NodeId& nodeId);
     static void sortLabel(costNodeVec_t &label);
     std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;

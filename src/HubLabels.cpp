@@ -70,13 +70,18 @@ pathFinder::costNodeVec_t& pathFinder::HubLabels::getLabels(pathFinder::NodeId n
     return hubLabels[nodeId];
 }
 
-std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target, double& searchTime, double& mergeTime, double& lookUpTime) {
     if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
         return std::nullopt;
-    auto forwardLabels = calcLabel(source, EdgeDirection::FORWARD);
-    auto backwardLabels = calcLabel(target, EdgeDirection::BACKWARD);
+    auto forwardLabels = calcLabel(source, EdgeDirection::FORWARD, searchTime, mergeTime);
+    auto backwardLabels = calcLabel(target, EdgeDirection::BACKWARD, searchTime, mergeTime);
     NodeId topNode;
-    return getShortestDistance(forwardLabels, backwardLabels, topNode);
+    auto start = std::chrono::high_resolution_clock::now();
+    auto d = getShortestDistance(forwardLabels, backwardLabels, topNode);
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+    lookUpTime += elapsed.count();
+    return d;
 }
 
 std::optional<pathFinder::Distance> pathFinder::HubLabels::getShortestDistancePrep(pathFinder::NodeId source, pathFinder::NodeId target) {
@@ -155,10 +160,11 @@ std::vector<pathFinder::LatLng> pathFinder::HubLabels::getShortestPath(pathFinde
     return std::vector<LatLng>();
 }
 
-pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDirection direction){
+pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDirection direction, double& searchTime, double& mergeTime){
     auto& sourceLabel = getLabels(source, direction);
     if(!sourceLabel.empty())
         return sourceLabel;
+    auto start = std::chrono::high_resolution_clock::now();
     std::vector<CostNode> settledNodes;
     std::vector<CostNode> labelsToCollect;
     for(auto nodeId: visited)
@@ -190,10 +196,17 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
             }
         }
     }
+    auto finish = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+    searchTime += elapsed.count();
+    start = std::chrono::high_resolution_clock::now();
     for(auto [id, m_cost] : labelsToCollect) {
         mergeLabels(settledNodes, getLabels(id, direction), cost[id]);
     }
     sortLabel(settledNodes);
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+    mergeTime += elapsed.count();
     return settledNodes;
 }
 
@@ -234,4 +247,9 @@ void pathFinder::HubLabels::writeToFile(boost::filesystem::path filePath){
         }
         ofs << "]\n";
     }
+}
+
+std::optional<pathFinder::Distance>
+pathFinder::HubLabels::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
+    return std::optional<Distance>();
 }

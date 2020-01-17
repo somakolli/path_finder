@@ -7,7 +7,7 @@ namespace pathFinder{
 class ChHlBenchmarker {
 private:
 	CHGraph& graph;
-	size_t numberOfQueriesPerLevel = 1000;
+	size_t numberOfQueriesPerLevel = 100;
 public:
 	explicit ChHlBenchmarker(CHGraph& graph);
     void compareSpeed(boost::filesystem::path benchFilePath);
