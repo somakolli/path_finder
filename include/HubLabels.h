@@ -37,7 +37,7 @@ private:
     void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel);
     void selfPrune(NodeId labelId, EdgeDirection direction);
     costNodeVec_t calcLabel(NodeId source, EdgeDirection direction, double& searchTime, double& mergeTime);
-    void mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance edgeDistance);
+    std::vector<CostNode> mergeLabels(const std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance edgeDistance);
     std::optional<Distance> getShortestDistancePrep(NodeId source, NodeId target);
 
 public:

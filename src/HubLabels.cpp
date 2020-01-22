@@ -121,11 +121,10 @@ void pathFinder::HubLabels::setLabel(pathFinder::NodeId nodeId, pathFinder::Edge
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
         if(level < graph.getLevel(edge.target)) {
             const auto& targetLabel = getLabels(edge.target, direction);
-            mergeLabels(label, targetLabel, edge.distance);
+            label = mergeLabels(label, targetLabel, edge.distance);
         }
     }
     label.emplace_back(nodeId, 0);
-    sortLabel(label);
     selfPrune(nodeId, direction);
     sortLabel(label);
 }
@@ -201,7 +200,7 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
     searchTime += elapsed.count();
     start = std::chrono::high_resolution_clock::now();
     for(auto [id, m_cost] : labelsToCollect) {
-        mergeLabels(settledNodes, getLabels(id, direction), cost[id]);
+        settledNodes = mergeLabels(settledNodes, getLabels(id, direction), cost[id]);
     }
     sortLabel(settledNodes);
     finish = std::chrono::high_resolution_clock::now();
@@ -210,24 +209,33 @@ pathFinder::costNodeVec_t pathFinder::HubLabels::calcLabel(NodeId source, EdgeDi
     return settledNodes;
 }
 
-void pathFinder::HubLabels::mergeLabels(std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
-    // TODO
-    // fix merge
-    for(const auto [idTarget, distanceTarget] : label2) {
-        bool found = false;
-        const auto addedDistance = distanceTarget + distanceToLabel;
-        for(auto&& [id, distance] : label1) {
-            if(id == idTarget) {
-                found = true;
-                if(addedDistance < distance)
-                    distance = addedDistance;
-                break;
-            }
-        }
-        if(!found) {
-            label1.emplace_back(idTarget, addedDistance);
-        }
-    }
+std::vector<pathFinder::CostNode> pathFinder::HubLabels::mergeLabels(const std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
+   std::vector<CostNode> returnVec;
+   int i = 0; int j = 0;
+   while(i < label1.size() && j < label2.size()){
+       if(label1[i].id < label2[j].id){
+           returnVec.emplace_back(label1[i]);
+           ++i;
+       } else if(label1[i].id > label2[j].id) {
+           returnVec.emplace_back(label2[j]);
+           ++j;
+       } else {
+           //equal
+           auto& emplaceLabel = label1[i].cost < label2[j].cost ? label1[i] : label2[j];
+           returnVec.emplace_back(emplaceLabel);
+           ++i;
+           ++j;
+       }
+   }
+   while(i < label1.size()){
+       returnVec.emplace_back(label1[i]);
+       ++i;
+   }
+   while(j < label2.size()){
+       returnVec.emplace_back(label2[j]);
+       ++j;
+   }
+   return returnVec;
 }
 
 void pathFinder::HubLabels::setMinLevel(pathFinder::Level level) {
