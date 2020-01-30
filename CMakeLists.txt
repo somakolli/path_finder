@@ -18,7 +18,9 @@ set(SOURCES
         src/GraphStats.cpp
         src/PathFinderBase.cpp
         src/ChHlBenchmarker.cpp
-        src/HubLabelStore.cpp src/MmapVector.cpp)
+        src/HubLabelStore.cpp
+        src/MmapVector.cpp
+        src/Static.cpp )
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -31,7 +33,8 @@ set(INCLUDES
         include/PathFinderBase.h
         include/ChHlBenchmarker.h
         include/HubLabelStore.h
-        include/MmapVector.h)
+        include/MmapVector.h
+        include/Static.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 

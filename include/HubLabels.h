@@ -17,15 +17,33 @@
 #include "PathFinderBase.h"
 #include "HubLabelStore.h"
 #include "MmapVector.h"
+#include "Static.h"
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
 
 namespace pathFinder {
 
+struct DistanceComparer {
+    inline bool operator()(CostNode const & a, CostNode const & b) const {
+        return a.cost < b.cost;
+    }
+};
+
+struct DistanceAdder {
+    inline CostNode operator()(CostNode const & costNode, Distance distance) const {
+        return CostNode(costNode.id, costNode.cost + distance);
+    }
+};
+
+struct Less {
+    inline bool operator()(CostNode const & a, CostNode const & b) const {
+        return a.id < b.id;
+    }
+};
+
 typedef std::vector<CostNode> costNodeVec_t;
 template< typename HubLabelStore, typename Graph>
 class HubLabels : public PathFinderBase {
-
 private:
     Level labelsUntilLevel = 0;
     HubLabelStore hubLabelStore;
@@ -44,35 +62,6 @@ public:
     HubLabels(Graph &graph, Level level, std::vector<CHNode>& sortedNodes, std::vector<Distance>& cost);
     HubLabels(Graph &graph, Level level, HubLabelStore& hubLabelStore);
     HubLabelStore& getHublabelStore();
-    static std::vector<CostNode> mergeLabels(const std::vector<CostNode>& label1, MyIterator<CostNode*> label2, Distance distanceToLabel){
-        std::vector<CostNode> returnVec;
-        auto i = label1.begin();
-        auto j = label2.begin();
-        while(i != label1.end() && j != label2.end()){
-            if(i->id < j->id){
-                returnVec.emplace_back(CostNode(i->id, i->cost));
-                ++i;
-            } else if(i->id > j->id) {
-                returnVec.emplace_back(CostNode(j->id, j->cost + distanceToLabel));
-                ++j;
-            } else {
-                //equal
-                auto emplaceLabel = i->cost < j->cost + distanceToLabel ? *i : CostNode(j->id, j->cost + distanceToLabel);
-                returnVec.emplace_back(emplaceLabel);
-                ++i;
-                ++j;
-            }
-        }
-        while(i < label1.end()){
-            returnVec.emplace_back(CostNode(i->id, i->cost + distanceToLabel));
-            ++i;
-        }
-        while(j < label2.end()){
-            returnVec.emplace_back(CostNode(j->id, j->cost + distanceToLabel));
-            ++j;
-        }
-        return returnVec;
-    };
     std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     void setMinLevel(Level level);
     std::optional<Distance> getShortestDistance(NodeId source, NodeId target, double& searchTime, double& mergeTime, double& lookUpTime);
@@ -187,7 +176,9 @@ std::vector<pathFinder::CostNode> pathFinder::HubLabels<HubLabelStore, Graph>::c
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
         if(level < graph.getLevel(edge.target)) {
             auto targetLabel = hubLabelStore.retrieve(edge.target, direction);
-            label = mergeLabels(label, targetLabel, edge.distance);
+            costNodeVec_t newLabel;
+            Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(), edge.distance, Less(), DistanceAdder(), DistanceComparer(), newLabel);
+            label = newLabel;
         }
     }
     label.emplace_back(nodeId, 0);
@@ -277,10 +268,13 @@ pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
     searchTime += elapsed.count();
     start = std::chrono::high_resolution_clock::now();
-    for(auto [id, m_cost] : labelsToCollect) {
-        settledNodes = mergeLabels(settledNodes, hubLabelStore.retrieve(id, direction), cost[id]);
-    }
     sortLabel(settledNodes);
+    for(auto [id, m_cost] : labelsToCollect) {
+        std::vector<CostNode> resultVec;
+        auto targetLabel = hubLabelStore.retrieve(id, direction);
+        Static::merge(settledNodes.begin(), settledNodes.end(),  targetLabel.begin(), targetLabel.end(), cost[id], Less(), DistanceAdder(), DistanceComparer(), resultVec);
+        settledNodes = resultVec;
+    }
     finish = std::chrono::high_resolution_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
     mergeTime += elapsed.count();

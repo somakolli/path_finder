@@ -37,7 +37,7 @@ pathFinder::ChHlBenchmarker<Graph>::compareSpeed(boost::filesystem::path benchFi
     cost.reserve(graph.getNodes().size());
     while(cost.size() < graph.getNodes().size())
         cost.push_back(MAX_DISTANCE);
-    for(int i = 15; i >= untilLevel; --i) {
+    for(int i = maxLevel + 1; i >= untilLevel; --i) {
         HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> hubLabels(graph, i, sortedNodes, cost);
         double totalTime = 0;
         double searchTime = 0;
