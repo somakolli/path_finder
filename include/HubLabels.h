@@ -175,7 +175,7 @@ std::vector<pathFinder::CostNode> pathFinder::HubLabels<HubLabelStore, Graph>::c
             auto targetLabel = hubLabelStore.retrieve(edge.target, direction);
             costNodeVec_t newLabel;
             Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(), edge.distance, Less(), DistanceAdder(), DistanceComparer(), newLabel);
-            label = newLabel;
+            label = std::move(newLabel);
         }
     }
     label.emplace_back(nodeId, 0);
@@ -304,13 +304,11 @@ pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel
    return returnVec;
 }
  */
-    template< typename HubLabelStore, typename Graph>
-
+template< typename HubLabelStore, typename Graph>
 void pathFinder::HubLabels<HubLabelStore, Graph>::setMinLevel(pathFinder::Level level) {
     this->labelsUntilLevel = level;
 }
-    template< typename HubLabelStore, typename Graph>
-
+template< typename HubLabelStore, typename Graph>
 void pathFinder::HubLabels<HubLabelStore, Graph>::writeToFile(boost::filesystem::path filePath){
     //TODO implement maybe
 }
