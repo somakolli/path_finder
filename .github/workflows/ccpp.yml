@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: checkout submodules
+      run:  git submodule update --init --recursive
     - name: boost
       run: sudo apt-get install libboost-all-dev
     - name: cmake
