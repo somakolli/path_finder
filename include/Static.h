@@ -15,11 +15,11 @@ static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance di
     auto j = bBegin;
     while(i < aEnd && j < bEnd){
         if(l(*i, *j)){
-            ++i;
             result.push_back(*i);
+            ++i;
         } else if(l(*j,*i)){
-            ++j;
             result.push_back(distanceAdder(*j, distanceToLabel));
+            ++j;
         } else {
             if(costComparer(*i, distanceAdder(*j, distanceToLabel)))
                 result.push_back(*i);
