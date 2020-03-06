@@ -77,7 +77,7 @@ void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::
 	offset[offset.size()-1] = edges.size();
 }
 
-void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const std::string &filepath) {
+void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph<std::vector<CHNode>, std::vector<Edge>, std::vector<NodeId>> &graph, const std::string &filepath) {
     uint32_t numberOfEdges{};
     int fdr = open(filepath.data(), O_RDONLY);
     if (fdr >= 0) {

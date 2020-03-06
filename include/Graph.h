@@ -11,7 +11,6 @@
 #include "vector"
 #include "ostream"
 
-#define Print(x) std::cout << x << '\n';
 #ifndef NDEBUG
     #define Debug(x);
 #else
@@ -61,7 +60,7 @@ private:
     MyPointerType _end;
 public:
     MyIterator(MyPointerType begin, MyPointerType end) : _begin(begin), _end(end) {}
-
+    bool empty() const {return _begin == _end;} ;
     MyPointerType begin() {return _begin;};
     MyPointerType end() {return _end;};
     size_t size() {return _end - _begin;}
