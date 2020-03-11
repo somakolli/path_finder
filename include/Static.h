@@ -10,14 +10,14 @@ class Static {
 public:
 template<typename ItA, typename ItB, typename Container, typename Distance, typename Less, typename DistanceAdder, typename CostComparer>
 static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel,
-        Less l, DistanceAdder distanceAdder, CostComparer costComparer, Container& result) {
+        Less less, DistanceAdder distanceAdder, CostComparer costComparer, Container& result) {
     auto i = aBegin;
     auto j = bBegin;
     while(i < aEnd && j < bEnd){
-        if(l(*i, *j)){
+        if(less(*i, *j)){
             result.push_back(*i);
             ++i;
-        } else if(l(*j,*i)){
+        } else if(less(*j,*i)){
             result.push_back(distanceAdder(*j, distanceToLabel));
             ++j;
         } else {

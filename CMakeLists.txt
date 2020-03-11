@@ -37,6 +37,7 @@ set(INCLUDES
         include/Static.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
+find_package(OpenMP)
 
 include_directories(${Boost_INCLUDE_DIRS} )
 include_directories(${STXXL_INCLUDE_DIRS})
@@ -51,6 +52,6 @@ if(PACKAGE_TESTS)
     add_subdirectory(tests)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES} OpenMP::OpenMP_CXX)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")
