@@ -11,7 +11,7 @@
 #include <iostream>
 namespace pathFinder {
 
-    template<typename T, typename Allocator>
+    template<typename T, typename Allocator = std::allocator<T>>
     class MmapVector {
     private:
         T *_data;
