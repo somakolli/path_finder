@@ -13,9 +13,9 @@ namespace pathFinder{
 class GraphReader{
 public:
 	static void readFmiFile(Graph& graph, const std::string& filepath);
-    static void readCHFmiFile(CHGraph<std::vector<CHNode>, std::vector<Edge>, std::vector<NodeId>> & chGraph, const std::string& filepath);
+    static void readCHFmiFile(CHGraph<std::vector> & chGraph, const std::string& filepath);
 private:
-	static void buildOffset(const Graph::edgeVector & edges, std::vector<NodeId>& offset);
+	static void buildOffset(Graph::edgeVector & edges, std::vector<NodeId>& offset);
 	static void buildBackEdges(const Graph::edgeVector & forwardEdges, Graph::edgeVector & backEdges);
 	static void sortEdges(Graph::edgeVector & edges);
 };

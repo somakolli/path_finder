@@ -12,14 +12,17 @@ namespace pathFinder{
 struct CHNode : Node {
     Level level;
 };
-template <class NodeVector , class EdgeVector, class OffsetVector>
+template <template<class, class> class Vector>
 class CHGraph {
+    using EdgeVector = Vector<Edge, std::allocator<Edge>>;
+    using NodeVector = Vector<CHNode, std::allocator<CHNode>>;
+    using OffsetVector = std::vector<NodeId>;
 private:
     NodeVector nodes;
     EdgeVector backEdges;
     OffsetVector backOffset;
 public:
-    CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges, OffsetVector& offset,OffsetVector& backOffset, size_t numberOfNodes);
+    CHGraph(NodeVector& nodes, EdgeVector& edges, EdgeVector& backEdges, OffsetVector& offset, OffsetVector& backOffset, size_t numberOfNodes);
 
     CHGraph();
 
@@ -39,14 +42,14 @@ public:
         return nodes[nodeId].level;
     }
     void sortByLevel(std::vector<CHNode>& sortedNodes);
-    NodeVector& getNodes();
-    EdgeVector & getForwardEdges();
-    OffsetVector& getForwardOffset();
-    EdgeVector & getBackEdges();
+    NodeVector & getNodes();
+    EdgeVector& getForwardEdges();
+    OffsetVector & getForwardOffset();
+    EdgeVector& getBackEdges();
     OffsetVector& getBackOffset();
 };
-template <class NodeVector , class EdgeVector, class OffsetVector>
-void pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::sortByLevel(std::vector<CHNode> &sortedNodes) {
+template <template<class, class> class Vector>
+void pathFinder::CHGraph<Vector>::sortByLevel(std::vector<CHNode> &sortedNodes) {
     sortedNodes.reserve(nodes.size());
     for(const auto& node : nodes)
         sortedNodes.emplace_back(node);
@@ -54,35 +57,35 @@ void pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::sortByLevel(std:
         return node1.level == node2.level? node1.id < node2.id : node1.level > node2.level;
     });
 }
-template <class NodeVector , class EdgeVector, class OffsetVector>
-NodeVector &pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::getNodes() {
+template <template<class, class> class Vector>
+Vector<CHNode, std::allocator<CHNode>> &pathFinder::CHGraph<Vector>::getNodes() {
     return nodes;
 }
-template <class NodeVector , class EdgeVector, class OffsetVector>
-EdgeVector &pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::getBackEdges() {
+template <template<class, class> class Vector>
+Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector>::getBackEdges() {
     return backEdges;
 }
-template <class NodeVector , class EdgeVector, class OffsetVector>
-OffsetVector &pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::getBackOffset() {
+template <template<class, class> class Vector>
+std::vector<NodeId> &pathFinder::CHGraph<Vector>::getBackOffset() {
     return backOffset;
 }
-template <class NodeVector , class EdgeVector, class OffsetVector>
-EdgeVector &pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::getForwardEdges() {
+template <template<class, class> class Vector>
+Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector>::getForwardEdges() {
     return edges;
 }
-template <class NodeVector , class EdgeVector, class OffsetVector>
-OffsetVector &pathFinder::CHGraph<NodeVector, EdgeVector, OffsetVector>::getForwardOffset() {
+template <template<class, class> class Vector>
+std::vector<NodeId> &pathFinder::CHGraph<Vector>::getForwardOffset() {
     return offset;
 }
 
-template<class NodeVector, class EdgeVector, class OffsetVector>
-CHGraph<NodeVector, EdgeVector, OffsetVector>::CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges,
+template <template<class, class> class Vector>
+CHGraph<Vector>::CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges,
                                                        OffsetVector& backOffset, OffsetVector& offset, size_t numberOfNodes
                                                        ):nodes(nodes), backEdges(backEdges),
                                                                          backOffset(backOffset), offset(offset),
                                                                          edges(edges), numberOfNodes(numberOfNodes) {}
 
-template<class NodeVector, class EdgeVector, class OffsetVector>
-CHGraph<NodeVector, EdgeVector, OffsetVector>::CHGraph() {}
+template <template<class, class> class Vector>
+CHGraph<Vector>::CHGraph() {}
 }
 #endif //ALG_ENG_PROJECT_CHGRAPH_H
