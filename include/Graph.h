@@ -114,6 +114,10 @@ public:
 		return cost > rhs.cost;
 	}
 	CostNode(NodeId id, size_t cost, NodeId previousNode): id(id), cost(cost), previousNode(previousNode) {}
+
+	bool operator==(const CostNode& rhs) const {
+        return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
+    }
 };
 }
 #endif //ALG_END_PROJECT_GRAPH_H

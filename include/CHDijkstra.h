@@ -66,8 +66,8 @@ std::optional<pathFinder::Distance> pathFinder::CHDijkstra<Graph>::getShortestDi
     auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
     auto backwardLabel = shortestDistance(target, EdgeDirection::BACKWARD);
 
-    HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> ::sortLabel(forwardLabel);
-    HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> ::sortLabel(backwardLabel);
+    HubLabels<HubLabelStore<std::vector>, Graph> ::sortLabel(forwardLabel);
+    HubLabels<HubLabelStore<std::vector>, Graph> ::sortLabel(backwardLabel);
     NodeId topNode;
     return pathFinder::HubLabels<std::vector<CostNode>, Graph>::getShortestDistance(MyIterator<CostNode*>(forwardLabel.begin().base(), forwardLabel.end().base()), MyIterator<CostNode*>(backwardLabel.begin().base(), backwardLabel.end().base()), topNode);
 }
