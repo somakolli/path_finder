@@ -24,7 +24,7 @@ std::optional<pathFinder::Distance> pathFinder::Dijkstra::getShortestDistance(pa
 	visited.emplace_back(source);
 	costs[source] = 0;
 	std::priority_queue<CostNode> q;
-	q.emplace(source, 0);
+	q.emplace(source, 0, source);
 	while (!q.empty()) {
 		const auto costNode = q.top();
 		q.pop();
@@ -35,7 +35,7 @@ std::optional<pathFinder::Distance> pathFinder::Dijkstra::getShortestDistance(pa
 			Distance currentCost = costNode.cost + edge.distance;
 			if(currentCost < costs[edge.target]) {
 				costs[edge.target] = currentCost;
-				q.emplace(edge.target, currentCost);
+				q.emplace(edge.target, currentCost, edge.source);
 				visited.emplace_back(edge.target);
 			}
 		}

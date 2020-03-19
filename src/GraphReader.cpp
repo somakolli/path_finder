@@ -43,7 +43,7 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::s
 	buildOffset(graph.edges, graph.offset);
 }
 
-void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::vector<NodeId>& offset) {
+void pathFinder::GraphReader::buildOffset(Graph::edgeVector & edges, std::vector<NodeId>& offset) {
 	offset.clear();
 	if(edges.empty() )
 		return;
@@ -77,7 +77,7 @@ void pathFinder::GraphReader::buildOffset(const Graph::edgeVector & edges, std::
 	offset[offset.size()-1] = edges.size();
 }
 
-void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const std::string &filepath) {
+void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph<std::vector> &graph, const std::string &filepath) {
     uint32_t numberOfEdges{};
     int fdr = open(filepath.data(), O_RDONLY);
     if (fdr >= 0) {
@@ -102,7 +102,7 @@ void pathFinder::GraphReader::readCHFmiFile(pathFinder::CHGraph &graph, const st
             int i = graph.numberOfNodes + 1;
             CHNode node{};
             while(--i > 0 && in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
-                graph.getNodes().emplace_back(node);
+                graph.getNodes().push_back(node);
             }
             i = numberOfEdges + 1;
             Edge edge{};

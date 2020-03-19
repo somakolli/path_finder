@@ -11,7 +11,6 @@
 #include "vector"
 #include "ostream"
 
-#define Print(x) std::cout << x << '\n';
 #ifndef NDEBUG
     #define Debug(x);
 #else
@@ -61,9 +60,11 @@ private:
     MyPointerType _end;
 public:
     MyIterator(MyPointerType begin, MyPointerType end) : _begin(begin), _end(end) {}
-
+    bool empty() const {return _begin == _end;} ;
     MyPointerType begin() {return _begin;};
+    MyPointerType begin() const {return _begin;};
     MyPointerType end() {return _end;};
+    MyPointerType end() const {return _end;};
     size_t size() {return _end - _begin;}
 };
 class Graph {
@@ -106,12 +107,17 @@ class CostNode {
 public:
 	NodeId id;
 	Distance cost;
+	NodeId previousNode;
     CostNode() = default;
 
     bool operator<(const CostNode& rhs) const {
 		return cost > rhs.cost;
 	}
-	CostNode(size_t id, size_t cost): id(id), cost(cost) {}
+	CostNode(NodeId id, size_t cost, NodeId previousNode): id(id), cost(cost), previousNode(previousNode) {}
+
+	bool operator==(const CostNode& rhs) const {
+        return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
+    }
 };
 }
 #endif //ALG_END_PROJECT_GRAPH_H
