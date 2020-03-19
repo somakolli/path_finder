@@ -184,7 +184,7 @@ std::vector<pathFinder::CostNode> pathFinder::HubLabels<HubLabelStore, Graph>::c
     Level level = graph.getLevel(nodeId);
     costNodeVec_t label;
     costNodeVec_t newLabel;
-    label.reserve(1000);
+    label.reserve(100);
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
         if(level < graph.getLevel(edge.target)) {
             auto targetLabel = hubLabelStore.retrieve(edge.target, direction);
@@ -230,6 +230,7 @@ void HubLabels<HubLabelStore, Graph>::processRangeParallel(std::pair<uint32_t, u
     for(auto& label: labelsForRange){
         hubLabelStore.store(label, sortedNodes[range.first + i++].id, direction);
         label.clear();
+        label.shrink_to_fit();
     }
 }
 
