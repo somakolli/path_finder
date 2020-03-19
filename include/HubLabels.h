@@ -13,16 +13,17 @@
 #include "thread"
 #include <boost/container/small_vector.hpp>
 #include "queue"
-#include "mutex"
 #include "PathFinderBase.h"
 #include "HubLabelStore.h"
 #include "MmapVector.h"
 #include "Static.h"
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
+#include <cmath>
+#include "Stopwatch.h"
+#define TIMER 1
 
 namespace pathFinder {
-
 struct DistanceComparer {
     inline bool operator()(CostNode const & a, CostNode const & b) const {
         return a.cost < b.cost;
@@ -31,7 +32,7 @@ struct DistanceComparer {
 
 struct DistanceAdder {
     inline CostNode operator()(CostNode const & costNode, Distance distance) const {
-        return CostNode(costNode.id, costNode.cost + distance);
+        return CostNode(costNode.id, costNode.cost + distance, costNode.previousNode);
     }
 };
 
@@ -51,20 +52,25 @@ private:
     std::vector<Distance> cost;
     std::vector<NodeId> visited;
     Graph& graph;
-    std::vector<CostNode> calcLabel(NodeId nodeId, EdgeDirection direction);
+
+    // functions for preprocessing
+    std::vector<CostNode> calcLabelPreprocessing(NodeId nodeId, EdgeDirection direction);
+    std::optional<Distance> getShortestDistancePreprocessing(NodeId source, NodeId target);
     void processRange(std::pair<uint32_t, uint32_t> range, EdgeDirection direction);
+    void processRangeParallel(std::pair<uint32_t, uint32_t> range, EdgeDirection direction);
     void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t >>& sameLevelRanges, int maxLevel, int minLevel);
     void selfPrune(std::vector<CostNode>& labels, pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction);
-    costNodeVec_t calcLabel(NodeId source, EdgeDirection direction, double& searchTime, double& mergeTime);
-    std::optional<Distance> getShortestDistancePrep(NodeId source, NodeId target);
+
+    //functions for queries
+    costNodeVec_t calcLabel(NodeId source, EdgeDirection direction);
+
 public:
     HubLabels(Graph &graph, Level level);
     HubLabels(Graph &graph, Level level, std::vector<CHNode>& sortedNodes, std::vector<Distance>& cost);
     HubLabels(Graph &graph, Level level, HubLabelStore& hubLabelStore);
     HubLabelStore& getHublabelStore();
-    std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     void setMinLevel(Level level);
-    std::optional<Distance> getShortestDistance(NodeId source, NodeId target, double& searchTime, double& mergeTime, double& lookUpTime);
+    std::optional<Distance> getShortestDistance(NodeId source, NodeId target) override;
     static std::optional<Distance> getShortestDistance(MyIterator<CostNode*> forwardLabels, MyIterator<CostNode*> backwardLabels, NodeId& nodeId);
     static void sortLabel(costNodeVec_t &label);
     std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
@@ -110,30 +116,26 @@ void pathFinder::HubLabels<HubLabelStore, Graph>::constructAllLabels(const std::
     int currentLevel = maxLevel;
     for(const auto& sameLevelRange : sameLevelRanges) {
         std:: cout << "constructing level: " << currentLevel << std::endl;
-        processRange(sameLevelRange, EdgeDirection::FORWARD);
-        processRange(sameLevelRange, EdgeDirection::BACKWARD);
+        processRangeParallel(sameLevelRange, EdgeDirection::FORWARD);
+        processRangeParallel(sameLevelRange, EdgeDirection::BACKWARD);
         if(--currentLevel < minLevel)
             break;
     }
 }
 
 template< typename HubLabelStore, typename Graph>
-std::optional<pathFinder::Distance> pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target, double& searchTime, double& mergeTime, double& lookUpTime) {
+std::optional<pathFinder::Distance> pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
     if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
         return std::nullopt;
-    auto forwardLabels = calcLabel(source, EdgeDirection::FORWARD, searchTime, mergeTime);
-    auto backwardLabels = calcLabel(target, EdgeDirection::BACKWARD, searchTime, mergeTime);
+    auto forwardLabels = calcLabel(source, EdgeDirection::FORWARD);
+    auto backwardLabels = calcLabel(target, EdgeDirection::BACKWARD);
     NodeId topNode;
-    auto start = std::chrono::high_resolution_clock::now();
     auto d = getShortestDistance(MyIterator(forwardLabels.begin().base(), forwardLabels.end().base()), MyIterator(backwardLabels.begin().base(), backwardLabels.end().base()), topNode);
-    auto finish = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    lookUpTime += elapsed.count();
     return d;
 }
 
 template< typename HubLabelStore, typename Graph>
-std::optional<pathFinder::Distance> pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistancePrep(pathFinder::NodeId source, pathFinder::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistancePreprocessing(pathFinder::NodeId source, pathFinder::NodeId target) {
     if(source >= graph.getNodes().size() || target >= graph.getNodes().size())
         return std::nullopt;
     auto forwardLabels = hubLabelStore.retrieve(source, EdgeDirection::FORWARD);
@@ -166,19 +168,23 @@ pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistance(MyIterator<Cost
     }
     return shortestDistance;
 }
+
 template< typename HubLabelStore, typename Graph>
-std::vector<pathFinder::CostNode> pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
+std::vector<pathFinder::CostNode> pathFinder::HubLabels<HubLabelStore, Graph>::calcLabelPreprocessing(pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
     Level level = graph.getLevel(nodeId);
     costNodeVec_t label;
+    costNodeVec_t newLabel;
+    label.reserve(1000);
     for(const auto& edge: graph.edgesFor(nodeId, direction)) {
         if(level < graph.getLevel(edge.target)) {
             auto targetLabel = hubLabelStore.retrieve(edge.target, direction);
-            costNodeVec_t newLabel;
-            Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(), edge.distance, Less(), DistanceAdder(), DistanceComparer(), newLabel);
+            newLabel.clear();
+            newLabel.reserve(targetLabel.size() + label.size());
+            Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(), edge.distance, newLabel);
             label = std::move(newLabel);
         }
     }
-    label.emplace_back(nodeId, 0);
+    label.emplace_back(nodeId, 0, nodeId);
     selfPrune(label, nodeId, direction);
     sortLabel(label);
     return label;
@@ -198,41 +204,67 @@ void pathFinder::HubLabels<HubLabelStore, Graph>::processRange(std::pair<uint32_
         hubLabelStore.store(label, sortedNodes[i].id, direction);
     }
 }
+
+template<typename HubLabelStore, typename Graph>
+void HubLabels<HubLabelStore, Graph>::processRangeParallel(std::pair<uint32_t, uint32_t> range, EdgeDirection direction) {
+    std::vector<costNodeVec_t> labelsForRange;
+    labelsForRange.reserve(range.second-range.first);
+    for(auto i = range.first; i < range.second; ++i)
+        labelsForRange.emplace_back(costNodeVec_t());
+    #pragma omp parallel for
+    for(auto i = range.first; i < range.second; ++i) {
+        labelsForRange[i - range.first] = calcLabelPreprocessing(sortedNodes[i].id, direction);
+    }
+    int i = 0;
+    for(auto& label: labelsForRange){
+        hubLabelStore.store(label, sortedNodes[range.first + i++].id, direction);
+        label.clear();
+    }
+}
+
 template< typename HubLabelStore, typename Graph>
 void pathFinder::HubLabels<HubLabelStore, Graph>::selfPrune(std::vector<CostNode>& labels, pathFinder::NodeId nodeId, pathFinder::EdgeDirection direction) {
     bool forward = (direction == EdgeDirection::FORWARD);
     for(int i = labels.size()-1; i > 0; --i) {
-        auto& [id, cost] = labels[i];
+        auto& [id, cost, previousNode] = labels[i];
         const auto& otherLabels = hubLabelStore.retrieve(id, (EdgeDirection) !direction);
-        auto d = forward ? getShortestDistancePrep(nodeId, id) : getShortestDistancePrep(id, nodeId);
+        auto d = forward ? getShortestDistancePreprocessing(nodeId, id) : getShortestDistancePreprocessing(id, nodeId);
         if(d < cost){
             labels[i] = labels[labels.size()-1];
             labels.pop_back();
         }
     }
 }
-    template< typename HubLabelStore, typename Graph>
 
-
+template< typename HubLabelStore, typename Graph>
 std::vector<pathFinder::LatLng> pathFinder::HubLabels<HubLabelStore, Graph>::getShortestPath(pathFinder::NodeId source, pathFinder::NodeId target) {
     return std::vector<LatLng>();
 }
 
-    template< typename HubLabelStore, typename Graph>
-
-
-pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel(NodeId source, EdgeDirection direction, double& searchTime, double& mergeTime){
+template< typename HubLabelStore, typename Graph>
+pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel(NodeId source, EdgeDirection direction){
     const auto& sourceLabel = hubLabelStore.retrieve(source, direction);
-    if(!sourceLabel.empty())
-        return pathFinder::costNodeVec_t();
-    auto start = std::chrono::high_resolution_clock::now();
+#ifdef TIMER
+    Stopwatch sw;
+#endif
+    if(!sourceLabel.empty()){
+        costNodeVec_t vec;
+        for(const auto entry : sourceLabel)
+            vec.push_back(entry);
+        return vec;
+    }
+#ifdef TIMER
+    std::cout << std::endl;
+    std::cout << "label not precalculated" << std::endl;
+    sw.reset();
+#endif
     std::vector<CostNode> settledNodes;
-    std::vector<CostNode> labelsToCollect;
+    std::vector<NodeId> labelsToCollect;
     for(auto nodeId: visited)
         cost[nodeId] = MAX_DISTANCE;
     visited.clear();
     std::priority_queue<CostNode> q;
-    q.emplace(source, 0);
+    q.emplace(source, 0, source);
     cost[source] = 0;
     visited.emplace_back(source);
     while(!q.empty()) {
@@ -240,10 +272,10 @@ pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel
         q.pop();
         if(costNode.cost > cost[costNode.id])
             continue;
-        settledNodes.emplace_back(costNode.id, costNode.cost);
+        settledNodes.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
         auto currentNode = graph.getNodes()[costNode.id];
         if(currentNode.level >= labelsUntilLevel){
-            labelsToCollect.emplace_back(costNode.id, costNode.cost);
+            labelsToCollect.emplace_back(costNode.id);
             continue;
         }
         for(const auto& edge: graph.edgesFor(costNode.id, direction)) {
@@ -253,57 +285,49 @@ pathFinder::costNodeVec_t pathFinder::HubLabels<HubLabelStore, Graph>::calcLabel
             if(addedCost < cost[edge.target]) {
                 visited.emplace_back(edge.target);
                 cost[edge.target] = addedCost;
-                q.emplace(edge.target, addedCost);
+                q.emplace(edge.target, addedCost, edge.source);
             }
         }
     }
-    auto finish = std::chrono::high_resolution_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    searchTime += elapsed.count();
-    start = std::chrono::high_resolution_clock::now();
+#ifdef TIMER
+    std::cout << "found settled nodes in: " << duration_cast<double>(sw.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+    std::cout << "label size: " << settledNodes.size() << std::endl;
+    sw.reset();
+#endif
     sortLabel(settledNodes);
-    for(auto [id, m_cost] : labelsToCollect) {
+#ifdef TIMER
+    std::cout << "sorted label in: " << duration_cast<double>(sw.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+    std::cout << "number of labels to merge: " << labelsToCollect.size() << std::endl;
+    sw.reset();
+#endif
+    for(auto id : labelsToCollect) {
+#ifdef TIMER
+        std::cout << "------------------\n";
         std::vector<CostNode> resultVec;
+        Stopwatch sw2;
+#endif
         auto targetLabel = hubLabelStore.retrieve(id, direction);
-        Static::merge(settledNodes.begin(), settledNodes.end(),  targetLabel.begin(), targetLabel.end(), cost[id], Less(), DistanceAdder(), DistanceComparer(), resultVec);
-        settledNodes = resultVec;
+#ifdef TIMER
+        std::cout << "retrieved label in: " << duration_cast<double>(sw2.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+        sw2.reset();
+#endif
+        Static::merge(settledNodes.begin(), settledNodes.end(),  targetLabel.begin(), targetLabel.end(), cost[id], resultVec);
+#ifdef TIMER
+        std::cout << "merged new label in: " << duration_cast<double>(sw2.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+        sw2.reset();
+#endif
+        settledNodes = std::move(resultVec);
+#ifdef TIMER
+        std::cout << "copied labels in: " << duration_cast<double>(sw2.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+        std::cout << "------------------\n";
+#endif
     }
-    finish = std::chrono::high_resolution_clock::now();
-    elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-    mergeTime += elapsed.count();
+#ifdef TIMER
+    std::cout << "merged labels in: " << duration_cast<double>(sw.elapsed()) * std::pow(10, 6) << "µs" << std::endl;
+#endif
     return settledNodes;
 }
 
-/*std::vector<pathFinder::CostNode> pathFinder::HubLabels::mergeLabels(const std::vector<CostNode>& label1, const std::vector<CostNode>& label2, Distance distanceToLabel) {
-   std::vector<CostNode> returnVec;
-   auto i = label1.begin();
-   auto j = label2.begin();
-   while(i != label1.end() && j != label2.end()){
-       if(i->id < j->id){
-           returnVec.emplace_back(*i);
-           ++i;
-       } else if(i->id > j->id) {
-           returnVec.emplace_back(*j);
-           ++j;
-       } else {
-           //equal
-           auto emplaceLabel = i->cost + distanceToLabel < j->cost + distanceToLabel ? *i : *j;
-           returnVec.emplace_back(emplaceLabel);
-           ++i;
-           ++j;
-       }
-   }
-   while(i < label1.end()){
-       returnVec.emplace_back(CostNode(i->id, i->cost + distanceToLabel));
-       ++i;
-   }
-   while(j < label2.end()){
-       returnVec.emplace_back(CostNode(j->id, j->cost + distanceToLabel));
-       ++j;
-   }
-   return returnVec;
-}
- */
 template< typename HubLabelStore, typename Graph>
 void pathFinder::HubLabels<HubLabelStore, Graph>::setMinLevel(pathFinder::Level level) {
     this->labelsUntilLevel = level;
@@ -313,18 +337,7 @@ void pathFinder::HubLabels<HubLabelStore, Graph>::writeToFile(boost::filesystem:
     //TODO implement maybe
 }
 
-    template< typename HubLabelStore, typename Graph>
-
-std::optional<pathFinder::Distance>
-pathFinder::HubLabels<HubLabelStore, Graph>::getShortestDistance(pathFinder::NodeId source, pathFinder::NodeId target) {
-    double mergeTime = 0;
-    double searchTime = 0;
-    double bla = 0;
-    return getShortestDistance(source, target, searchTime, mergeTime, bla);
-}
-
-    template< typename HubLabelStore, typename Graph>
-
+template< typename HubLabelStore, typename Graph>
 pathFinder::HubLabels<HubLabelStore, Graph>::HubLabels(Graph &graph, pathFinder::Level level,
                                                 HubLabelStore &hubLabelStore) : graph(graph), labelsUntilLevel(level), hubLabelStore(hubLabelStore) {
     graph.sortByLevel(sortedNodes);
@@ -333,40 +346,41 @@ pathFinder::HubLabels<HubLabelStore, Graph>::HubLabels(Graph &graph, pathFinder:
         cost.push_back(MAX_DISTANCE);
 }
 
-    template< typename HubLabelStore, typename Graph>
+template< typename HubLabelStore, typename Graph>
+HubLabelStore &HubLabels<HubLabelStore, Graph>::getHublabelStore() {
+    return hubLabelStore;
+}
 
-    HubLabelStore &HubLabels<HubLabelStore, Graph>::getHublabelStore() {
-        return hubLabelStore;
-    }
+template<typename HubLabelStore, typename Graph>
+HubLabels<HubLabelStore, Graph>::HubLabels(Graph &graph, Level level, std::vector<CHNode>& sortedNodes, std::vector<Distance>& cost): graph(graph), labelsUntilLevel(level), hubLabelStore(graph.getNodes().size()) {
+    this->graph = graph;
+    this->labelsUntilLevel = level;
+    this->sortedNodes = sortedNodes;
+    this->cost = cost;
 
-    template<typename HubLabelStore, typename Graph>
-    HubLabels<HubLabelStore, Graph>::HubLabels(Graph &graph, Level level, std::vector<CHNode>& sortedNodes, std::vector<Distance>& cost): graph(graph), labelsUntilLevel(level), hubLabelStore(graph.getNodes().size()) {
-        this->graph = graph;
-        this->labelsUntilLevel = level;
-        this->sortedNodes = sortedNodes;
-        this->cost = cost;
-
-        // calculate node ranges with same level
-        std::vector<std::pair<uint32_t, uint32_t >> sameLevelRanges;
-        auto maxLevel = sortedNodes.begin()->level;
-        auto currentLevel = sortedNodes.begin()->level;
-        for(auto j = 0; j < sortedNodes.size(); ++j) {
-            auto i = j;
-            while(sortedNodes[j].level == currentLevel && j < sortedNodes.size()){
-                ++j;
-            }
-            sameLevelRanges.emplace_back(i, j+1);
-            currentLevel--;
+    // calculate node ranges with same level
+    std::vector<std::pair<uint32_t, uint32_t >> sameLevelRanges;
+    auto maxLevel = sortedNodes.begin()->level;
+    auto currentLevel = sortedNodes.begin()->level;
+    for(int j = 0; j < sortedNodes.size(); ++j) {
+        auto i = j;
+        while(sortedNodes[j].level == currentLevel && j < sortedNodes.size()){
+            ++j;
         }
-        auto start = std::chrono::steady_clock::now();
-        std::cout << "constructing labels..." << std::endl;
-        constructAllLabels(sameLevelRanges, maxLevel, labelsUntilLevel);
-
-        // construct forward and backward labels
-        auto end = std::chrono::steady_clock::now();
-        std::cout << "Constructed Labels in  "
-                  << std::chrono::duration_cast<std::chrono::seconds>(end - start).count()
-                  << " s" << std::endl;
+        sameLevelRanges.emplace_back(i, j+1);
+        currentLevel--;
     }
+    auto start = std::chrono::steady_clock::now();
+    std::cout << "constructing labels..." << std::endl;
+    constructAllLabels(sameLevelRanges, maxLevel, labelsUntilLevel);
+
+    // construct forward and backward labels
+    auto end = std::chrono::steady_clock::now();
+    std::cout << "Constructed Labels in  "
+              << std::chrono::duration_cast<std::chrono::seconds>(end - start).count()
+              << " s" << std::endl;
+}
+
+
 }
 #endif //ALG_ENG_PROJECT_HUBLABELS_H

@@ -20,7 +20,8 @@ set(SOURCES
         src/ChHlBenchmarker.cpp
         src/HubLabelStore.cpp
         src/MmapVector.cpp
-        src/Static.cpp )
+        src/Static.cpp
+        src/Stopwatch.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -34,9 +35,11 @@ set(INCLUDES
         include/ChHlBenchmarker.h
         include/HubLabelStore.h
         include/MmapVector.h
-        include/Static.h)
+        include/Static.h
+        include/Stopwatch.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
+find_package(OpenMP)
 
 include_directories(${Boost_INCLUDE_DIRS} )
 include_directories(${STXXL_INCLUDE_DIRS})
@@ -51,6 +54,6 @@ if(PACKAGE_TESTS)
     add_subdirectory(tests)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES} OpenMP::OpenMP_CXX)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")

@@ -30,10 +30,10 @@ std::vector<pathFinder::CostNode> pathFinder::CHDijkstra<Graph>::shortestDistanc
         cost[nodeId] = MAX_DISTANCE;
     visited.clear();
     std::priority_queue<CostNode> q;
-    q.emplace(source, 0);
+    q.emplace(source, 0, source);
     cost[source] = 0;
     visited.emplace_back(source);
-    settledNodes.emplace_back(source, 0);
+    settledNodes.emplace_back(source, 0, source);
     while(!q.empty()) {
         auto costNode = q.top();
         q.pop();
@@ -47,7 +47,7 @@ std::vector<pathFinder::CostNode> pathFinder::CHDijkstra<Graph>::shortestDistanc
             if(addedCost < cost[edge.target]) {
                 visited.emplace_back(edge.target);
                 cost[edge.target] = addedCost;
-                q.emplace(edge.target, addedCost);
+                q.emplace(edge.target, addedCost, edge.source);
             }
         }
     }
@@ -66,8 +66,8 @@ std::optional<pathFinder::Distance> pathFinder::CHDijkstra<Graph>::getShortestDi
     auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
     auto backwardLabel = shortestDistance(target, EdgeDirection::BACKWARD);
 
-    HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> ::sortLabel(forwardLabel);
-    HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> ::sortLabel(backwardLabel);
+    HubLabels<HubLabelStore<std::vector>, Graph> ::sortLabel(forwardLabel);
+    HubLabels<HubLabelStore<std::vector>, Graph> ::sortLabel(backwardLabel);
     NodeId topNode;
     return pathFinder::HubLabels<std::vector<CostNode>, Graph>::getShortestDistance(MyIterator<CostNode*>(forwardLabel.begin().base(), forwardLabel.end().base()), MyIterator<CostNode*>(backwardLabel.begin().base(), backwardLabel.end().base()), topNode);
 }

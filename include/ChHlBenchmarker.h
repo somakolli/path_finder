@@ -38,14 +38,14 @@ pathFinder::ChHlBenchmarker<Graph>::compareSpeed(boost::filesystem::path benchFi
     while(cost.size() < graph.getNodes().size())
         cost.push_back(MAX_DISTANCE);
     for(int i = maxLevel + 1; i >= untilLevel; --i) {
-        HubLabels<HubLabelStore<std::vector, CostNode, std::allocator<CostNode>>, Graph> hubLabels(graph, i, sortedNodes, cost);
+        HubLabels<HubLabelStore<std::vector>, Graph> hubLabels(graph, i, sortedNodes, cost);
         double totalTime = 0;
         double searchTime = 0;
         double mergeTime = 0;
         double lookUpTime = 0;
         for(int j = 0; j < numberOfQueriesPerLevel; ++j) {
             auto start = std::chrono::high_resolution_clock::now();
-            hubLabels.getShortestDistance(node(rng), node(rng), searchTime, mergeTime, lookUpTime).value();
+            hubLabels.getShortestDistance(node(rng), node(rng)).value();
             auto finish = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
             totalTime += elapsed.count();
