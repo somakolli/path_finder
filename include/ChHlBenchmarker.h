@@ -30,28 +30,32 @@ pathFinder::ChHlBenchmarker<Graph>::compareSpeed(boost::filesystem::path benchFi
     boost::random::mt19937 rng;
     boost::random::uniform_int_distribution<> node(0, graph.numberOfNodes-1);
     Level maxLevel = gs.getHighestLevel();
-    ofs << "level,searchTime,mergeTime,loopUpTime,totalTime(µs)\n";
+    ofs << "level,searchTime,mergeTime,lookUpTime,totalTime(µs),spaceConsumption\n";
     std::vector<CHNode> sortedNodes;
     graph.sortByLevel(sortedNodes);
     std::vector<Distance > cost;
     cost.reserve(graph.getNodes().size());
     while(cost.size() < graph.getNodes().size())
         cost.push_back(MAX_DISTANCE);
+
+    Timer timer(numberOfQueriesPerLevel);
+    HubLabels<HubLabelStore<std::vector>, Graph> hubLabels(graph, untilLevel, sortedNodes, cost, timer);
     for(int i = maxLevel + 1; i >= untilLevel; --i) {
-        HubLabels<HubLabelStore<std::vector>, Graph> hubLabels(graph, i, sortedNodes, cost);
-        double totalTime = 0;
-        double searchTime = 0;
-        double mergeTime = 0;
-        double lookUpTime = 0;
+        timer.resetAll();
+        hubLabels.setLabelsUntilLevel(i);
         for(int j = 0; j < numberOfQueriesPerLevel; ++j) {
-            auto start = std::chrono::high_resolution_clock::now();
+            Stopwatch sw;
             hubLabels.getShortestDistance(node(rng), node(rng)).value();
-            auto finish = std::chrono::high_resolution_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-            totalTime += elapsed.count();
+            timer.addTotalTime(std::chrono::duration_cast<std::chrono::microseconds>(sw.elapsed()).count());
         }
-        ofs << i << "," << searchTime/numberOfQueriesPerLevel << "," << mergeTime/numberOfQueriesPerLevel << "," << lookUpTime/numberOfQueriesPerLevel << "," << totalTime/numberOfQueriesPerLevel << ","  << hubLabels.getSpaceConsumption() << std::endl;
-        std::cout << "finished level: " << i << "with average time: " << totalTime/numberOfQueriesPerLevel << "," << searchTime/numberOfQueriesPerLevel << "," << mergeTime/numberOfQueriesPerLevel << "," << lookUpTime/numberOfQueriesPerLevel << std::endl;
+        ofs << i << ","
+        << timer.getAverageSearchTime()
+        << "," << timer.getAverageMergeTime()
+        << "," << timer.getAverageLookUpTime()
+        << "," << timer.getAverageTotalTime()
+        << ","  << hubLabels.spaceMeasurer.getSpaceConsumption(i)
+        << std::endl;
+        std::cout << "finished level: " << i << std::endl;
     }
 }
 }

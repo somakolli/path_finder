@@ -12,7 +12,7 @@ namespace pathFinder{
 struct CHNode : Node {
     Level level;
 };
-template <template<class, class> class Vector>
+template <template<class, class> class Vector = std::vector>
 class CHGraph {
     using EdgeVector = Vector<Edge, std::allocator<Edge>>;
     using NodeVector = Vector<CHNode, std::allocator<CHNode>>;

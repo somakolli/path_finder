@@ -12,7 +12,7 @@ struct OffsetElement {
     size_t position;
     uint32_t size;
 };
-template<template<class, class> class Vector>
+template<template<class, class> class Vector = std::vector>
 class HubLabelStore{
     using CostNodeVector = Vector<CostNode, std::allocator<CostNode>>;
     using OffsetVector = std::vector<OffsetElement>;
@@ -32,6 +32,7 @@ public:
     auto& getBackwardLabels();
     auto& getForwardOffset();
     auto& getBackwardOffset();
+    size_t getSpaceConsumption();
 };
 
 template<template<class, class> class Vector>
@@ -103,6 +104,11 @@ auto &HubLabelStore<Vector>::getForwardOffset() {
 template<template<class, class> class Vector>
 auto &HubLabelStore<Vector>::getBackwardOffset() {
     return backwardOffset;
+}
+
+template<template<class, class> class Vector>
+size_t HubLabelStore<Vector>::getSpaceConsumption() {
+    return forwardLabels.size() * sizeof(CostNode) + backwardLabels.size() * sizeof(CostNode);
 }
 }
 

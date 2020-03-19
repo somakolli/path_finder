@@ -21,7 +21,8 @@ set(SOURCES
         src/HubLabelStore.cpp
         src/MmapVector.cpp
         src/Static.cpp
-        src/Stopwatch.cpp)
+        src/Stopwatch.cpp
+        src/Timer.cpp src/SpaceMeasurer.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -36,7 +37,8 @@ set(INCLUDES
         include/HubLabelStore.h
         include/MmapVector.h
         include/Static.h
-        include/Stopwatch.h)
+        include/Stopwatch.h
+        include/Timer.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)
