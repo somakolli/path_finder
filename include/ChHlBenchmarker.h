@@ -45,7 +45,7 @@ pathFinder::ChHlBenchmarker<Graph>::compareSpeed(boost::filesystem::path benchFi
         double lookUpTime = 0;
         for(int j = 0; j < numberOfQueriesPerLevel; ++j) {
             auto start = std::chrono::high_resolution_clock::now();
-            hubLabels.getShortestDistance(node(rng), node(rng), searchTime, mergeTime, lookUpTime).value();
+            hubLabels.getShortestDistance(node(rng), node(rng)).value();
             auto finish = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
             totalTime += elapsed.count();

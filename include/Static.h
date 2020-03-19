@@ -8,23 +8,22 @@
 
 class Static {
 public:
-template<typename ItA, typename ItB, typename Container, typename Distance, typename Less, typename DistanceAdder, typename CostComparer>
-static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel,
-        Less less, DistanceAdder distanceAdder, CostComparer costComparer, Container& result) {
+template<typename ItA, typename ItB, typename Container, typename Distance>
+static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel, Container& result) {
     auto i = aBegin;
     auto j = bBegin;
     while(i < aEnd && j < bEnd){
-        if(less(*i, *j)){
+        if(i->id< j->id){
             result.push_back(*i);
             ++i;
-        } else if(less(*j,*i)){
-            result.push_back(distanceAdder(*j, distanceToLabel));
+        } else if(j->id < i->id){
+            result.emplace_back(j->id, j->cost + distanceToLabel, j->previousNode);
             ++j;
         } else {
-            if(costComparer(*i, distanceAdder(*j, distanceToLabel)))
-                result.push_back(*i);
+            if(i->cost < j->cost + distanceToLabel)
+                result.emplace_back(*i);
             else
-                result.push_back(distanceAdder(*j, distanceToLabel));
+                result.emplace_back(j->id, j->cost + distanceToLabel, j->previousNode);
             ++j;
             ++i;
         }
@@ -34,7 +33,7 @@ static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance di
         ++i;
     }
     while(j != bEnd) {
-        result.push_back(distanceAdder(*j, distanceToLabel));
+        result.emplace_back(j->id, j->cost + distanceToLabel, j->previousNode);
         ++j;
     }
 }

@@ -20,7 +20,8 @@ set(SOURCES
         src/ChHlBenchmarker.cpp
         src/HubLabelStore.cpp
         src/MmapVector.cpp
-        src/Static.cpp )
+        src/Static.cpp
+        src/Stopwatch.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -34,7 +35,8 @@ set(INCLUDES
         include/ChHlBenchmarker.h
         include/HubLabelStore.h
         include/MmapVector.h
-        include/Static.h)
+        include/Static.h
+        include/Stopwatch.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)
