@@ -116,7 +116,7 @@ public:
 	CostNode(NodeId id, size_t cost, NodeId previousNode): id(id), cost(cost), previousNode(previousNode) {}
 
 	bool operator==(const CostNode& rhs) const {
-        return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
+return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
     }
 };
 }

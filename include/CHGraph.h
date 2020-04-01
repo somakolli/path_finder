@@ -47,6 +47,8 @@ public:
     OffsetVector & getForwardOffset();
     EdgeVector& getBackEdges();
     OffsetVector& getBackOffset();
+    void deleteNodes();
+    void deleteEdges();
 };
 template <template<class, class> class Vector>
 void pathFinder::CHGraph<Vector>::sortByLevel(std::vector<CHNode> &sortedNodes) {
@@ -80,12 +82,24 @@ std::vector<NodeId> &pathFinder::CHGraph<Vector>::getForwardOffset() {
 
 template <template<class, class> class Vector>
 CHGraph<Vector>::CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges,
-                                                       OffsetVector& backOffset, OffsetVector& offset, size_t numberOfNodes
+                                                       OffsetVector& offset, OffsetVector& backOffset, size_t numberOfNodes
                                                        ):nodes(nodes), backEdges(backEdges),
                                                                          backOffset(backOffset), offset(offset),
                                                                          edges(edges), numberOfNodes(numberOfNodes) {}
 
 template <template<class, class> class Vector>
 CHGraph<Vector>::CHGraph() {}
+
+template <template<class, class> class Vector>
+void CHGraph<Vector>::deleteNodes() {
+    nodes.clear();
+    nodes.shrink_to_fit();
+}
+
+    template <template<class, class> class Vector>
+    void CHGraph<Vector>::deleteEdges() {
+        edges.clear();
+        edges.shrink_to_fit();
+    }
 }
 #endif //ALG_ENG_PROJECT_CHGRAPH_H

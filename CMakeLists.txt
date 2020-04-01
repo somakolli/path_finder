@@ -22,7 +22,7 @@ set(SOURCES
         src/MmapVector.cpp
         src/Static.cpp
         src/Stopwatch.cpp
-        src/Timer.cpp src/SpaceMeasurer.cpp)
+        src/Timer.cpp src/SpaceMeasurer.cpp src/DataConfig.cpp src/VectorBase.cpp src/RamVector.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -38,7 +38,8 @@ set(INCLUDES
         include/MmapVector.h
         include/Static.h
         include/Stopwatch.h
-        include/Timer.h)
+        include/Timer.h
+        include/DataConfig.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)
@@ -49,6 +50,10 @@ include_directories(INCLUDES)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(vendor/nlohmann_json)
+
+
 option(PACKAGE_TESTS "Build the tests" ON)
 if(PACKAGE_TESTS)
     enable_testing()
@@ -56,6 +61,6 @@ if(PACKAGE_TESTS)
     add_subdirectory(tests)
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${STXXL_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")

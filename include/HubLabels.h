@@ -27,23 +27,6 @@
 #define TIMER 1
 
 namespace pathFinder {
-struct DistanceComparer {
-    inline bool operator()(CostNode const & a, CostNode const & b) const {
-        return a.cost < b.cost;
-    }
-};
-
-struct DistanceAdder {
-    inline CostNode operator()(CostNode const & costNode, Distance distance) const {
-        return CostNode(costNode.id, costNode.cost + distance, costNode.previousNode);
-    }
-};
-
-struct Less {
-    inline bool operator()(CostNode const & a, CostNode const & b) const {
-        return a.id < b.id;
-    }
-};
 
 typedef std::vector<CostNode> costNodeVec_t;
 template< typename HubLabelStore = HubLabelStore<std::vector>, typename Graph = CHGraph<std::vector>>

@@ -15,7 +15,7 @@ struct OffsetElement {
 template<template<class, class> class Vector = std::vector>
 class HubLabelStore{
     using CostNodeVector = Vector<CostNode, std::allocator<CostNode>>;
-    using OffsetVector = std::vector<OffsetElement>;
+    using OffsetVector = std::vector<OffsetElement, std::allocator<OffsetElement>>;
     CostNodeVector forwardLabels;
     CostNodeVector backwardLabels;
     OffsetVector forwardOffset;

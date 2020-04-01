@@ -3,7 +3,6 @@
 //
 #include <gtest/gtest.h>
 #include "../include/HubLabelStore.h"
-#include "../include/MmapVector.h"
 #include <vector>
 #include <gmock/gmock-matchers.h>
 

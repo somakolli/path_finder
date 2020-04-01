@@ -6,7 +6,6 @@
 #include "../include/HubLabels.h"
 #include "../include/Static.h"
 #include <vector>
-#include <gmock/gmock-matchers.h>
 namespace pathFinder{
 TEST(HubLabels, MergeWorks){
     std::vector<pathFinder::CostNode> costNodeVec1 = {

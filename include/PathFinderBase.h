@@ -11,8 +11,8 @@
 namespace pathFinder{
 class PathFinderBase {
 public:
-    virtual std::optional<Distance> getShortestDistance(NodeId source, NodeId target) = 0;
-    virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target) = 0;
+    virtual std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
+    virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
 };
 }
 
