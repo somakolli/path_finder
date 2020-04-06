@@ -12,10 +12,9 @@ struct OffsetElement {
     size_t position;
     uint32_t size;
 };
-template<template<class, class> class Vector = std::vector>
+template<template<class, class> class Vector = std::vector, class OffsetVector = std::vector<OffsetElement>>
 class HubLabelStore{
     using CostNodeVector = Vector<CostNode, std::allocator<CostNode>>;
-    using OffsetVector = std::vector<OffsetElement, std::allocator<OffsetElement>>;
     CostNodeVector forwardLabels;
     CostNodeVector backwardLabels;
     OffsetVector forwardOffset;
@@ -35,8 +34,8 @@ public:
     size_t getSpaceConsumption();
 };
 
-template<template<class, class> class Vector>
-HubLabelStore<Vector>::HubLabelStore(size_t numberOfLabels) {
+template<template<class, class> class Vector, class OffsetVector>
+HubLabelStore<Vector, OffsetVector>::HubLabelStore(size_t numberOfLabels) {
     forwardOffset.reserve(numberOfLabels);
     backwardOffset.reserve(numberOfLabels);
     while(forwardOffset.size() < numberOfLabels){
@@ -45,9 +44,9 @@ HubLabelStore<Vector>::HubLabelStore(size_t numberOfLabels) {
     }
 }
 
-template<template<class, class> class Vector>
+template<template<class, class> class Vector, class OffsetVector>
 template<typename Id>
-void HubLabelStore<Vector>::store(const std::vector<CostNode> &label, Id id, EdgeDirection direction) {
+void HubLabelStore<Vector, OffsetVector>::store(const std::vector<CostNode> &label, Id id, EdgeDirection direction) {
     if(direction == EdgeDirection::FORWARD){
         forwardOffset[id] = OffsetElement{forwardLabels.size(), (uint32_t)label.size()};
         for(auto element : label){
@@ -61,9 +60,9 @@ void HubLabelStore<Vector>::store(const std::vector<CostNode> &label, Id id, Edg
     }
 }
 
-template<template<class, class> class Vector>
+template<template<class, class> class Vector, class OffsetVector>
 template<typename Id>
-pathFinder::MyIterator<CostNode*> HubLabelStore<Vector>::retrieve(Id id, EdgeDirection direction){
+pathFinder::MyIterator<CostNode*> HubLabelStore<Vector, OffsetVector>::retrieve(Id id, EdgeDirection direction){
     if(direction == EdgeDirection::FORWARD){
         auto offsetElement = forwardOffset[id];
         return MyIterator<CostNode*>{&forwardLabels[offsetElement.position], &forwardLabels[offsetElement.position + offsetElement.size]};
@@ -73,41 +72,41 @@ pathFinder::MyIterator<CostNode*> HubLabelStore<Vector>::retrieve(Id id, EdgeDir
     }
 }
 
-template<template<class, class> class Vector>
-size_t HubLabelStore<Vector>::numberOfLabels() {
+template<template<class, class> class Vector, class OffsetVector>
+size_t HubLabelStore<Vector, OffsetVector>::numberOfLabels() {
     return forwardOffset.size();
 }
 
-template<template<class, class> class Vector>
-HubLabelStore<Vector>::HubLabelStore(CostNodeVector & forwardLabels, CostNodeVector & backwardLabels, OffsetVector & forwardOffset, OffsetVector & backwardOffset) {
+template<template<class, class> class Vector, class OffsetVector>
+HubLabelStore<Vector, OffsetVector>::HubLabelStore(CostNodeVector & forwardLabels, CostNodeVector & backwardLabels, OffsetVector & forwardOffset, OffsetVector & backwardOffset) {
     this->forwardLabels = forwardLabels;
     this->backwardLabels = backwardLabels;
     this->forwardOffset = forwardOffset;
     this->backwardOffset = backwardOffset;
 }
 
-template<template<class, class> class Vector>
-auto &HubLabelStore<Vector>::getBackwardLabels() {
+template<template<class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getBackwardLabels() {
     return backwardLabels;
 }
 
-template<template<class, class> class Vector>
-auto &HubLabelStore<Vector>::getForwardLabels() {
+template<template<class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getForwardLabels() {
     return forwardLabels;
 }
 
-template<template<class, class> class Vector>
-auto &HubLabelStore<Vector>::getForwardOffset() {
+template<template<class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getForwardOffset() {
     return forwardOffset;
 }
 
-template<template<class, class> class Vector>
-auto &HubLabelStore<Vector>::getBackwardOffset() {
+template<template<class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getBackwardOffset() {
     return backwardOffset;
 }
 
-template<template<class, class> class Vector>
-size_t HubLabelStore<Vector>::getSpaceConsumption() {
+template<template<class, class> class Vector, class OffsetVector>
+size_t HubLabelStore<Vector, OffsetVector>::getSpaceConsumption() {
     return forwardLabels.size() * sizeof(CostNode) + backwardLabels.size() * sizeof(CostNode);
 }
 }

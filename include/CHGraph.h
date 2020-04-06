@@ -12,11 +12,10 @@ namespace pathFinder{
 struct CHNode : Node {
     Level level;
 };
-template <template<class, class> class Vector = std::vector>
+template <template<class, class> class Vector = std::vector, class OffsetVector = std::vector<NodeId>>
 class CHGraph {
     using EdgeVector = Vector<Edge, std::allocator<Edge>>;
     using NodeVector = Vector<CHNode, std::allocator<CHNode>>;
-    using OffsetVector = std::vector<NodeId>;
 private:
     NodeVector nodes;
     EdgeVector backEdges;
@@ -50,8 +49,8 @@ public:
     void deleteNodes();
     void deleteEdges();
 };
-template <template<class, class> class Vector>
-void pathFinder::CHGraph<Vector>::sortByLevel(std::vector<CHNode> &sortedNodes) {
+template <template<class, class> class Vector, class OffsetVector>
+void pathFinder::CHGraph<Vector, OffsetVector>::sortByLevel(std::vector<CHNode> &sortedNodes) {
     sortedNodes.reserve(nodes.size());
     for(const auto& node : nodes)
         sortedNodes.emplace_back(node);
@@ -59,45 +58,45 @@ void pathFinder::CHGraph<Vector>::sortByLevel(std::vector<CHNode> &sortedNodes) 
         return node1.level == node2.level? node1.id < node2.id : node1.level > node2.level;
     });
 }
-template <template<class, class> class Vector>
-Vector<CHNode, std::allocator<CHNode>> &pathFinder::CHGraph<Vector>::getNodes() {
+template <template<class, class> class Vector, class OffsetVector>
+Vector<CHNode, std::allocator<CHNode>> &pathFinder::CHGraph<Vector, OffsetVector>::getNodes() {
     return nodes;
 }
-template <template<class, class> class Vector>
-Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector>::getBackEdges() {
+template <template<class, class> class Vector, class OffsetVector>
+Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector, OffsetVector>::getBackEdges() {
     return backEdges;
 }
-template <template<class, class> class Vector>
-std::vector<NodeId> &pathFinder::CHGraph<Vector>::getBackOffset() {
+template <template<class, class> class Vector, class OffsetVector>
+OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getBackOffset() {
     return backOffset;
 }
-template <template<class, class> class Vector>
-Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector>::getForwardEdges() {
+template <template<class, class> class Vector, class OffsetVector>
+Vector<Edge, std::allocator<Edge>> &pathFinder::CHGraph<Vector, OffsetVector>::getForwardEdges() {
     return edges;
 }
-template <template<class, class> class Vector>
-std::vector<NodeId> &pathFinder::CHGraph<Vector>::getForwardOffset() {
+template <template<class, class> class Vector, class OffsetVector>
+OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getForwardOffset() {
     return offset;
 }
 
-template <template<class, class> class Vector>
-CHGraph<Vector>::CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges,
+template <template<class, class> class Vector, class OffsetVector>
+CHGraph<Vector, OffsetVector>::CHGraph(NodeVector& nodes, EdgeVector& edges,EdgeVector& backEdges,
                                                        OffsetVector& offset, OffsetVector& backOffset, size_t numberOfNodes
                                                        ):nodes(nodes), backEdges(backEdges),
                                                                          backOffset(backOffset), offset(offset),
                                                                          edges(edges), numberOfNodes(numberOfNodes) {}
 
-template <template<class, class> class Vector>
-CHGraph<Vector>::CHGraph() {}
+template <template<class, class> class Vector, class OffsetVector>
+CHGraph<Vector, OffsetVector>::CHGraph() {}
 
-template <template<class, class> class Vector>
-void CHGraph<Vector>::deleteNodes() {
+template <template<class, class> class Vector, class OffsetVector>
+void CHGraph<Vector, OffsetVector>::deleteNodes() {
     nodes.clear();
     nodes.shrink_to_fit();
 }
 
-    template <template<class, class> class Vector>
-    void CHGraph<Vector>::deleteEdges() {
+    template <template<class, class> class Vector, class OffsetVector>
+    void CHGraph<Vector, OffsetVector>::deleteEdges() {
         edges.clear();
         edges.shrink_to_fit();
     }
