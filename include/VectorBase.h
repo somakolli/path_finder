@@ -8,62 +8,54 @@
 #include <vector>
 
 namespace pathFinder {
-template<typename T, typename Allocator = std::allocator<T>>
-class VectorBase {
+template <typename T, typename Allocator = std::allocator<T>> class VectorBase {
 public:
-    virtual T &operator[](size_t index);
+  virtual T &operator[](size_t index);
 
-    virtual T *begin();
+  virtual T *begin();
 
-    virtual T *end();
+  virtual T *end();
 
-    virtual size_t size();
+  virtual size_t size();
 
-    virtual void push_back(T element);
+  virtual void push_back(T element);
 
-    virtual T* data();
+  virtual T *data();
 
-    virtual void clear();
+  virtual void clear();
 
-    virtual void shrink_to_fit();
+  virtual void shrink_to_fit();
 };
 
-template<typename T, typename Allocator>
+template <typename T, typename Allocator>
 T &VectorBase<T, Allocator>::operator[](size_t index) {
-    return nullptr;
+  return nullptr;
 }
 
-template<typename T, typename Allocator>
-T *VectorBase<T, Allocator>::begin() {
-    return nullptr;
+template <typename T, typename Allocator> T *VectorBase<T, Allocator>::begin() {
+  return nullptr;
 }
 
-template<typename T, typename Allocator>
-T *VectorBase<T, Allocator>::end() {
-    return nullptr;
+template <typename T, typename Allocator> T *VectorBase<T, Allocator>::end() {
+  return nullptr;
 }
 
-template<typename T, typename Allocator>
+template <typename T, typename Allocator>
 size_t VectorBase<T, Allocator>::size() {
-    return 0;
+  return 0;
 }
 
-template<typename T, typename Allocator>
-void VectorBase<T, Allocator>::push_back(T element) {
+template <typename T, typename Allocator>
+void VectorBase<T, Allocator>::push_back(T element) {}
 
-}
-
-template<typename T, typename Allocator>
-T* VectorBase<T, Allocator>::data() {
-    return nullptr;
+template <typename T, typename Allocator> T *VectorBase<T, Allocator>::data() {
+  return nullptr;
 }
 
-template<typename T, typename Allocator>
-void VectorBase<T, Allocator>::clear() {
-}
+template <typename T, typename Allocator>
+void VectorBase<T, Allocator>::clear() {}
 
-template<typename T, typename Allocator>
-void VectorBase<T, Allocator>::shrink_to_fit() {
-}
-}
-#endif //MASTER_ARBEIT_VECTORBASE_H
+template <typename T, typename Allocator>
+void VectorBase<T, Allocator>::shrink_to_fit() {}
+} // namespace pathFinder
+#endif // MASTER_ARBEIT_VECTORBASE_H

@@ -4,17 +4,18 @@
 
 #ifndef MASTER_ARBEIT_SPACEMEASURER_H
 #define MASTER_ARBEIT_SPACEMEASURER_H
-#include <map>
 #include "Graph.h"
+#include <map>
 
-namespace pathFinder{
+namespace pathFinder {
 class SpaceMeasurer {
 private:
-    std::map<Level, size_t> spaceConsumption;
-public:
-    void setSpaceConsumption(Level level, size_t space);
-    size_t getSpaceConsumption(Level level);
-};
-}
+  std::map<Level, size_t> spaceConsumption;
 
-#endif //MASTER_ARBEIT_SPACEMEASURER_H
+public:
+  void setSpaceConsumption(Level level, size_t space);
+  size_t getSpaceConsumption(Level level);
+};
+} // namespace pathFinder
+
+#endif // MASTER_ARBEIT_SPACEMEASURER_H

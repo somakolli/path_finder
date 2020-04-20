@@ -8,12 +8,13 @@
 #include "Graph.h"
 #include <optional>
 
-namespace pathFinder{
+namespace pathFinder {
 class PathFinderBase {
 public:
-    virtual std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
-    virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
+  virtual std::optional<Distance> getShortestDistance(NodeId source,
+                                                      NodeId target);
+  virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
 };
-}
+} // namespace pathFinder
 
-#endif //ALG_ENG_PROJECT_PATHFINDERBASE_H
+#endif // ALG_ENG_PROJECT_PATHFINDERBASE_H

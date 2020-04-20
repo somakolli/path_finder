@@ -5,21 +5,15 @@
 #include <chrono>
 #include <iostream>
 namespace pathFinder {
-template<typename Clock = std::chrono::high_resolution_clock>
-class Stopwatch {
-    typename Clock::time_point _last;
+template <typename Clock = std::chrono::high_resolution_clock> class Stopwatch {
+  typename Clock::time_point _last;
 
 public:
-    Stopwatch()
-            : _last(Clock::now()) {}
+  Stopwatch() : _last(Clock::now()) {}
 
-    void reset() {
-        *this = Stopwatch();
-    }
+  void reset() { *this = Stopwatch(); }
 
-    typename Clock::duration elapsed() const {
-        return Clock::now() - _last;
-    }
+  typename Clock::duration elapsed() const { return Clock::now() - _last; }
 };
-}
-#endif //MASTER_ARBEIT_STOPWATCH_H
+} // namespace pathFinder
+#endif // MASTER_ARBEIT_STOPWATCH_H

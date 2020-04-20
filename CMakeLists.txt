@@ -22,7 +22,7 @@ set(SOURCES
         src/MmapVector.cpp
         src/Static.cpp
         src/Stopwatch.cpp
-        src/Timer.cpp src/SpaceMeasurer.cpp src/DataConfig.cpp src/VectorBase.cpp src/RamVector.cpp)
+        src/Timer.cpp src/SpaceMeasurer.cpp src/DataConfig.cpp src/VectorBase.cpp src/RamVector.cpp include/Grid.h src/Grid.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
