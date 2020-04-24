@@ -22,7 +22,12 @@ set(SOURCES
         src/MmapVector.cpp
         src/Static.cpp
         src/Stopwatch.cpp
-        src/Timer.cpp src/SpaceMeasurer.cpp src/DataConfig.cpp src/VectorBase.cpp src/RamVector.cpp include/Grid.h src/Grid.cpp)
+        src/Timer.cpp
+        src/SpaceMeasurer.cpp
+        src/DataConfig.cpp
+        src/VectorBase.cpp
+        src/RamVector.cpp
+        src/Grid.cpp)
 
 set(INCLUDES
         include/CHDijkstra.h
@@ -39,7 +44,8 @@ set(INCLUDES
         include/Static.h
         include/Stopwatch.h
         include/Timer.h
-        include/DataConfig.h)
+        include/DataConfig.h
+        include/Grid.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)

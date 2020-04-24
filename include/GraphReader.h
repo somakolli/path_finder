@@ -14,7 +14,7 @@ class GraphReader {
 public:
   static void readFmiFile(Graph &graph, const std::string &filepath);
   static void readCHFmiFile(pathFinder::CHGraph<std::vector> &chGraph,
-                            const std::string &filepath);
+                            const std::string &filepath, bool reorderWithGrid);
 
   static void buildOffset(Graph::edgeVector &edges,
                           std::vector<NodeId> &offset);

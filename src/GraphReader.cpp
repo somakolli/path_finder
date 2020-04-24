@@ -84,7 +84,7 @@ void pathFinder::GraphReader::buildOffset(Graph::edgeVector &edges,
 }
 
 void pathFinder::GraphReader::readCHFmiFile(
-    pathFinder::CHGraph<std::vector> &graph, const std::string &filepath) {
+    pathFinder::CHGraph<std::vector> &graph, const std::string &filepath, bool reorderWithGrid) {
   uint32_t numberOfEdges{};
   int fdr = open(filepath.data(), O_RDONLY);
   if (fdr >= 0) {
@@ -126,7 +126,8 @@ void pathFinder::GraphReader::readCHFmiFile(
   buildOffset(graph.edges, graph.offset);
   buildBackEdges(graph.edges, graph.getBackEdges());
   buildOffset(graph.getBackEdges(), graph.getBackOffset());
-  gridReorder(graph);
+  if(reorderWithGrid)
+    gridReorder(graph);
 }
 
 void pathFinder::GraphReader::buildBackEdges(
