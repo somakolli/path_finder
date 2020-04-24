@@ -2,6 +2,7 @@
 // Created by sokol on 02.10.19.
 //
 #include "../include/GraphReader.h"
+#include "../include/Grid.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -110,6 +111,7 @@ void pathFinder::GraphReader::readCHFmiFile(
       CHNode node{};
       while (--i > 0 &&
              in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
+        node.latLng = {lat, lng};
         graph.getNodes().push_back(node);
       }
       i = numberOfEdges + 1;
@@ -124,6 +126,7 @@ void pathFinder::GraphReader::readCHFmiFile(
   buildOffset(graph.edges, graph.offset);
   buildBackEdges(graph.edges, graph.getBackEdges());
   buildOffset(graph.getBackEdges(), graph.getBackOffset());
+  gridReorder(graph);
 }
 
 void pathFinder::GraphReader::buildBackEdges(
@@ -144,4 +147,11 @@ void pathFinder::GraphReader::sortEdges(Graph::edgeVector &edges) {
                          ? edge1.target <= edge2.target
                          : edge1.source < edge2.source;
             });
+}
+void pathFinder::GraphReader::gridReorder(pathFinder::CHGraph<std::vector>& graph) {
+  Grid grid(graph.getNodes(), 3600, 1800);
+  grid.buildGrid();
+  grid.reorderNodes(graph);
+  std::cout << "pointer grid length " << grid.pointerGrid.size() << std::endl;
+  graph.gridMap = grid.pointerGrid;
 }

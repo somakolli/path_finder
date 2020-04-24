@@ -20,6 +20,7 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataConfig &d) {
       {"backwardHublabels", d.backwardHublabels},
       {"forwardHublabelOffset", d.forwardHublabelOffset},
       {"backwardHublabelOffset", d.backwardHublabelOffset},
+      {"gridMapEntries", d.gridMapEntries}
   };
 }
 
@@ -37,6 +38,7 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::DataConfig &d) {
   j.at("backwardHublabels").get_to(d.backwardHublabels);
   j.at("forwardHublabelOffset").get_to(d.forwardHublabelOffset);
   j.at("backwardHublabelOffset").get_to(d.backwardHublabelOffset);
+  j.at("gridMapEntries").get_to(d.gridMapEntries);
 }
 
 void pathFinder::from_json(const nlohmann::json &j, BinaryFileDescription &d) {
@@ -64,4 +66,15 @@ nlohmann::json pathFinder::BinaryFileDescription::toJson() const {
   nlohmann::json j;
   to_json(j, *this);
   return j.dump();
+}
+
+void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d){
+  j = {{"lat", d.latLng.first}, {"lng", d.latLng.second}, {"begin", d.pointerPair.first}, {"end", d.pointerPair.second}};
+}
+
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d){
+  j.at("lat").get_to(d.latLng.first);
+  j.at("lng").get_to(d.latLng.second);
+  j.at("begin").get_to(d.pointerPair.first);
+  j.at("end").get_to(d.pointerPair.second);
 }

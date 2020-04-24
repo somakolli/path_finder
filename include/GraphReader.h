@@ -13,15 +13,16 @@ namespace pathFinder {
 class GraphReader {
 public:
   static void readFmiFile(Graph &graph, const std::string &filepath);
-  static void readCHFmiFile(CHGraph<std::vector> &chGraph,
+  static void readCHFmiFile(pathFinder::CHGraph<std::vector> &chGraph,
                             const std::string &filepath);
 
-private:
   static void buildOffset(Graph::edgeVector &edges,
                           std::vector<NodeId> &offset);
+private:
   static void buildBackEdges(const Graph::edgeVector &forwardEdges,
                              Graph::edgeVector &backEdges);
   static void sortEdges(Graph::edgeVector &edges);
+  static void gridReorder(CHGraph<std::vector>& graph);
 };
 } // namespace pathFinder
 

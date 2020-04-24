@@ -7,6 +7,7 @@
 
 #include "Graph.h"
 #include <algorithm>
+#include <map>
 
 namespace pathFinder {
 struct CHNode : Node {
@@ -32,6 +33,7 @@ public:
   OffsetVector offset;
   EdgeVector edges;
   size_t numberOfNodes;
+  std::map<std::pair<Lat, Lng>, std::pair<NodeId, NodeId>> gridMap;
   [[nodiscard]] MyIterator<const Edge *> edgesFor(NodeId node,
                                                   EdgeDirection direction) {
     switch (direction) {
@@ -44,6 +46,7 @@ public:
   }
   Level getLevel(NodeId nodeId) { return nodes[nodeId].level; }
   void sortByLevel(std::vector<CHNode> &sortedNodes);
+  void sortEdges();
   NodeVector &getNodes();
   EdgeVector &getForwardEdges();
   OffsetVector &getForwardOffset();
@@ -110,6 +113,12 @@ template <template <class, class> class Vector, class OffsetVector>
 void CHGraph<Vector, OffsetVector>::deleteEdges() {
   edges.clear();
   edges.shrink_to_fit();
+}
+template <template <class, class> class Vector, class OffsetVector>
+void CHGraph<Vector, OffsetVector>::sortEdges() {
+  std::sort(edges.begin(), edges.end(), [](auto edge1, auto edge2) -> bool{
+    return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
+  });
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H
