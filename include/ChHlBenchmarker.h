@@ -14,7 +14,7 @@ private:
 
 public:
   explicit ChHlBenchmarker(Graph &graph);
-  void compareSpeed(boost::filesystem::path benchFilePath, Level untilLevel);
+  void compareSpeed(boost::filesystem::path benchFilePath, Level untilLevel, bool ram);
 };
 template <class Graph>
 pathFinder::ChHlBenchmarker<Graph>::ChHlBenchmarker(Graph &graph)
@@ -22,7 +22,7 @@ pathFinder::ChHlBenchmarker<Graph>::ChHlBenchmarker(Graph &graph)
 
 template <class Graph>
 void pathFinder::ChHlBenchmarker<Graph>::compareSpeed(
-    boost::filesystem::path benchFilePath, Level untilLevel) {
+    boost::filesystem::path benchFilePath, Level untilLevel, bool ram) {
   // CHDijkstra chDijkstra(graph);
   boost::filesystem::ofstream ofs{benchFilePath};
   GraphStats<Graph> gs(graph);
@@ -41,21 +41,59 @@ void pathFinder::ChHlBenchmarker<Graph>::compareSpeed(
   Timer timer(numberOfQueriesPerLevel);
   HubLabels<HubLabelStore<std::vector>, Graph> hubLabels(
       graph, untilLevel, sortedNodes, cost, timer);
-  for (int i = maxLevel + 1; i >= untilLevel; --i) {
-    timer.resetAll();
-    hubLabels.setLabelsUntilLevel(i);
-    for (int j = 0; j < numberOfQueriesPerLevel; ++j) {
-      Stopwatch sw;
-      hubLabels.getShortestDistance(node(rng), node(rng)).value();
-      timer.addTotalTime(
-          std::chrono::duration_cast<std::chrono::microseconds>(sw.elapsed())
-              .count());
+  if(!ram) {
+
+    auto& ramHlStore = hubLabels.getHublabelStore();
+
+    auto mmapNodes = pathFinder::MmapVector(graph.getNodes(), "nodes");
+    std::cout << "test" << std::endl;
+    auto mmapForwardEdges = pathFinder::MmapVector(graph.getForwardEdges(), "forwardEdges");
+    auto mmapBackwardEdges = pathFinder::MmapVector(graph.getBackEdges(), "backwardEdges");
+    auto diskGraph = pathFinder::CHGraph(mmapNodes, mmapForwardEdges, mmapBackwardEdges, graph.getForwardOffset(), graph.getBackOffset(), graph.numberOfNodes);
+    auto mmapForwardLabels = pathFinder::MmapVector(ramHlStore.getForwardLabels(), "forwardLabels");
+    auto mmapBackwardLabels = pathFinder::MmapVector(ramHlStore.getBackwardLabels(), "backwardLabels");
+    pathFinder::HubLabelStore diskHlStore(mmapForwardLabels, mmapBackwardLabels, ramHlStore.getForwardOffset(), ramHlStore.getBackwardOffset());
+    pathFinder::HubLabels diskHl(diskGraph, untilLevel, diskHlStore, timer);
+    ramHlStore.getBackwardLabels().clear();
+    ramHlStore.getBackwardLabels().shrink_to_fit();
+    ramHlStore.getForwardLabels().clear();
+    ramHlStore.getForwardLabels().shrink_to_fit();
+    graph.deleteEdges();
+    graph.deleteNodes();
+
+    for (int i = maxLevel + 1; i >= untilLevel; --i) {
+      timer.resetAll();
+      diskHl.setLabelsUntilLevel(i);
+      for (int j = 0; j < numberOfQueriesPerLevel; ++j) {
+        Stopwatch sw;
+        diskHl.getShortestDistance(node(rng), node(rng)).value();
+        timer.addTotalTime(
+            std::chrono::duration_cast<std::chrono::microseconds>(sw.elapsed())
+                .count());
+      }
+      ofs << i << "," << timer.getAverageSearchTime() << ","
+          << timer.getAverageMergeTime() << "," << timer.getAverageLookUpTime()
+          << "," << timer.getAverageTotalTime() << ","
+          <<hubLabels.spaceMeasurer.getSpaceConsumption(i) << std::endl;
+      std::cout << "finished level: " << i << std::endl;
     }
-    ofs << i << "," << timer.getAverageSearchTime() << ","
-        << timer.getAverageMergeTime() << "," << timer.getAverageLookUpTime()
-        << "," << timer.getAverageTotalTime() << ","
-        << hubLabels.spaceMeasurer.getSpaceConsumption(i) << std::endl;
-    std::cout << "finished level: " << i << std::endl;
+  } else {
+    for (int i = maxLevel + 1; i >= untilLevel; --i) {
+      timer.resetAll();
+      hubLabels.setLabelsUntilLevel(i);
+      for (int j = 0; j < numberOfQueriesPerLevel; ++j) {
+        Stopwatch sw;
+        hubLabels.getShortestDistance(node(rng), node(rng)).value();
+        timer.addTotalTime(
+            std::chrono::duration_cast<std::chrono::microseconds>(sw.elapsed())
+                .count());
+      }
+      ofs << i << "," << timer.getAverageSearchTime() << ","
+          << timer.getAverageMergeTime() << "," << timer.getAverageLookUpTime()
+          << "," << timer.getAverageTotalTime() << ","
+          << hubLabels.spaceMeasurer.getSpaceConsumption(i) << std::endl;
+      std::cout << "finished level: " << i << std::endl;
+    }
   }
 }
 } // namespace pathFinder
