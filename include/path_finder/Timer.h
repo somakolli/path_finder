@@ -10,6 +10,7 @@ private:
   double searchTime{};
   double totalTime{};
   uint32_t numberOfLabelsToMerge{};
+  double averageLabelSize{};
   uint32_t numberOfQueries = 1;
 
 public:
@@ -20,10 +21,13 @@ public:
   void addSearchTime(double time);
   void addTotalTime(double time);
   void addNumberOfLabelsToMerge(uint32_t labelsToMerge);
-  double getAverageMergeTime();
-  double getAverageLookUpTime();
-  double getAverageSearchTime();
-  double getAverageTotalTime();
+  void addAverageLabelSize(double averageLabelSize);
+  double getAverageMergeTime() const;
+  double getAverageLookUpTime() const;
+  double getAverageSearchTime() const;
+  double getAverageTotalTime() const;
+  double getAverageNumbersOfLabels() const;
+  double getAverageItemNumber() const;
   void resetAll();
 };
 } // namespace pathFinder

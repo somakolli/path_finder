@@ -1,7 +1,7 @@
 //
 // Created by sokol on 31.03.20.
 //
-#include "../include/DataConfig.h"
+#include <path_finder/DataConfig.h>
 #include <nlohmann/json.hpp>
 #include <sstream>
 

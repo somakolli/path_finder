@@ -1,8 +1,8 @@
 //
 // Created by sokol on 02.10.19.
 //
-#include "../include/GraphReader.h"
-#include "../include/Grid.h"
+#include "path_finder/GraphReader.h"
+#include "path_finder/Grid.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -45,10 +45,10 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph,
       fdDevice.close();
     }
   }
-  buildOffset(graph.edges, graph.offset);
+  //buildOffset(graph.edges, graph.offset);
 }
 
-void pathFinder::GraphReader::buildOffset(Graph::edgeVector &edges,
+void pathFinder::GraphReader::buildOffset(std::vector<CHEdge> &edges,
                                           std::vector<NodeId> &offset) {
   offset.clear();
   if (edges.empty())
@@ -115,9 +115,11 @@ void pathFinder::GraphReader::readCHFmiFile(
         graph.getNodes().push_back(node);
       }
       i = numberOfEdges + 1;
-      Edge edge{};
+      CHEdge edge{};
       while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >>
                             type >> maxSpeed >> child1 >> child2) {
+        child1 == -1 ? edge.child1 = std::nullopt : edge.child1 = child1;
+        child2 == -1 ? edge.child2 = std::nullopt : edge.child2 = child2;
         graph.edges.push_back(edge);
       }
       fdDevice.close();
@@ -131,9 +133,9 @@ void pathFinder::GraphReader::readCHFmiFile(
 }
 
 void pathFinder::GraphReader::buildBackEdges(
-    const Graph::edgeVector &forwardEdges, Graph::edgeVector &backEdges) {
+    const std::vector<CHEdge> &forwardEdges, std::vector<CHEdge> &backEdges) {
   for (const auto &edge : forwardEdges) {
-    Edge backWardEdge = edge;
+    auto backWardEdge = edge;
     backWardEdge.source = edge.target;
     backWardEdge.target = edge.source;
     backEdges.push_back(backWardEdge);
@@ -141,7 +143,7 @@ void pathFinder::GraphReader::buildBackEdges(
   sortEdges(backEdges);
 }
 
-void pathFinder::GraphReader::sortEdges(Graph::edgeVector &edges) {
+void pathFinder::GraphReader::sortEdges(std::vector<CHEdge> &edges) {
   std::sort(edges.begin(), edges.end(),
             [](const auto &edge1, const auto &edge2) -> bool {
               return (edge1.source == edge2.source)

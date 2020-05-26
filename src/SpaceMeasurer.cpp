@@ -2,7 +2,7 @@
 // Created by sokol on 19.03.20.
 //
 
-#include "../include/SpaceMeasurer.h"
+#include "path_finder/SpaceMeasurer.h"
 
 void pathFinder::SpaceMeasurer::setSpaceConsumption(pathFinder::Level nodeId,
                                                     size_t space) {

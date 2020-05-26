@@ -16,12 +16,12 @@ public:
   static void readCHFmiFile(pathFinder::CHGraph<std::vector> &chGraph,
                             const std::string &filepath, bool reorderWithGrid);
 
-  static void buildOffset(Graph::edgeVector &edges,
+  static void buildOffset(std::vector<CHEdge> &edges,
                           std::vector<NodeId> &offset);
 private:
-  static void buildBackEdges(const Graph::edgeVector &forwardEdges,
-                             Graph::edgeVector &backEdges);
-  static void sortEdges(Graph::edgeVector &edges);
+  static void buildBackEdges(const std::vector<CHEdge> &forwardEdges,
+                             std::vector<CHEdge> &backEdges);
+  static void sortEdges(std::vector<CHEdge> &edges);
   static void gridReorder(CHGraph<std::vector>& graph);
 };
 } // namespace pathFinder

@@ -1,7 +1,7 @@
 //
 // Created by sokol on 02.12.19.
 //
-#include "../include/PathFinderBase.h"
+#include "path_finder/PathFinderBase.h"
 
 std::optional<pathFinder::Distance>
 pathFinder::PathFinderBase::getShortestDistance(pathFinder::NodeId source,

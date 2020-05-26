@@ -28,6 +28,7 @@ struct LatLng {
   Lat lat;
   Lng lng;
 };
+
 constexpr Distance MAX_DISTANCE = std::numeric_limits<Distance>::max();
 enum EdgeDirection { FORWARD = true, BACKWARD = false };
 class Edge {
@@ -49,6 +50,9 @@ public:
   NodeId id;
   LatLng latLng;
   double quickBeeLine(const LatLng &other) const;
+  double quickBeeLine(const Node &other) const;
+  double euclid(const Node &other) const;
+
 };
 template <typename MyPointerType> class MyIterator {
 private:
@@ -64,6 +68,7 @@ public:
   MyPointerType end() { return _end; };
   MyPointerType end() const { return _end; };
   size_t size() { return _end - _begin; }
+
 };
 class Graph {
 public:
@@ -115,6 +120,27 @@ public:
   bool operator==(const CostNode &rhs) const {
     return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
   }
+};
+class PreviousReplacer {
+private:
+  NodeId currentNode;
+
+public:
+  explicit PreviousReplacer(NodeId id) {
+    currentNode = id;
+  }
+  CostNode operator()  (CostNode costNode) const {
+    if(costNode.previousNode == costNode.id){
+      // the previous node of the label has not been set so replace it
+      // with the current node
+      return CostNode(costNode.id, costNode.cost, currentNode);
+    }
+    return costNode;
+  }
+  CostNode operator() (NodeId id, Distance cost, NodeId previousNode) {
+    return (*this)(CostNode(id, cost, previousNode));
+  }
+
 };
 } // namespace pathFinder
 #endif // ALG_END_PROJECT_GRAPH_H

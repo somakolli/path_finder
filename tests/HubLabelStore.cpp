@@ -1,10 +1,10 @@
 //
 // Created by sokol on 23.01.20.
 //
-#include <gtest/gtest.h>
-#include "../include/HubLabelStore.h"
-#include <vector>
+#include "../include/path_finder/HubLabelStore.h"
 #include <gmock/gmock-matchers.h>
+#include <gtest/gtest.h>
+#include <vector>
 
 TEST(HubLabelStore, ConstructstCorrectly) {
     pathFinder::HubLabelStore<std::vector> hubLabelStore(0);

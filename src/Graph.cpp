@@ -2,7 +2,7 @@
 // Created by sokol on 02.10.19.
 //
 
-#include "../include/Graph.h"
+#include "path_finder/Graph.h"
 #include <cmath>
 
 pathFinder::LatLng
@@ -28,4 +28,11 @@ pathFinder::Graph::getNodeId(pathFinder::LatLng latLng) const {
 double pathFinder::Node::quickBeeLine(const LatLng &other) const {
   return std::pow(other.lat - latLng.lat, 2) +
          std::pow(other.lng - latLng.lng, 2);
+}
+
+double pathFinder::Node::quickBeeLine(const Node &other) const {
+  return quickBeeLine(other.latLng);
+}
+double pathFinder::Node::euclid(const pathFinder::Node &other) const {
+  return std::sqrt(quickBeeLine(other));
 }
