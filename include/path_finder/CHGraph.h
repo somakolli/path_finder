@@ -59,6 +59,7 @@ public:
   OffsetVector &getForwardOffset();
   EdgeVector &getBackEdges();
   OffsetVector &getBackOffset();
+  std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
   std::vector<NodeId> getPathFromShortcut(CHEdge shortcut, double minLength);
   double getDistance(NodeId node1, NodeId node2);
   void deleteNodes();
@@ -172,6 +173,16 @@ std::vector<NodeId> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge sh
 template <template <class, class> class Vector, class OffsetVector>
 CHNode CHGraph<Vector, OffsetVector>::getNode(NodeId id) const {
   return nodes[id];
+}
+template <template <class, class> class Vector, class OffsetVector>
+std::optional<size_t> CHGraph<Vector, OffsetVector>::getEdgePosition(const CHEdge& edge, EdgeDirection direction) {
+  for(auto i = offset[edge.source]; i < offset[edge.target]; ++i) {
+    auto e = edges[i];
+    if(e.target == edge.target) {
+      return i;
+    }
+  }
+  return std::nullopt;
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H
