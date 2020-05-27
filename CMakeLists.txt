@@ -27,7 +27,7 @@ set(SOURCES
         src/VectorBase.cpp
         src/RamVector.cpp
         src/Grid.cpp
-        src/OscarIntegration.cpp)
+        src/OscarIntegration.cpp src/CellIdStore.cpp)
 
 set(INCLUDES
         include/path_finder/CHDijkstra.h

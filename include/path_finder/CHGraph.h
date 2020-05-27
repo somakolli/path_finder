@@ -54,6 +54,7 @@ public:
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   NodeVector &getNodes();
+  CHNode getNode(NodeId id) const;
   EdgeVector &getForwardEdges();
   OffsetVector &getForwardOffset();
   EdgeVector &getBackEdges();
@@ -167,6 +168,10 @@ std::vector<NodeId> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge sh
     }
   }
   return path;
+}
+template <template <class, class> class Vector, class OffsetVector>
+CHNode CHGraph<Vector, OffsetVector>::getNode(NodeId id) const {
+  return nodes[id];
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H
