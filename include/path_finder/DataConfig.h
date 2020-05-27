@@ -41,6 +41,8 @@ struct DataConfig {
   BinaryFileDescription forwardHublabelOffset;
   BinaryFileDescription backwardHublabels;
   BinaryFileDescription backwardHublabelOffset;
+  BinaryFileDescription cellIds;
+  BinaryFileDescription cellIdsOffset;
   std::vector<GridMapEntry> gridMapEntries;
 
   std::string toJson();

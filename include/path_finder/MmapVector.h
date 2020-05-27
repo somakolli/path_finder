@@ -47,11 +47,12 @@ template <typename T, typename Allocator>
 MmapVector<T, Allocator>::MmapVector(const char *filename, size_t size) {
   FILE *file = fopen64(filename, "r");
   if (file == nullptr)
-    std::cerr << "could not open file" << std::endl;
+    throw std::runtime_error("could not open file: " + std::string(filename));
+
   auto mmapPointer =
       mmap64(nullptr, sizeof(T) * size, PROT_READ, MAP_SHARED, fileno(file), 0);
   if (mmapPointer == MAP_FAILED)
-    std::cerr << "could not map file to memory" << std::endl;
+    throw std::runtime_error("could not map file(" + std::string(filename) + ") to memory");
   _data = (T *)mmapPointer;
   _size = size;
 }
@@ -73,6 +74,8 @@ template <typename T, typename Allocator>
 MmapVector<T, Allocator>::MmapVector() {}
 
 template <typename T, typename Allocator>
-void MmapVector<T, Allocator>::push_back(T element) {}
+void MmapVector<T, Allocator>::push_back(T element) {
+
+}
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_MMAPVECTOR_H

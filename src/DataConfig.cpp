@@ -20,7 +20,9 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataConfig &d) {
       {"backwardHublabels", d.backwardHublabels},
       {"forwardHublabelOffset", d.forwardHublabelOffset},
       {"backwardHublabelOffset", d.backwardHublabelOffset},
-      {"gridMapEntries", d.gridMapEntries}
+      {"gridMapEntries", d.gridMapEntries},
+      {"cellIds", d.cellIds},
+      {"cellIdsOffset", d.cellIdsOffset}
   };
 }
 
@@ -39,6 +41,8 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::DataConfig &d) {
   j.at("forwardHublabelOffset").get_to(d.forwardHublabelOffset);
   j.at("backwardHublabelOffset").get_to(d.backwardHublabelOffset);
   j.at("gridMapEntries").get_to(d.gridMapEntries);
+  j.at("cellIds").get_to(d.cellIds);
+  j.at("cellIdsOffset").get_to(d.cellIdsOffset);
 }
 
 void pathFinder::from_json(const nlohmann::json &j, BinaryFileDescription &d) {
