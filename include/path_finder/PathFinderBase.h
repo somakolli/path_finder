@@ -14,6 +14,7 @@ public:
   virtual std::optional<Distance> getShortestDistance(NodeId source,
                                                       NodeId target);
   virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
+  virtual std::vector<LatLng> getShortestPath(NodeId source, NodeId target, std::vector<unsigned int>* cellIds);
 };
 } // namespace pathFinder
 

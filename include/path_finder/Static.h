@@ -61,17 +61,22 @@ public:
 
   template <typename T>
   static inline std::vector<T>
-  getFromFile(pathFinder::BinaryFileDescription fileDescription) {
-    FILE *file = fopen64(fileDescription.path.c_str(), "r");
+  getFromFile(pathFinder::BinaryFileDescription fileDescription,
+              const std::string& folderPrefix) {
+    std::string path = folderPrefix  + '/'+ fileDescription.path;
+    FILE *file = fopen64(
+        path.c_str(), "r");
     std::vector<T> buf(fileDescription.size);
     std::fread(&buf[0], sizeof(buf[0]), buf.size(), file);
     return buf;
   }
   template <typename T>
   static inline auto
-  getFromFileMMap(pathFinder::BinaryFileDescription fileDescription) {
-    return pathFinder::MmapVector<T>(fileDescription.path.c_str(),
-                                     fileDescription.size);
+  getFromFileMMap(pathFinder::BinaryFileDescription fileDescription,
+                  const std::string& folderPrefix) {
+    return pathFinder::MmapVector<T>(
+        std::string(folderPrefix + '/' + fileDescription.path).c_str(),
+        fileDescription.size);
   }
 };
 } // namespace pathFinder

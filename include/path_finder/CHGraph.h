@@ -60,7 +60,7 @@ public:
   EdgeVector &getBackEdges();
   OffsetVector &getBackOffset();
   std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
-  std::vector<NodeId> getPathFromShortcut(CHEdge shortcut, double minLength);
+  std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength);
   double getDistance(NodeId node1, NodeId node2);
   void deleteNodes();
   void deleteEdges();
@@ -131,17 +131,15 @@ void CHGraph<Vector, OffsetVector>::sortEdges() {
   });
 }
 template <template <class, class> class Vector, class OffsetVector>
-std::vector<NodeId> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge shortcut, double minLength) {
-  std::vector<NodeId> path;
-  path.emplace_back(shortcut.source);
+std::vector<CHEdge> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge shortcut, double minLength) {
+  std::vector<CHEdge> path;
   Node source = nodes[shortcut.source];
   Node target = nodes[shortcut.target];
   double length = source.euclid(target);
 
   if(!shortcut.child2.has_value() || length <= minLength) {
     //std::cout << "is not shortcut" << std::endl;
-    path.emplace_back(shortcut.source);
-    path.emplace_back(shortcut.target);
+    path.push_back(shortcut);
     return path;
   }
   //std::cout << "found shortcut" << std::endl;
@@ -165,7 +163,7 @@ std::vector<NodeId> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge sh
       edgesStack.push(edge.child1.value());
     } else {
       //std::cout << "is not shortcut" << std::endl;
-      path.emplace_back(edge.target);
+      path.push_back(edge);
     }
   }
   return path;
@@ -176,7 +174,7 @@ CHNode CHGraph<Vector, OffsetVector>::getNode(NodeId id) const {
 }
 template <template <class, class> class Vector, class OffsetVector>
 std::optional<size_t> CHGraph<Vector, OffsetVector>::getEdgePosition(const CHEdge& edge, EdgeDirection direction) {
-  for(auto i = offset[edge.source]; i < offset[edge.target]; ++i) {
+  for(auto i = offset[edge.source]; i < offset[edge.source+1]; ++i) {
     auto e = edges[i];
     if(e.target == edge.target) {
       return i;

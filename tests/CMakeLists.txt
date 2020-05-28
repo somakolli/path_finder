@@ -1,5 +1,4 @@
 add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/googletest" "vendor/googletest")
-set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 #keep cache clean
 mark_as_advanced(
@@ -7,13 +6,12 @@ mark_as_advanced(
         gmock_build_tests gtest_build_samples gtest_build_tests
         gtest_disable_pthreads gtest_force_shared_crt gtest_hide_internal_symbols
 )
-
 macro(package_add_test TESTNAME)
     # create an exectuable in which the tests will be stored
     add_executable(${TESTNAME} ${ARGN})
-    # link the Google test infrastructure, mocking library, and a default main fuction to
+    # link the Google test infrastructure, mocking library, and a default main function to
     # the test executable.  Remove g_test_main if writing your own main function.
-    target_link_libraries(${TESTNAME} gtest gmock gtest_main ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
+    target_link_libraries(${TESTNAME} gtest gmock gtest_main ${Boost_LIBRARIES} nlohmann_json::nlohmann_json path_finder)
     gtest_discover_tests(${TESTNAME}
             # set a working directory so your project root so that you can find test data via paths relative to the project root
             WORKING_DIRECTORY ${PROJECT_DIR}
@@ -21,6 +19,7 @@ macro(package_add_test TESTNAME)
             )
     set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 endmacro()
+
 
 package_add_test(HubLabelStore HubLabelStore.cpp)
 package_add_test(HubLabels HubLabels.cpp)

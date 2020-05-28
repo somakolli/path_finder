@@ -70,11 +70,11 @@ private:
 
 public:
   SpaceMeasurer spaceMeasurer;
-  HubLabels(Graph &graph, Level level, Timer &timer);
+  HubLabels(Graph &graph, Level level, Timer &timer, CellIdStore& cellIdStore);
   HubLabels(Graph &graph, Level level, std::vector<CHNode> &sortedNodes,
-            std::vector<Distance> &cost, Timer &timer);
+            std::vector<Distance> &cost, Timer &timer, CellIdStore& cellIdStore);
   HubLabels(Graph &graph, Level level, HubLabelStore &hubLabelStore,
-            Timer &timer, CellIdStore cellIdStore);
+            Timer &timer, CellIdStore& cellIdStore);
   HubLabelStore &getHublabelStore();
   void setMinLevel(Level level);
   std::optional<Distance> getShortestDistance(NodeId source,
@@ -92,7 +92,7 @@ public:
   static void sortLabel(costNodeVec_t &label);
   std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
   std::vector<LatLng> getShortestPath(NodeId source, NodeId target,
-                                      std::optional<std::vector<CellId_t>>& cellIds);
+                                      std::vector<CellId_t> *cellIds = nullptr) override;
   void writeToFile(boost::filesystem::path filePath);
   void setLabelsUntilLevel(Level level);
 
@@ -102,9 +102,9 @@ public:
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::HubLabels(Graph &graph,
                                                        Level level,
-                                                       Timer &timer)
+                                                       Timer &timer, CellIdStore& cellIdStore)
     : graph(graph), labelsUntilLevel(level),
-      hubLabelStore(graph.getNodes().size()), _timer(timer) {
+      hubLabelStore(graph.getNodes().size()), _timer(timer), _cellIdStore(cellIdStore) {
   cost.reserve(graph.getNodes().size());
   while (cost.size() < graph.getNodes().size())
     cost.push_back(MAX_DISTANCE);
@@ -253,6 +253,7 @@ void pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::processRange(
   }
 }
 
+
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 void HubLabels<HubLabelStore, Graph, CellIdStore>::processRangeParallel(
     std::pair<uint32_t, uint32_t> range, EdgeDirection direction) {
@@ -295,7 +296,7 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 std::vector<pathFinder::LatLng>
 pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     pathFinder::NodeId source, pathFinder::NodeId target,
-    std::optional<std::vector<CellId_t>>& cellIds) {
+    std::vector<CellId_t> *cellIds) {
   auto forwardLabel = calcLabel(source, EdgeDirection::FORWARD);
   auto backwardLabel = calcLabel(target, EdgeDirection::BACKWARD);
   NodeId topNode;
@@ -307,7 +308,7 @@ pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::getShortestPath(
 
   // reverse the forward path
   std::vector<NodeId> forwardPath;
-  for(int i = reverseForwardPath.size(); i >= 0; --i) {
+  for(int i = reverseForwardPath.size() - 1; i >= 0; --i) {
     forwardPath.push_back(reverseForwardPath[i]);
   }
 
@@ -316,38 +317,46 @@ pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   std::vector<CHEdge> backwardEdges = getEdgeVectorFromNodeIdPath(backwardPath, EdgeDirection::BACKWARD);
 
   // unpack edges
-  std::vector<NodeId> finalPath;
+  std::vector<CHEdge> finalForwardEdgePath;
   for(auto edge : forwardEdges) {
-    if(cellIds.has_value())
-      addCellIds(edge, cellIds.value());
-    for (auto id : graph.getPathFromShortcut(edge, 0))
-      finalPath.emplace_back(id);
+    for (auto e : graph.getPathFromShortcut(edge, 0))
+      finalForwardEdgePath.emplace_back(e);
   }
 
-
+  std::vector<CHEdge> finalBackwardEdgePath;
   for(auto edge : backwardEdges) {
-    if(cellIds.has_value()){
-      auto reverseEdge = CHEdge(edge);
-      reverseEdge.target = edge.source;
-      reverseEdge.source = edge.target;
-      addCellIds(reverseEdge, cellIds);
-    }
-    for (auto id : graph.getPathFromShortcut(edge, 0))
-      finalPath.emplace_back(id);
+    for (auto e : graph.getPathFromShortcut(edge, 0))
+      finalBackwardEdgePath.emplace_back(e);
   }
-
-
+  // find cell ids
+  if(cellIds != nullptr){
+    // forward
+    for(auto edge : finalForwardEdgePath){
+      addCellIds(edge, *cellIds);
+    }
+    // backward
+    for(auto edge : finalBackwardEdgePath){
+      addCellIds(edge, *cellIds);
+    }
+  }
   // get lat longs
   std::vector<LatLng> latLngVector;
-  for(auto id : finalPath) {
-    latLngVector.push_back(graph.getNodes()[id].latLng);
+  if(!finalForwardEdgePath.empty())
+    latLngVector.push_back(graph.getNodes()[finalForwardEdgePath[0].source].latLng);
+  for(auto edge : finalForwardEdgePath) {
+    latLngVector.push_back(graph.getNodes()[edge.target].latLng);
+  }
+  if(!finalBackwardEdgePath.empty())
+    latLngVector.push_back(graph.getNodes()[finalBackwardEdgePath[0].target].latLng);
+  for(auto edge : finalBackwardEdgePath) {
+    latLngVector.push_back(graph.getNodes()[edge.source].latLng);
   }
 
   // remove duplicates from cellIds
-  if(cellIds.has_value()){
-    sort( cellIds.value().begin(), cellIds.value().end() );
-    cellIds.value().erase(
-      unique(cellIds.value().begin(), cellIds.value().end()), cellIds.value().end()
+  if(cellIds != nullptr){
+    sort( (*cellIds).begin(), (*cellIds).end() );
+    (*cellIds).erase(
+      unique((*cellIds).begin(), (*cellIds).end()), (*cellIds).end()
     );
   }
 
@@ -434,7 +443,7 @@ void pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::writeToFile(
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::HubLabels(
     Graph &graph, pathFinder::Level level, HubLabelStore &hubLabelStore,
-    Timer &timer, CellIdStore cellIdStore)
+    Timer &timer, CellIdStore& cellIdStore)
     : graph(graph), labelsUntilLevel(level), hubLabelStore(hubLabelStore),
       _timer(timer), _cellIdStore(cellIdStore) {
   graph.sortByLevel(sortedNodes);
@@ -450,11 +459,14 @@ HubLabelStore &HubLabels<HubLabelStore, Graph, CellIdStore>::getHublabelStore() 
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 HubLabels<HubLabelStore, Graph, CellIdStore>::HubLabels(Graph &graph, Level level,
+
                                            std::vector<CHNode> &sortedNodes,
                                            std::vector<Distance> &cost,
-                                           Timer &timer)
+                                           Timer &timer,CellIdStore& cellIdStore)
     : graph(graph), labelsUntilLevel(level),
-      hubLabelStore(graph.getNodes().size()), _timer(timer) {
+      hubLabelStore(graph.getNodes().size()), _timer(timer),
+      _cellIdStore(cellIdStore)
+{
   this->graph = graph;
   this->labelsUntilLevel = level;
   this->sortedNodes = sortedNodes;
@@ -549,10 +561,18 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 void HubLabels<HubLabelStore, Graph, CellIdStore>::addCellIds(
     const CHEdge &edge, std::vector<CellId_t> &result) {
   // edge always needs to be in forward order
-  size_t edgeId = graph.getEdgePosition(edge, EdgeDirection::FORWARD);
-  for(auto cellId : _cellIdStore.getCellIds(edgeId)){
+  auto edgeId = graph.getEdgePosition(edge, EdgeDirection::FORWARD);
+  if(!edgeId.has_value())
+    throw std::runtime_error("[Hublabels.addCellIds]could not find edgeId for edge(" + std::to_string(edge.source) + "," + std::to_string(edge.target) + ")");
+  for(auto cellId : _cellIdStore.getCellIds(edgeId.value())){
     result.push_back(cellId);
   }
+}
+template <typename HubLabelStore, typename Graph, typename CellIdStore>
+std::vector<LatLng>
+HubLabels<HubLabelStore, Graph, CellIdStore>::getShortestPath(NodeId source,
+                                                              NodeId target) {
+  return getShortestPath(source, target, nullptr);
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_HUBLABELS_H

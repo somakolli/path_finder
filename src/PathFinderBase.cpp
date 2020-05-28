@@ -14,3 +14,8 @@ pathFinder::PathFinderBase::getShortestPath(pathFinder::NodeId source,
                                             pathFinder::NodeId target) {
   return std::vector<LatLng>();
 }
+std::vector<pathFinder::LatLng> pathFinder::PathFinderBase::getShortestPath(
+    pathFinder::NodeId source, pathFinder::NodeId target,
+    std::vector<unsigned int> *cellIds) {
+  return std::vector<LatLng>();
+}

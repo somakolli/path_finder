@@ -25,6 +25,7 @@ template <class Graph>
 void pathFinder::ChHlBenchmarker<Graph>::compareSpeed(
     boost::filesystem::path benchFilePath, Level untilLevel, bool ram) {
   // CHDijkstra chDijkstra(graph);
+  CellIdStore<std::vector> cellIdStore(0);
   boost::filesystem::ofstream ofs{benchFilePath};
   GraphStats<Graph> gs(graph);
   boost::random::mt19937 rng;
@@ -41,7 +42,7 @@ void pathFinder::ChHlBenchmarker<Graph>::compareSpeed(
 
   Timer timer(numberOfQueriesPerLevel);
   HubLabels<HubLabelStore<std::vector>, Graph> hubLabels(
-      graph, untilLevel, sortedNodes, cost, timer);
+      graph, untilLevel, sortedNodes, cost, timer, cellIdStore);
   // first timer is for ram second timer is for disk
   std::map<int, std::pair<Timer, Timer>> timings;
 
@@ -70,7 +71,7 @@ void pathFinder::ChHlBenchmarker<Graph>::compareSpeed(
   auto mmapForwardLabels = pathFinder::MmapVector(ramHlStore.getForwardLabels(), "forwardLabels");
   auto mmapBackwardLabels = pathFinder::MmapVector(ramHlStore.getBackwardLabels(), "backwardLabels");
   pathFinder::HubLabelStore diskHlStore(mmapForwardLabels, mmapBackwardLabels, ramHlStore.getForwardOffset(), ramHlStore.getBackwardOffset());
-  pathFinder::HubLabels diskHl(diskGraph, untilLevel, diskHlStore, timer);
+  pathFinder::HubLabels diskHl(diskGraph, untilLevel, diskHlStore, timer, cellIdStore);
   ramHlStore.getBackwardLabels().clear();
   ramHlStore.getBackwardLabels().shrink_to_fit();
   ramHlStore.getForwardLabels().clear();

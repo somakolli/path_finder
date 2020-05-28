@@ -1,9 +1,7 @@
 //
 // Created by sokol on 27.01.20.
 //
-#include "../include/path_finder/HubLabels.h"
-#include "../include/path_finder/HubLabelStore.h"
-#include "../include/path_finder/Static.h"
+#include <path_finder/Static.h>
 #include <gtest/gtest.h>
 #include <vector>
 namespace pathFinder{
