@@ -27,7 +27,9 @@ set(SOURCES
         src/VectorBase.cpp
         src/RamVector.cpp
         src/Grid.cpp
-        src/OscarIntegration.cpp src/CellIdStore.cpp)
+        src/OscarIntegration.cpp
+        src/CellIdStore.cpp
+        src/FileLoader.cpp)
 
 set(INCLUDES
         include/path_finder/CHDijkstra.h
@@ -45,7 +47,8 @@ set(INCLUDES
         include/path_finder/Stopwatch.h
         include/path_finder/Timer.h
         include/path_finder/DataConfig.h
-        include/path_finder/Grid.h)
+        include/path_finder/Grid.h
+        include/path_finder/FileLoader.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)

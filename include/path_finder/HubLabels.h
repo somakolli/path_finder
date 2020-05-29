@@ -73,7 +73,7 @@ public:
   HubLabels(Graph &graph, Level level, Timer &timer, CellIdStore& cellIdStore);
   HubLabels(Graph &graph, Level level, std::vector<CHNode> &sortedNodes,
             std::vector<Distance> &cost, Timer &timer, CellIdStore& cellIdStore);
-  HubLabels(Graph &graph, Level level, HubLabelStore &hubLabelStore,
+  HubLabels(CHGraph<MmapVector, MmapVector<unsigned int>> graph, Level level, HubLabelStore &hubLabelStore,
             Timer &timer, CellIdStore& cellIdStore);
   HubLabelStore &getHublabelStore();
   void setMinLevel(Level level);
@@ -442,7 +442,7 @@ void pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::writeToFile(
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 pathFinder::HubLabels<HubLabelStore, Graph, CellIdStore>::HubLabels(
-    Graph &graph, pathFinder::Level level, HubLabelStore &hubLabelStore,
+    CHGraph<MmapVector, MmapVector<unsigned int>> graph, pathFinder::Level level, HubLabelStore &hubLabelStore,
     Timer &timer, CellIdStore& cellIdStore)
     : graph(graph), labelsUntilLevel(level), hubLabelStore(hubLabelStore),
       _timer(timer), _cellIdStore(cellIdStore) {
