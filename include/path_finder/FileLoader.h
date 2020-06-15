@@ -3,6 +3,7 @@
 #include "HubLabels.h"
 namespace pathFinder{
 class FileLoader {
+public:
   using HL = HubLabels<HubLabelStore<MmapVector, MmapVector<OffsetElement>>,
                   CHGraph<MmapVector,
                                MmapVector<NodeId>>,
