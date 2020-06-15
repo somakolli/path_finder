@@ -1,6 +1,6 @@
 #include <path_finder/FileLoader.h>
-pathFinder::FileLoader::HL
-pathFinder::FileLoader::loadHubLabels(const std::string &configFolder) {
+std::shared_ptr<pathFinder::FileLoader::HL>
+pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
@@ -25,5 +25,5 @@ pathFinder::FileLoader::loadHubLabels(const std::string &configFolder) {
 
   pathFinder::HubLabelStore hubLabelStore(forwardHublabels, backwardHublabels, forwardHublabelOffset, backwardHublabelOffset);
   pathFinder::Timer timer;
-  return HL(chGraph, config.calculatedUntilLevel, hubLabelStore, timer, cellIdStore);
+  return std::make_shared<HL>(HL(chGraph, config.calculatedUntilLevel, hubLabelStore, timer, cellIdStore));
 }

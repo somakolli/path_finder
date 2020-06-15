@@ -7,7 +7,7 @@ class FileLoader {
                   CHGraph<MmapVector,
                                MmapVector<NodeId>>,
                        CellIdStore<MmapVector, MmapVector<OffsetElement>>>;
-  static HL loadHubLabels(const std::string& configFolder);
+  static std::shared_ptr<HL> loadHubLabelsShared(const std::string& configFolder);
 };
 }
 
