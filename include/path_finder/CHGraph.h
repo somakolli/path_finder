@@ -53,6 +53,7 @@ public:
   Level getLevel(NodeId nodeId) { return nodes[nodeId].level; }
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
+  NodeId getNodeIdFor(LatLng latLng);
   NodeVector &getNodes();
   CHNode getNode(NodeId id) const;
   EdgeVector &getForwardEdges();
@@ -62,6 +63,7 @@ public:
   std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
   std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength);
   double getDistance(NodeId node1, NodeId node2);
+  static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
   void deleteNodes();
   void deleteEdges();
 };
@@ -181,6 +183,26 @@ std::optional<size_t> CHGraph<Vector, OffsetVector>::getEdgePosition(const CHEdg
     }
   }
   return std::nullopt;
+}
+template <template <class, class> class Vector, class OffsetVector>
+NodeId CHGraph<Vector, OffsetVector>::getNodeIdFor(LatLng latLng) {
+  double distance = std::numeric_limits<double>::max();
+  NodeId position = nodes.size();
+  for(int i = 0; i < nodes.size(); ++i) {
+    auto& node = nodes[i];
+    double currentDistance = beeLineWithoutSquareRoot(node.latLng, latLng);
+    if(currentDistance < distance){
+      distance = currentDistance;
+      position = i;
+    }
+  }
+  std::cout << position << std::endl;
+  return position;
+}
+template <template <class, class> class Vector, class OffsetVector>
+double CHGraph<Vector, OffsetVector>::beeLineWithoutSquareRoot(LatLng latLng1,
+                                                               LatLng latLng2) {
+  return pow(latLng1.lat - latLng2.lat, 2) + pow(latLng1.lng - latLng2.lng, 2);
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H

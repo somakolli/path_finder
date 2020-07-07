@@ -3,19 +3,13 @@
 //
 #include "path_finder/PathFinderBase.h"
 
-std::optional<pathFinder::Distance>
-pathFinder::PathFinderBase::getShortestDistance(pathFinder::NodeId source,
-                                                pathFinder::NodeId target) {
-  return std::optional<Distance>();
-}
-
-std::vector<pathFinder::LatLng>
-pathFinder::PathFinderBase::getShortestPath(pathFinder::NodeId source,
-                                            pathFinder::NodeId target) {
+std::vector<pathFinder::LatLng> pathFinder::PathFinderBase::getShortestPath(
+    pathFinder::NodeId source, pathFinder::NodeId target, std::optional<Distance>& distance,
+    std::vector<unsigned int> *cellIds) {
   return std::vector<LatLng>();
 }
 std::vector<pathFinder::LatLng> pathFinder::PathFinderBase::getShortestPath(
-    pathFinder::NodeId source, pathFinder::NodeId target,
+    pathFinder::LatLng source, pathFinder::LatLng target, std::optional<Distance>& distance,
     std::vector<unsigned int> *cellIds) {
   return std::vector<LatLng>();
 }

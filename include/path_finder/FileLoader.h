@@ -1,14 +1,14 @@
 #ifndef MASTER_ARBEIT_FILELOADER_H
 #define MASTER_ARBEIT_FILELOADER_H
-#include "HubLabels.h"
+#include "HybridPathFinder.h"
 namespace pathFinder{
 class FileLoader {
 public:
-  using HL = HubLabels<HubLabelStore<MmapVector, MmapVector<OffsetElement>>,
+  using HybridPF = HybridPathFinder<HubLabelStore<MmapVector, MmapVector<OffsetElement>>,
                   CHGraph<MmapVector,
                                MmapVector<NodeId>>,
                        CellIdStore<MmapVector, MmapVector<OffsetElement>>>;
-  static std::shared_ptr<HL> loadHubLabelsShared(const std::string& configFolder);
+  static std::shared_ptr<HybridPF> loadHubLabelsShared(const std::string& configFolder);
 };
 }
 

@@ -6,8 +6,9 @@
 #define ALG_ENG_PROJECT_CHDIJKSTRA_H
 
 #include "CHGraph.h"
-#include "HubLabels.h"
 #include "PathFinderBase.h"
+#include "Static.h"
+#include <queue>
 #include <set>
 
 namespace pathFinder {
@@ -15,10 +16,10 @@ template <typename Graph> class CHDijkstra : public PathFinderBase {
 public:
   explicit CHDijkstra(Graph &graph);
   std::optional<Distance> getShortestDistance(NodeId source,
-                                              NodeId target) override;
+                                              NodeId target);
   std::vector<CostNode> shortestDistance(NodeId source,
                                          EdgeDirection direction);
-  std::vector<LatLng> getShortestPath(NodeId source, NodeId target) override;
+  std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
 
 private:
   std::vector<Distance> cost;
@@ -72,11 +73,10 @@ pathFinder::CHDijkstra<Graph>::getShortestDistance(pathFinder::NodeId source,
   auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
   auto backwardLabel = shortestDistance(target, EdgeDirection::BACKWARD);
 
-  HubLabels<HubLabelStore<std::vector>, Graph>::sortLabel(forwardLabel);
-  HubLabels<HubLabelStore<std::vector>, Graph>::sortLabel(backwardLabel);
+  Static::sortLabel(forwardLabel);
+  Static::sortLabel(backwardLabel);
   NodeId topNode;
-  return pathFinder::HubLabels<std::vector<CostNode>, Graph>::
-      getShortestDistance(MyIterator<CostNode *>(forwardLabel.begin().base(),
+  return Static::getShortestDistance(MyIterator<CostNode *>(forwardLabel.begin().base(),
                                                  forwardLabel.end().base()),
                           MyIterator<CostNode *>(backwardLabel.begin().base(),
                                                  backwardLabel.end().base()),

@@ -13,10 +13,8 @@ set(SOURCES
         src/Dijkstra.cpp
         src/CHGraph.cpp
         src/CHDijkstra.cpp
-        src/HubLabels.cpp
         src/GraphStats.cpp
         src/PathFinderBase.cpp
-        src/ChHlBenchmarker.cpp
         src/HubLabelStore.cpp
         src/MmapVector.cpp
         src/Static.cpp
@@ -29,7 +27,10 @@ set(SOURCES
         src/Grid.cpp
         src/OscarIntegration.cpp
         src/CellIdStore.cpp
-        src/FileLoader.cpp)
+        src/FileLoader.cpp
+        src/HubLabelCreator.cpp
+        src/HybridPathFinder.cpp
+        src/Types.cpp)
 
 set(INCLUDES
         include/path_finder/CHDijkstra.h
@@ -38,9 +39,7 @@ set(INCLUDES
         include/path_finder/Graph.h
         include/path_finder/GraphReader.h
         include/path_finder/GraphStats.h
-        include/path_finder/HubLabels.h
         include/path_finder/PathFinderBase.h
-        include/path_finder/ChHlBenchmarker.h
         include/path_finder/HubLabelStore.h
         include/path_finder/MmapVector.h
         include/path_finder/Static.h

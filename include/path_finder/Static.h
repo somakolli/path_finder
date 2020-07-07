@@ -13,8 +13,30 @@
 #include <vector>
 
 namespace pathFinder {
+/**
+ * @brief
+ * Static function container
+ */
 class Static {
 public:
+  /**
+   * @brief
+   * Iterates through two iterators, merges them and stores the result in a container.
+   *
+   * TODO: document replacePrevious
+   * @tparam ItA
+   * @tparam ItB
+   * @tparam Container
+   * @tparam Distance
+   * @tparam ReplacePrevious
+   * @param aBegin
+   * @param aEnd
+   * @param bBegin
+   * @param bEnd
+   * @param distanceToLabel
+   * @param result
+   * @param replacePrevious
+   */
   template <typename ItA, typename ItB, typename Container, typename Distance, typename ReplacePrevious>
   static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd,
                            Distance distanceToLabel, Container &result,
@@ -77,6 +99,56 @@ public:
     return pathFinder::MmapVector<T>(
         std::string(folderPrefix + '/' + fileDescription.path).c_str(),
         fileDescription.size);
+  }
+  /**
+  * @brief
+  * sorts a label by node ids
+  * @param label input label to be store
+  */
+  static inline void sortLabel(std::vector<CostNode> &label) {
+    std::sort(label.begin(), label.end(),
+              [](const CostNode &node1, const CostNode &node2) {
+                return node1.id == node2.id ? node1.cost < node2.cost
+                                            : node1.id < node2.id;
+              });
+  }
+  /**
+   * @brief
+   * calculates the shortest distance of two labels
+   *
+   * @details
+   * This function finds the entry which is present in both labels and
+   * the added cost is the lowest.
+   * The node id of that entry is store in topNode.
+   *
+   * @param forwardLabels iterator for the forward labels
+   * @param backwardLabels iterator for the backward labels
+   * @param topNode store for node id of the topNode (see details)
+   * @return
+   */
+  static inline std::optional<pathFinder::Distance> getShortestDistance(
+      MyIterator<CostNode *> forwardLabels, MyIterator<CostNode *> backwardLabels,
+      NodeId &topNode) {
+    Distance shortestDistance = MAX_DISTANCE;
+    topNode = 0;
+    auto i = forwardLabels.begin();
+    auto j = backwardLabels.begin();
+    while (i != forwardLabels.end() && j != backwardLabels.end()) {
+      auto &forwardCostNode = *i;
+      auto &backwardCostNode = *j;
+      if (forwardCostNode.id == backwardCostNode.id) {
+        if (forwardCostNode.cost + backwardCostNode.cost < shortestDistance){
+          shortestDistance = forwardCostNode.cost + backwardCostNode.cost;
+          topNode = forwardCostNode.id;
+        }
+        ++j;
+        ++i;
+      } else if (forwardCostNode.id < backwardCostNode.id)
+        ++i;
+      else
+        ++j;
+    }
+    return shortestDistance;
   }
 };
 } // namespace pathFinder

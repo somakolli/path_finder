@@ -46,6 +46,6 @@ public:
     }
   }
 };
-}
+} // namespace pathFinder
 
 #endif // MASTER_ARBEIT_OSCARINTEGRATION_H
