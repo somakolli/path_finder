@@ -44,9 +44,3 @@ pathFinder::Dijkstra::getShortestDistance(pathFinder::NodeId source,
   }
   return costs[target];
 }
-
-std::vector<pathFinder::LatLng>
-pathFinder::Dijkstra::getShortestPath(pathFinder::NodeId source,
-                                      pathFinder::NodeId target) {
-  return std::vector<LatLng>();
-}

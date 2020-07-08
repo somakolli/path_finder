@@ -22,7 +22,6 @@ private:
 public:
   explicit Dijkstra(const Graph &graph);
   std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
-  std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
 };
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_DIJKSTRA_H

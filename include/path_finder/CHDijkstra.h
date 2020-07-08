@@ -19,7 +19,6 @@ public:
                                               NodeId target);
   std::vector<CostNode> shortestDistance(NodeId source,
                                          EdgeDirection direction);
-  std::vector<LatLng> getShortestPath(NodeId source, NodeId target);
 
 private:
   std::vector<Distance> cost;
@@ -81,12 +80,6 @@ pathFinder::CHDijkstra<Graph>::getShortestDistance(pathFinder::NodeId source,
                           MyIterator<CostNode *>(backwardLabel.begin().base(),
                                                  backwardLabel.end().base()),
                           topNode);
-}
-template <typename Graph>
-std::vector<pathFinder::LatLng>
-pathFinder::CHDijkstra<Graph>::getShortestPath(pathFinder::NodeId source,
-                                               pathFinder::NodeId target) {
-  return std::vector<LatLng>();
 }
 } // namespace pathFinder
 
