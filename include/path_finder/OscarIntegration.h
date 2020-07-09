@@ -22,8 +22,8 @@ public:
   static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter) {
     int progress = 0;
 #pragma omp parallel for
-    for(int i = 0; i < graph.edges.size(); ++i) {
-      const auto& edge = graph.edges[i];
+    for(int i = 0; i < graph.m_edges.size(); ++i) {
+      const auto& edge = graph.m_edges[i];
       if(edge.child1.has_value()){
         std::cout << "skip" << '\n';
         continue;
@@ -41,7 +41,7 @@ public:
 #pragma omp critical
       {
         diskWriter(i, cellIds);
-        std::cout << "progress: " << progress++ << "/" << graph.edges.size() << '\n';
+        std::cout << "progress: " << progress++ << "/" << graph.m_edges.size() << '\n';
       }
     }
   }

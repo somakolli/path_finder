@@ -24,7 +24,7 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   for(auto gridEntry : config.gridMapEntries) {
     chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
   }
-
+  std::cout << chGraph.use_count() << '\n';
   auto hubLabelStore = std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels, forwardHublabelOffset, backwardHublabelOffset));
   pathFinder::Timer timer;
   return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.calculatedUntilLevel));

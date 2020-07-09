@@ -34,9 +34,9 @@ class HybridPathFinder : public PathFinderBase {
 private:
   typedef std::vector<CostNode> costNodeVec_t;
 
-  std::shared_ptr<HubLabelStore> &m_hubLabelStore;
-  std::shared_ptr<Graph> &m_graph;
-  std::shared_ptr<CellIdStore> &m_cellIdStore;
+  std::shared_ptr<HubLabelStore> m_hubLabelStore;
+  std::shared_ptr<Graph> m_graph;
+  std::shared_ptr<CellIdStore> m_cellIdStore;
   Level m_labelsUntilLevel = 0;
   std::vector<Distance> m_cost;
   std::vector<NodeId> m_visited;
@@ -104,8 +104,8 @@ public:
    * @param cellIdStore store for egde -> oscar cell id
    * @param labelsUntilLevel level until the labels are computed in the store
    */
-  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<Graph> graph,
-                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel)
+  HybridPathFinder(std::shared_ptr<HubLabelStore>& hubLabelStore, std::shared_ptr<Graph>& graph,
+                   std::shared_ptr<CellIdStore>& cellIdStore, Level labelsUntilLevel)
       : m_hubLabelStore(hubLabelStore), m_graph(graph),
         m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel) {
     m_cost.reserve(graph->getNodes().size());
@@ -144,6 +144,7 @@ public:
   RoutingResult getShortestPath(LatLng source, LatLng target) override;
   size_t graphNodeSize();
   Level labelsUntilLevel();
+  auto getGraph();
 };
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
@@ -227,6 +228,7 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 RoutingResult
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     LatLng source, LatLng target) {
+  std::cout << m_graph.use_count() << std::endl;
   std::cout << "graph size: " << m_graph->getNodes().size();
   std::cout << "hublabel size: " << m_hubLabelStore->getForwardLabels().size();
   std::cout << "lat" << source.lat << std::endl;
@@ -366,6 +368,10 @@ size_t HybridPathFinder<HubLabelStore, Graph, CellIdStore>::graphNodeSize() {
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 Level HybridPathFinder<HubLabelStore, Graph, CellIdStore>::labelsUntilLevel() {
   return m_labelsUntilLevel;
+}
+template <typename HubLabelStore, typename Graph, typename CellIdStore>
+auto HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getGraph() {
+  return m_graph;
 }
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_HYBRIDPATHFINDER_H
