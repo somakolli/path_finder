@@ -228,10 +228,6 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 RoutingResult
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     LatLng source, LatLng target) {
-  std::cout << m_graph.use_count() << std::endl;
-  std::cout << "graph size: " << m_graph->getNodes().size();
-  std::cout << "hublabel size: " << m_hubLabelStore->getForwardLabels().size();
-  std::cout << "lat" << source.lat << std::endl;
   NodeId sourceId = m_graph->getNodeIdFor(source);
   NodeId targetId = m_graph->getNodeIdFor(target);
   return getShortestPath(sourceId, targetId);
