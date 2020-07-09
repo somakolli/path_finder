@@ -18,14 +18,14 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   auto backwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.backwardHublabelOffset, configFolder);
   auto cellIds = Static::getFromFileMMap<CellId_t>(config.cellIds, configFolder);
   auto cellIdsOffset = Static::getFromFileMMap<OffsetElement>(config.cellIdsOffset, configFolder);
-  CHGraph chGraph(nodes, forwardEdges, backwardEdges, forwardOffset, backwardOffset, config.numberOfNodes);
-  auto cellIdStore = CellIdStore(cellIds, cellIdsOffset);
+  auto chGraph = std::make_shared<MMapGraph>(CHGraph(nodes, forwardEdges, backwardEdges, forwardOffset, backwardOffset, config.numberOfNodes));
+  auto cellIdStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds, cellIdsOffset));
   // set up grid
   for(auto gridEntry : config.gridMapEntries) {
-    chGraph.gridMap[gridEntry.latLng] = gridEntry.pointerPair;
+    chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
   }
 
-  pathFinder::HubLabelStore hubLabelStore(forwardHublabels, backwardHublabels, forwardHublabelOffset, backwardHublabelOffset);
+  auto hubLabelStore = std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels, forwardHublabelOffset, backwardHublabelOffset));
   pathFinder::Timer timer;
   return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.calculatedUntilLevel));
 }

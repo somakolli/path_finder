@@ -97,7 +97,7 @@ void pathFinder::GraphReader::readCHFmiFile(
       for (auto i = 0; i < 10; ++i) {
         std::getline(in, line);
       }
-      in >> graph.numberOfNodes;
+      in >> graph.m_numberOfNodes;
       in >> numberOfEdges;
       uint32_t type;
       uint32_t maxSpeed;
@@ -107,7 +107,7 @@ void pathFinder::GraphReader::readCHFmiFile(
       Lat lat;
       Lng lng;
       uint32_t el;
-      int i = graph.numberOfNodes + 1;
+      int i = graph.m_numberOfNodes + 1;
       CHNode node{};
       while (--i > 0 &&
              in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
@@ -120,13 +120,13 @@ void pathFinder::GraphReader::readCHFmiFile(
                             type >> maxSpeed >> child1 >> child2) {
         child1 == -1 ? edge.child1 = std::nullopt : edge.child1 = child1;
         child2 == -1 ? edge.child2 = std::nullopt : edge.child2 = child2;
-        graph.edges.push_back(edge);
+        graph.m_edges.push_back(edge);
       }
       fdDevice.close();
     }
   }
-  buildOffset(graph.edges, graph.offset);
-  buildBackEdges(graph.edges, graph.getBackEdges());
+  buildOffset(graph.m_edges, graph.m_offset);
+  buildBackEdges(graph.m_edges, graph.getBackEdges());
   buildOffset(graph.getBackEdges(), graph.getBackOffset());
   if(reorderWithGrid)
     gridReorder(graph);

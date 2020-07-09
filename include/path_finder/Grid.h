@@ -53,13 +53,13 @@ void Grid<GridNode, Graph>::reorderNodes(Graph &graph) {
     }
     pointerGrid[latLng] = pointerPair;
   }
-  for(auto& edge: graph.edges) {
+  for(auto& edge: graph.m_edges) {
     edge.source = oldIdToNewId[edge.source];
     edge.target = oldIdToNewId[edge.target];
   }
   graph.sortEdges();
-  graph.offset.clear();
-  GraphReader::buildOffset(graph.edges, graph.offset);
+  graph.m_offset.clear();
+  GraphReader::buildOffset(graph.m_edges, graph.m_offset);
 }
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_GRID_H

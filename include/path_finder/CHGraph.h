@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <memory>
 #include <stack>
 
 namespace pathFinder {
@@ -26,9 +27,9 @@ class CHGraph {
   using NodeVector = Vector<CHNode, std::allocator<CHNode>>;
 
 private:
-  NodeVector nodes;
-  EdgeVector backEdges;
-  OffsetVector backOffset;
+  NodeVector m_nodes;
+  EdgeVector m_backEdges;
+  OffsetVector m_backOffset;
 
 public:
   CHGraph(NodeVector &nodes, EdgeVector &edges, EdgeVector &backEdges,
@@ -36,21 +37,24 @@ public:
 
   CHGraph();
 
-  OffsetVector offset;
-  EdgeVector edges;
-  size_t numberOfNodes;
+  static std::shared_ptr<CHGraph> makeShared(NodeVector &nodes, EdgeVector &edges, EdgeVector &backEdges,
+                                      OffsetVector &offset, OffsetVector &backOffset, size_t numberOfNodes);
+
+  OffsetVector m_offset;
+  EdgeVector m_edges;
+  size_t m_numberOfNodes;
   std::map<std::pair<Lat, Lng>, std::pair<NodeId, NodeId>> gridMap;
   [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node,
                                                   EdgeDirection direction) {
     switch (direction) {
     case FORWARD:
-      return {&edges[offset[node]], &edges[offset[node + 1]]};
+      return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
     case BACKWARD:
-      return {&backEdges[backOffset[node]], &backEdges[backOffset[node + 1]]};
+      return {&m_backEdges[m_backOffset[node]], &m_backEdges[m_backOffset[node + 1]]};
     }
-    return {&edges[offset[node]], &edges[offset[node + 1]]};
+    return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
   }
-  Level getLevel(NodeId nodeId) { return nodes[nodeId].level; }
+  Level getLevel(NodeId nodeId) { return m_nodes[nodeId].level; }
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   NodeId getNodeIdFor(LatLng latLng);
@@ -70,8 +74,8 @@ public:
 template <template <class, class> class Vector, class OffsetVector>
 void pathFinder::CHGraph<Vector, OffsetVector>::sortByLevel(
     std::vector<CHNode> &sortedNodes) {
-  sortedNodes.reserve(nodes.size());
-  for (const auto &node : nodes)
+  sortedNodes.reserve(m_nodes.size());
+  for (const auto &node : m_nodes)
     sortedNodes.emplace_back(node);
   std::sort(sortedNodes.begin(), sortedNodes.end(),
             [](const auto &node1, const auto &node2) -> bool {
@@ -82,25 +86,25 @@ void pathFinder::CHGraph<Vector, OffsetVector>::sortByLevel(
 template <template <class, class> class Vector, class OffsetVector>
 Vector<CHNode, std::allocator<CHNode>> &
 pathFinder::CHGraph<Vector, OffsetVector>::getNodes() {
-  return nodes;
+  return m_nodes;
 }
 template <template <class, class> class Vector, class OffsetVector>
 Vector<CHEdge, std::allocator<CHEdge>> &
 pathFinder::CHGraph<Vector, OffsetVector>::getBackEdges() {
-  return backEdges;
+  return m_backEdges;
 }
 template <template <class, class> class Vector, class OffsetVector>
 OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getBackOffset() {
-  return backOffset;
+  return m_backOffset;
 }
 template <template <class, class> class Vector, class OffsetVector>
 Vector<CHEdge, std::allocator<CHEdge>> &
 pathFinder::CHGraph<Vector, OffsetVector>::getForwardEdges() {
-  return edges;
+  return m_edges;
 }
 template <template <class, class> class Vector, class OffsetVector>
 OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getForwardOffset() {
-  return offset;
+  return m_offset;
 }
 
 template <template <class, class> class Vector, class OffsetVector>
@@ -109,34 +113,34 @@ CHGraph<Vector, OffsetVector>::CHGraph(NodeVector &nodes, EdgeVector &edges,
                                        OffsetVector &offset,
                                        OffsetVector &backOffset,
                                        size_t numberOfNodes)
-    : nodes(nodes), backEdges(backEdges), backOffset(backOffset),
-      offset(offset), edges(edges), numberOfNodes(numberOfNodes) {}
+    : m_nodes(nodes), m_backEdges(backEdges), m_backOffset(backOffset),
+      m_offset(offset), m_edges(edges), m_numberOfNodes(numberOfNodes) {}
 
 template <template <class, class> class Vector, class OffsetVector>
 CHGraph<Vector, OffsetVector>::CHGraph() {}
 
 template <template <class, class> class Vector, class OffsetVector>
 void CHGraph<Vector, OffsetVector>::deleteNodes() {
-  nodes.clear();
-  nodes.shrink_to_fit();
+  m_nodes.clear();
+  m_nodes.shrink_to_fit();
 }
 
 template <template <class, class> class Vector, class OffsetVector>
 void CHGraph<Vector, OffsetVector>::deleteEdges() {
-  edges.clear();
-  edges.shrink_to_fit();
+  m_edges.clear();
+  m_edges.shrink_to_fit();
 }
 template <template <class, class> class Vector, class OffsetVector>
 void CHGraph<Vector, OffsetVector>::sortEdges() {
-  std::sort(edges.begin(), edges.end(), [](auto edge1, auto edge2) -> bool{
+  std::sort(m_edges.begin(), m_edges.end(), [](auto edge1, auto edge2) -> bool{
     return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
   });
 }
 template <template <class, class> class Vector, class OffsetVector>
 std::vector<CHEdge> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge shortcut, double minLength) {
   std::vector<CHEdge> path;
-  Node source = nodes[shortcut.source];
-  Node target = nodes[shortcut.target];
+  Node source = m_nodes[shortcut.source];
+  Node target = m_nodes[shortcut.target];
   double length = source.euclid(target);
 
   if(!shortcut.child2.has_value() || length <= minLength) {
@@ -153,11 +157,11 @@ std::vector<CHEdge> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge sh
   while (!edgesStack.empty()) {
     auto& edgeIdx = edgesStack.top();
     edgesStack.pop();
-    const auto& edge = edges[edgeIdx];
+    const auto& edge = m_edges[edgeIdx];
     //std::cout << "edge from stack: " << edge << std::endl;
     //std::cout << "source: " << nodes[edge.source] << std::endl;
     //std::cout << "target: " << nodes[edge.target] << std::endl;
-    double length = nodes[edge.source].euclid(nodes[edge.target]);
+    double length = m_nodes[edge.source].euclid(m_nodes[edge.target]);
     if(edge.child1.has_value() && length > minLength) {
       //std::cout << "is shortcut" << std::endl;
 
@@ -172,12 +176,12 @@ std::vector<CHEdge> CHGraph<Vector, OffsetVector>::getPathFromShortcut(CHEdge sh
 }
 template <template <class, class> class Vector, class OffsetVector>
 CHNode CHGraph<Vector, OffsetVector>::getNode(NodeId id) const {
-  return nodes[id];
+  return m_nodes[id];
 }
 template <template <class, class> class Vector, class OffsetVector>
 std::optional<size_t> CHGraph<Vector, OffsetVector>::getEdgePosition(const CHEdge& edge, EdgeDirection direction) {
-  for(auto i = offset[edge.source]; i < offset[edge.source+1]; ++i) {
-    auto e = edges[i];
+  for(auto i = m_offset[edge.source]; i < m_offset[edge.source+1]; ++i) {
+    auto e = m_edges[i];
     if(e.target == edge.target) {
       return i;
     }
@@ -187,15 +191,16 @@ std::optional<size_t> CHGraph<Vector, OffsetVector>::getEdgePosition(const CHEdg
 template <template <class, class> class Vector, class OffsetVector>
 NodeId CHGraph<Vector, OffsetVector>::getNodeIdFor(LatLng latLng) {
   double distance = std::numeric_limits<double>::max();
-  NodeId position = nodes.size();
-  for(int i = 0; i < nodes.size(); ++i) {
-    auto& node = nodes[i];
+  NodeId position = m_nodes.size();
+  for(int i = 0; i < m_nodes.size(); ++i) {
+    auto& node = m_nodes[i];
     double currentDistance = beeLineWithoutSquareRoot(node.latLng, latLng);
     if(currentDistance < distance){
       distance = currentDistance;
       position = i;
     }
   }
+  std::cout << latLng.lat << latLng.lng << std::endl;
   std::cout << position << std::endl;
   return position;
 }
@@ -203,6 +208,14 @@ template <template <class, class> class Vector, class OffsetVector>
 double CHGraph<Vector, OffsetVector>::beeLineWithoutSquareRoot(LatLng latLng1,
                                                                LatLng latLng2) {
   return pow(latLng1.lat - latLng2.lat, 2) + pow(latLng1.lng - latLng2.lng, 2);
+}
+template <template <class, class> class Vector, class OffsetVector>
+std::shared_ptr<CHGraph<Vector, OffsetVector>> CHGraph<Vector, OffsetVector>::makeShared(
+    NodeVector &nodes, EdgeVector &edges, EdgeVector &backEdges,
+    OffsetVector &offset, OffsetVector &backOffset, size_t numberOfNodes) {
+  return std::make_shared<CHGraph<Vector, OffsetVector>>(CHGraph(
+      nodes, edges, backEdges, offset, backOffset, numberOfNodes
+      ));
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H
