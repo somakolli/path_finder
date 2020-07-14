@@ -237,13 +237,14 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 std::vector<CostNode>
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
     NodeId source, EdgeDirection direction) {
-  const auto &sourceLabel = m_hubLabelStore->retrieve(source, direction);
   if (m_graph->getLevel(source) >= m_labelsUntilLevel) {
+    const auto &sourceLabel = m_hubLabelStore->retrieve(source, direction);
     costNodeVec_t vec;
     for (const auto entry : sourceLabel)
       vec.push_back(entry);
     return vec;
   }
+
   std::vector<CostNode> settledNodes;
   std::map<NodeId, std::vector<NodeId>> labelsToCollectMap;
   for (auto nodeId : m_visited)
