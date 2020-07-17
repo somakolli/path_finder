@@ -30,7 +30,8 @@ set(SOURCES
         src/FileLoader.cpp
         src/HubLabelCreator.cpp
         src/HybridPathFinder.cpp
-        src/Types.cpp)
+        src/Types.cpp
+        src/base64.cpp)
 
 set(INCLUDES
         include/path_finder/CHDijkstra.h
