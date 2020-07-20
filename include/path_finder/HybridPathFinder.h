@@ -170,12 +170,55 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   for (int i = reverseForwardPath.size() - 1; i >= 0; --i) {
     forwardPath.push_back(reverseForwardPath[i]);
   }
+  for(int i = 1; i < backwardPath.size(); ++i)
+    forwardPath.push_back(backwardPath[i]);
+
+  std::vector<CHEdge> newForwardEdges =
+      getEdgeVectorFromNodeIdPath(forwardPath, EdgeDirection::FORWARD);
+  // unpack edges
+  std::vector<CHEdge> newFinalForwardEdgePath;
+  for (auto edge : newForwardEdges) {
+    for (auto e : m_graph->getPathFromShortcut(edge, 0))
+      newFinalForwardEdgePath.emplace_back(e);
+  }
+
+  // find cell ids
+  for (auto edge : newFinalForwardEdgePath) {
+    addCellIds(edge, routingResult.cellIds);
+  }
+
+  // get lat longs
+  std::vector<LatLng> newLatLngVector;
+  if (!newFinalForwardEdgePath.empty())
+    newLatLngVector.push_back(
+        m_graph->getNodes()[newFinalForwardEdgePath[0].source].latLng);
+  for (auto edge : newFinalForwardEdgePath) {
+    newLatLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
+  }
+  // remove duplicates from cellIds
+  sort(routingResult.cellIds.begin(), routingResult.cellIds.end());
+  (routingResult.cellIds)
+      .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
+             routingResult.cellIds.end());
+  routingResult.path = newLatLngVector;
+  return routingResult;
+
+
+
+
+  // reverse the backward path
+  std::vector<NodeId> reverseBackwardPath;
+  for (int i = backwardPath.size() - 1; i >= 0; --i) {
+    reverseBackwardPath.push_back(backwardPath[i]);
+  }
+
 
   // get edges to unpack them
   std::vector<CHEdge> forwardEdges =
       getEdgeVectorFromNodeIdPath(forwardPath, EdgeDirection::FORWARD);
   std::vector<CHEdge> backwardEdges =
-      getEdgeVectorFromNodeIdPath(backwardPath, EdgeDirection::BACKWARD);
+      getEdgeVectorFromNodeIdPath(reverseBackwardPath, EdgeDirection::BACKWARD);
+
 
   // unpack edges
   std::vector<CHEdge> finalForwardEdgePath;
@@ -209,13 +252,12 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   }
   if (!finalBackwardEdgePath.empty())
     latLngVector.push_back(
-        m_graph->getNodes()[finalBackwardEdgePath[0].target].latLng);
+        m_graph->getNodes()[finalBackwardEdgePath[0].source].latLng);
   for (auto edge : finalBackwardEdgePath) {
-    latLngVector.push_back(m_graph->getNodes()[edge.source].latLng);
+    latLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
   }
 
   // remove duplicates from cellIds
-
   sort(routingResult.cellIds.begin(), routingResult.cellIds.end());
   (routingResult.cellIds)
       .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
@@ -309,6 +351,11 @@ std::vector<CHEdge> HybridPathFinder<HubLabelStore, Graph, CellIdStore>::
     for (CHEdge edge : m_graph->edgesFor(path[i], direction)) {
       if (edge.target == path[i + 1])
         edgePath.emplace_back(edge);
+    }
+  }
+  if(direction == EdgeDirection::BACKWARD) {
+    for(auto& edge : edgePath) {
+      Static::reverseEdge(edge);
     }
   }
   return edgePath;

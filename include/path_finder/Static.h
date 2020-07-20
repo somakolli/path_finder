@@ -150,6 +150,12 @@ public:
     }
     return shortestDistance;
   }
+  template <typename Edge>
+  static inline void reverseEdge(Edge& edge) {
+    auto copyEdge = edge;
+    edge.source = copyEdge.target;
+    edge.target = copyEdge.source;
+  }
 };
 } // namespace pathFinder
 
