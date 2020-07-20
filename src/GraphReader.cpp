@@ -44,43 +44,10 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph,
       }
       fdDevice.close();
     }
+  } else {
+    throw std::invalid_argument("File not found");
   }
-  //buildOffset(graph.edges, graph.offset);
-}
-
-void pathFinder::GraphReader::buildOffset(std::vector<CHEdge> &edges,
-                                          std::vector<NodeId> &offset) {
-  offset.clear();
-  if (edges.empty())
-    return;
-  NodeId numberOfNodes = edges[edges.size() - 1].source + 1;
-  offset.reserve(numberOfNodes + 1);
-  while (offset.size() <= numberOfNodes) {
-    offset.emplace_back(0);
-  }
-  offset[numberOfNodes] = edges.size();
-  for (int i = edges.size() - 1; i >= 0; --i) {
-    offset[edges[i].source] = i;
-  }
-  for (int i = edges[0].source + 1; i < offset.size() - 2; ++i) {
-
-    if (offset[i] == 0) {
-      size_t j = i + 1;
-      while (offset[j] == 0) {
-        ++j;
-      }
-      size_t offsetToSet = offset[j];
-      --j;
-      size_t firstNullPosition = i;
-      while (j >= firstNullPosition) {
-        offset[j] = offsetToSet;
-        --j;
-        ++i;
-      }
-    }
-  }
-  offset[0] = 0;
-  offset[offset.size() - 1] = edges.size();
+  buildOffset(graph.edges, graph.offset);
 }
 
 void pathFinder::GraphReader::readCHFmiFile(

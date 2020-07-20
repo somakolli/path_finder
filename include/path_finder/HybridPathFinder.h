@@ -104,8 +104,8 @@ public:
    * @param cellIdStore store for egde -> oscar cell id
    * @param labelsUntilLevel level until the labels are computed in the store
    */
-  HybridPathFinder(std::shared_ptr<HubLabelStore>& hubLabelStore, std::shared_ptr<Graph>& graph,
-                   std::shared_ptr<CellIdStore>& cellIdStore, Level labelsUntilLevel)
+  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<Graph> graph,
+                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel)
       : m_hubLabelStore(hubLabelStore), m_graph(graph),
         m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel) {
     m_cost.reserve(graph->getNodes().size());

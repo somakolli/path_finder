@@ -22,9 +22,11 @@ void HubLabelCreator::create(Level untilLevel) {
     while (m_sortedNodes[j].level == currentLevel && j < m_sortedNodes.size()) {
       ++j;
     }
-    sameLevelRanges.emplace_back(i, j + 1);
+    sameLevelRanges.emplace_back(i, j);
+    --j;
     currentLevel--;
   }
+
   constructAllLabels(sameLevelRanges, maxLevel, m_labelsUntilLevel);
 }
 
@@ -47,11 +49,12 @@ void HubLabelCreator::constructAllLabels(
 
 void HubLabelCreator::processRangeParallel(
     const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
-#pragma omp parallel for
+//#pragma omp parallel for
   for (auto i = range.first; i < range.second; ++i) {
-    auto label = calcLabel(m_sortedNodes[i].id, edgeDirection);
-#pragma omp critical
-    m_hubLabelStore.store(label, m_sortedNodes[range.first + i].id,
+    auto id = m_sortedNodes[i].id;
+    auto label = calcLabel(id, edgeDirection);
+//#pragma omp critical
+    m_hubLabelStore.store(label, id,
                           edgeDirection);
   }
 }

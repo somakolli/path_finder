@@ -54,7 +54,9 @@ public:
     }
     return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
   }
-  Level getLevel(NodeId nodeId) { return m_nodes[nodeId].level; }
+  Level getLevel(NodeId nodeId) {
+    return m_nodes[nodeId].level;
+  }
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   NodeId getNodeIdFor(LatLng latLng);

@@ -11,6 +11,9 @@
 #include <vector>
 namespace pathFinder {
 using costNodeVec_t = std::vector<CostNode>;
+using RamGraph = CHGraph<std::vector, std::vector<NodeId>>;
+using RamCellIdStore = CellIdStore<std::vector, std::vector<OffsetElement>, unsigned int>;
+using RamHubLabelStore = HubLabelStore<std::vector, std::vector<OffsetElement>>;
 using MMapGraph = CHGraph<MmapVector, MmapVector<NodeId>>;
 using MMapCellIdStore = CellIdStore<MmapVector, MmapVector<OffsetElement>, unsigned int>;
 using MMapHubLabelStore = HubLabelStore<MmapVector, MmapVector<OffsetElement>>;
