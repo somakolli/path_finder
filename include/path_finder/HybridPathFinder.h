@@ -205,7 +205,7 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
 
 
 
-
+  /*
   // reverse the backward path
   std::vector<NodeId> reverseBackwardPath;
   for (int i = backwardPath.size() - 1; i >= 0; --i) {
@@ -264,6 +264,7 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
              routingResult.cellIds.end());
   routingResult.path = latLngVector;
   return routingResult;
+   */
 }
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
