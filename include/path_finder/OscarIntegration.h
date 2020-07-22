@@ -18,14 +18,14 @@ public:
 };
 class OscarIntegrator {
 public:
-  template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter>
-  static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter) {
+  template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
+  static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
     int progress = 0;
-#pragma omp parallel for
+//#pragma omp parallel for
     for(int i = 0; i < graph.m_edges.size(); ++i) {
       const auto& edge = graph.m_edges[i];
       if(edge.child1.has_value()){
-        std::cout << "skip" << '\n';
+        ++progress;
         continue;
       }
       const auto sourceNode = graph.getNode(edge.source);
@@ -38,10 +38,21 @@ public:
       targetPoint.lon() = targetNode.latLng.lng;
 
       auto cellIds = cellIdsForEdge(sourcePoint, targetPoint);
-#pragma omp critical
+      cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
+
+      for(auto cellId : cellIds) {
+        auto cell = store.geoHierarchy().cell(cellId);
+        auto boundary = cell.boundary();
+        auto size = cell.itemCount();
+        auto ptr = cell.itemPtr();
+      }
+ //#pragma omp critical
       {
         diskWriter(i, cellIds);
-        std::cout << "progress: " << progress++ << "/" << graph.m_edges.size() << '\n';
+        ++progress;
+        if(progress % 1000 == 0)
+            std::cout << "progress: " << progress << "/" << graph.m_edges.size() << '\n';
+        //std::cout << "count: " << cellIds.size() << '\n';
       }
     }
   }

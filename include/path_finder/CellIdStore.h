@@ -8,7 +8,7 @@
 #include <path_finder/HubLabelStore.h>
 
 namespace pathFinder{
-using CellId_t = unsigned int;
+using CellId_t = uint32_t;
 template <template <class, class> class Vector = std::vector,
     class OffsetVector = std::vector<OffsetElement>,
           class CellId_t = unsigned int>
@@ -42,10 +42,10 @@ template <template <class, class> class Vector,
     class CellId_t>
 void CellIdStore<Vector, OffsetVector, CellId_t>::storeCellIds(
     size_t edgeId, const std::vector<CellId_t>&cellToAdd) {
+  _offsetVector[edgeId].position = _cellIds.size();
   for(auto cell : cellToAdd) {
     _cellIds.push_back(cell);
   }
-  _offsetVector[edgeId].position = _cellIds.size();
   _offsetVector[edgeId].size = cellToAdd.size();
 }
 template <template <class, class> class Vector,
