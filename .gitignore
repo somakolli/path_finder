@@ -1,6 +1,5 @@
 build/*
 cmake-build-debug/*
-*.fmi
 *.o
 .idea/*
 
