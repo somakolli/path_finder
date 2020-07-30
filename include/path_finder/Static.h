@@ -85,7 +85,7 @@ public:
   static inline std::vector<T>
   getFromFile(pathFinder::BinaryFileDescription fileDescription,
               const std::string& folderPrefix) {
-    std::string path = folderPrefix  + '/'+ fileDescription.path;
+    std::string path = !folderPrefix.empty() ? folderPrefix  + '/' + fileDescription.path : fileDescription.path;
     FILE *file = fopen64(
         path.c_str(), "r");
     std::vector<T> buf(fileDescription.size);
@@ -96,8 +96,10 @@ public:
   static inline auto
   getFromFileMMap(pathFinder::BinaryFileDescription fileDescription,
                   const std::string& folderPrefix) {
+    std::string path =
+        !folderPrefix.empty() ? folderPrefix  + '/' + fileDescription.path : fileDescription.path;
     return pathFinder::MmapVector<T>(
-        std::string(folderPrefix + '/' + fileDescription.path).c_str(),
+        path.c_str(),
         fileDescription.size);
   }
   /**
