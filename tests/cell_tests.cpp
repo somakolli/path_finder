@@ -3,6 +3,7 @@
 #include <path_finder/CellIdStore.h>
 #include <path_finder/Static.h>
 #include <path_finder/Types.h>
+#include <stdio.h>
 
 namespace pathFinder{
 TEST(CellIdStore, StoreAndRetrieveWorks) {
@@ -59,6 +60,8 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ++j;
     }
   }
+  remove(ids.path.c_str());
+  remove(offset.path.c_str());
 }
 }
 
