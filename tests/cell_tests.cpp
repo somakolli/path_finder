@@ -10,7 +10,7 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
   std::vector<uint32_t> cellIds0 = {
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10
   };
-  std::vector<uint32_t> cellIds1 = {2};
+  std::vector<uint32_t> cellIds1 = {};
   std::vector<uint32_t> cellIds2 = {
       1, 2, 3, 4, 5
   };
@@ -23,7 +23,7 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ASSERT_EQ(cellId, cellIds0[i]);
       ++i;
     }
-    ASSERT_EQ(store.getCellIds(1).size(), 1);
+    ASSERT_EQ(store.getCellIds(1).size(), 0);
     int j = 0;
     for (auto cellId : store.getCellIds(2)) {
       ASSERT_EQ(cellId, cellIds2[j]);
@@ -52,7 +52,7 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ASSERT_EQ(cellId, cellIds0[i]);
       ++i;
     }
-    ASSERT_EQ(mmapStore->getCellIds(1).size(), 1);
+    ASSERT_EQ(mmapStore->getCellIds(1).size(), 0);
     int j = 0;
     for (auto cellId : mmapStore->getCellIds(2)) {
       ASSERT_EQ(cellId, cellIds2[j]);
