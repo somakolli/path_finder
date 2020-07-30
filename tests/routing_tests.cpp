@@ -7,7 +7,7 @@
 #include <path_finder/HybridPathFinder.h>
 namespace pathFinder {
 TEST(RoutingTest, DistanceWorks) {
-  std::string path = "../../../../vendor/path_finder/test-data/";
+  std::string path = "../test-data/";
   for (const auto & entry : std::filesystem::directory_iterator(path))
     std::cerr << entry.path() << std::endl;
   Graph graph;
@@ -33,7 +33,7 @@ TEST(RoutingTest, DistanceWorks) {
   ASSERT_EQ(22, graph.nodes.size());
 }
 TEST(RoutingTest, PathFindingWorks) {
-  std::string path = "../../../../vendor/path_finder/test-data/";
+  std::string path = "../test-data/";
   for (const auto & entry : std::filesystem::directory_iterator(path))
     std::cerr << entry.path() << std::endl;
   Graph graph;
