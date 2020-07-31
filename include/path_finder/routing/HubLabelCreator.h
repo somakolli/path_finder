@@ -4,11 +4,11 @@
 
 #ifndef MASTER_ARBEIT_HUBLABELCREATOR_H
 #define MASTER_ARBEIT_HUBLABELCREATOR_H
-#include "CHGraph.h"
-#include "CellIdStore.h"
-#include "HubLabelStore.h"
-#include "SpaceMeasurer.h"
-#include "Types.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/helper/SpaceMeasurer.h"
+#include "path_finder/helper/Types.h"
+#include "path_finder/storage/CellIdStore.h"
+#include "path_finder/storage/HubLabelStore.h"
 #include <memory>
 #include <vector>
 namespace pathFinder {

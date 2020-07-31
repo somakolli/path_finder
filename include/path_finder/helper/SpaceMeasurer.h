@@ -4,7 +4,7 @@
 
 #ifndef MASTER_ARBEIT_SPACEMEASURER_H
 #define MASTER_ARBEIT_SPACEMEASURER_H
-#include "Graph.h"
+#include "path_finder/graphs/Graph.h"
 #include <map>
 
 namespace pathFinder {

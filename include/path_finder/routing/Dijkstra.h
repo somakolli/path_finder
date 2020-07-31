@@ -5,8 +5,8 @@
 #ifndef ALG_ENG_PROJECT_DIJKSTRA_H
 #define ALG_ENG_PROJECT_DIJKSTRA_H
 
-#include "Graph.h"
 #include "PathFinderBase.h"
+#include "path_finder/graphs/Graph.h"
 #include "set"
 #include <vector>
 

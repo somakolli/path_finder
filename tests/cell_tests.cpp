@@ -1,8 +1,8 @@
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
-#include <path_finder/CellIdStore.h>
-#include <path_finder/Static.h>
-#include <path_finder/Types.h>
+#include <path_finder/helper/Static.h>
+#include <path_finder/helper/Types.h>
+#include <path_finder/storage/CellIdStore.h>
 #include <stdio.h>
 
 namespace pathFinder{

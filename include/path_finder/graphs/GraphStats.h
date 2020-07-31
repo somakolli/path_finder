@@ -5,7 +5,7 @@
 #ifndef ALG_ENG_PROJECT_GRAPHSTATS_H
 #define ALG_ENG_PROJECT_GRAPHSTATS_H
 
-#include "CHGraph.h"
+#include "path_finder/graphs/CHGraph.h"
 
 namespace pathFinder {
 template <typename Graph> class GraphStats {

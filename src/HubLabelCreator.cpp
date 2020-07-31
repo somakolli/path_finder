@@ -1,8 +1,8 @@
 //
 // Created by sokol on 16.06.20.
 //
-#include <path_finder/HubLabelCreator.h>
-#include <path_finder/Static.h>
+#include <path_finder/helper/Static.h>
+#include <path_finder/routing/HubLabelCreator.h>
 namespace pathFinder {
 HubLabelCreator::HubLabelCreator(
     CHGraph<std::vector> &graph, HubLabelStore<std::vector> &hubLabelStore)

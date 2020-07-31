@@ -1,8 +1,8 @@
 //
 // Created by sokol on 27.01.20.
 //
-#include <path_finder/Static.h>
 #include <gtest/gtest.h>
+#include <path_finder/helper/Static.h>
 #include <vector>
 namespace pathFinder{
 TEST(HubLabels, MergeWorks){

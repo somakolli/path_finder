@@ -2,7 +2,7 @@
 // Created by sokol on 02.10.19.
 //
 
-#include "path_finder/Graph.h"
+#include "path_finder/graphs/Graph.h"
 #include <cmath>
 
 pathFinder::LatLng

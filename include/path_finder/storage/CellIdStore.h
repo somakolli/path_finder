@@ -4,8 +4,8 @@
 
 #ifndef MASTER_ARBEIT_CELLIDSTORE_H
 #define MASTER_ARBEIT_CELLIDSTORE_H
+#include <path_finder/storage/HubLabelStore.h>
 #include <vector>
-#include <path_finder/HubLabelStore.h>
 
 namespace pathFinder{
 using CellId_t = uint32_t;

@@ -31,7 +31,7 @@
 
 */
 
-#include "path_finder/base64.h"
+#include "path_finder/helper/base64.h"
 
 //
 // Depending on the url parameter in base64_chars, one of

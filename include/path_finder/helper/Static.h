@@ -4,8 +4,8 @@
 
 #ifndef MASTER_ARBEIT_STATIC_H
 #define MASTER_ARBEIT_STATIC_H
-#include "DataConfig.h"
-#include "MmapVector.h"
+#include "path_finder/storage/DataConfig.h"
+#include "path_finder/storage/MmapVector.h"
 #include <any>
 #include <cstddef>
 #include <iostream>

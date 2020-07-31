@@ -5,7 +5,7 @@
 #ifndef MASTER_ARBEIT_DATACONFIG_H
 #define MASTER_ARBEIT_DATACONFIG_H
 
-#include "Graph.h"
+#include "path_finder/graphs/Graph.h"
 #include <nlohmann/json.hpp>
 #include <string>
 

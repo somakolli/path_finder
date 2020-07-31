@@ -1,15 +1,13 @@
 #include <filesystem>
 #include <gtest/gtest.h>
-#include <path_finder/Dijkstra.h>
-#include <path_finder/Graph.h>
-#include <path_finder/GraphReader.h>
-#include <path_finder/HubLabelCreator.h>
-#include <path_finder/HybridPathFinder.h>
+#include <path_finder/graphs/Graph.h>
+#include <path_finder/routing/Dijkstra.h>
+#include <path_finder/routing/HubLabelCreator.h>
+#include <path_finder/routing/HybridPathFinder.h>
+#include <path_finder/storage/GraphReader.h>
 namespace pathFinder {
 TEST(RoutingTest, DistanceWorks) {
   std::string path = "../test-data/";
-  for (const auto & entry : std::filesystem::directory_iterator(path))
-    std::cerr << entry.path() << std::endl;
   Graph graph;
   GraphReader::readFmiFile(graph, path + "test.fmi");
   CHGraph chGraph;
@@ -34,8 +32,6 @@ TEST(RoutingTest, DistanceWorks) {
 }
 TEST(RoutingTest, PathFindingWorks) {
   std::string path = "../test-data/";
-  for (const auto & entry : std::filesystem::directory_iterator(path))
-    std::cerr << entry.path() << std::endl;
   Graph graph;
   GraphReader::readFmiFile(graph, path + "test.fmi");
   CHGraph chGraph;

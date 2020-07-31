@@ -5,8 +5,8 @@
 #ifndef ALG_ENG_PROJECT_GRAPHREADER_H
 #define ALG_ENG_PROJECT_GRAPHREADER_H
 
-#include "CHGraph.h"
-#include "Graph.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/graphs/Graph.h"
 #include "string"
 
 namespace pathFinder {

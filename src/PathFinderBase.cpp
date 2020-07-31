@@ -1,8 +1,8 @@
 //
 // Created by sokol on 02.12.19.
 //
-#include <path_finder/Types.h>
-#include "path_finder/PathFinderBase.h"
+#include "path_finder/routing/PathFinderBase.h"
+#include <path_finder/helper/Types.h>
 
 pathFinder::RoutingResult pathFinder::PathFinderBase::getShortestPath(
     pathFinder::NodeId source, pathFinder::NodeId target) {

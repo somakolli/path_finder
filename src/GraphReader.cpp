@@ -1,8 +1,8 @@
 //
 // Created by sokol on 02.10.19.
 //
-#include "path_finder/GraphReader.h"
-#include "path_finder/Grid.h"
+#include "path_finder/storage/GraphReader.h"
+#include "path_finder/graphs/Grid.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
@@ -119,9 +119,9 @@ void pathFinder::GraphReader::sortEdges(std::vector<CHEdge> &edges) {
             });
 }
 void pathFinder::GraphReader::gridReorder(pathFinder::CHGraph<std::vector>& graph) {
-  Grid grid(graph.getNodes(), 3600, 1800);
+  Grid grid(graph, 3600, 1800);
   grid.buildGrid();
-  grid.reorderNodes(graph);
+  grid.reorderNodes();
   std::cout << "pointer grid length " << grid.pointerGrid.size() << std::endl;
   graph.gridMap = grid.pointerGrid;
 }

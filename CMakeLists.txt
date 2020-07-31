@@ -34,21 +34,21 @@ set(SOURCES
         src/base64.cpp)
 
 set(INCLUDES
-        include/path_finder/CHDijkstra.h
-        include/path_finder/CHGraph.h
-        include/path_finder/Dijkstra.h
-        include/path_finder/Graph.h
-        include/path_finder/GraphReader.h
-        include/path_finder/GraphStats.h
-        include/path_finder/PathFinderBase.h
-        include/path_finder/HubLabelStore.h
-        include/path_finder/MmapVector.h
-        include/path_finder/Static.h
-        include/path_finder/Stopwatch.h
-        include/path_finder/Timer.h
-        include/path_finder/DataConfig.h
-        include/path_finder/Grid.h
-        include/path_finder/FileLoader.h)
+        include/path_finder/routing/CHDijkstra.h
+        include/path_finder/graphs/CHGraph.h
+        include/path_finder/routing/Dijkstra.h
+        include/path_finder/graphs/Graph.h
+        include/path_finder/storage/GraphReader.h
+        include/path_finder/graphs/GraphStats.h
+        include/path_finder/routing/PathFinderBase.h
+        include/path_finder/storage/HubLabelStore.h
+        include/path_finder/storage/MmapVector.h
+        include/path_finder/helper/Static.h
+        include/path_finder/helper/Stopwatch.h
+        include/path_finder/helper/Timer.h
+        include/path_finder/storage/DataConfig.h
+        include/path_finder/graphs/Grid.h
+        include/path_finder/storage/FileLoader.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)

@@ -5,9 +5,9 @@
 #ifndef ALG_ENG_PROJECT_CHDIJKSTRA_H
 #define ALG_ENG_PROJECT_CHDIJKSTRA_H
 
-#include "CHGraph.h"
 #include "PathFinderBase.h"
-#include "Static.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/helper/Static.h"
 #include <queue>
 #include <set>
 

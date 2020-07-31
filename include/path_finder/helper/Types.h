@@ -4,10 +4,10 @@
 
 #ifndef MASTER_ARBEIT_TYPES_H
 #define MASTER_ARBEIT_TYPES_H
-#include "CHGraph.h"
-#include "CellIdStore.h"
-#include "Graph.h"
-#include "MmapVector.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/graphs/Graph.h"
+#include "path_finder/storage/CellIdStore.h"
+#include "path_finder/storage/MmapVector.h"
 #include <vector>
 namespace pathFinder {
 using costNodeVec_t = std::vector<CostNode>;

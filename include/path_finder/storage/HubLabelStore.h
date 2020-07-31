@@ -5,7 +5,7 @@
 #ifndef MASTER_ARBEIT_HUBLABELSTORE_H
 #define MASTER_ARBEIT_HUBLABELSTORE_H
 
-#include "Graph.h"
+#include "path_finder/graphs/Graph.h"
 #include <vector>
 namespace pathFinder {
 struct OffsetElement {

@@ -1,7 +1,7 @@
 //
 // Created by sokol on 02.10.19.
 //
-#include "path_finder/Dijkstra.h"
+#include "path_finder/routing/Dijkstra.h"
 #include <queue>
 
 pathFinder::Dijkstra::Dijkstra(const pathFinder::Graph &graph) : graph(graph) {

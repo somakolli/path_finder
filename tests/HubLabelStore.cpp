@@ -1,7 +1,7 @@
 //
 // Created by sokol on 23.01.20.
 //
-#include "path_finder/HubLabelStore.h"
+#include "path_finder/storage/HubLabelStore.h"
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 #include <vector>

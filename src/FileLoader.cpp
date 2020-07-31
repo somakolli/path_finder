@@ -1,6 +1,6 @@
 #include <fstream>
-#include <path_finder/FileLoader.h>
-#include <path_finder/Timer.h>
+#include <path_finder/helper/Timer.h>
+#include <path_finder/storage/FileLoader.h>
 std::shared_ptr<pathFinder::FileLoader::HybridPF>
 pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");

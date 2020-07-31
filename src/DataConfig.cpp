@@ -1,8 +1,8 @@
 //
 // Created by sokol on 31.03.20.
 //
-#include <path_finder/DataConfig.h>
 #include <nlohmann/json.hpp>
+#include <path_finder/storage/DataConfig.h>
 #include <sstream>
 
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataConfig &d) {

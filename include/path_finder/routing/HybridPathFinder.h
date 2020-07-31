@@ -7,12 +7,12 @@
 #ifndef MASTER_ARBEIT_HYBRIDPATHFINDER_H
 #define MASTER_ARBEIT_HYBRIDPATHFINDER_H
 
-#include "CHGraph.h"
-#include "CellIdStore.h"
-#include "HubLabelCreator.h"
-#include "HubLabelStore.h"
 #include "PathFinderBase.h"
-#include "Static.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/helper/Static.h"
+#include "path_finder/routing/HubLabelCreator.h"
+#include "path_finder/storage/CellIdStore.h"
+#include "path_finder/storage/HubLabelStore.h"
 #include <queue>
 #include <vector>
 

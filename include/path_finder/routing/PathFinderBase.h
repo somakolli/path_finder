@@ -5,8 +5,8 @@
 #ifndef ALG_ENG_PROJECT_PATHFINDERBASE_H
 #define ALG_ENG_PROJECT_PATHFINDERBASE_H
 
-#include "Graph.h"
-#include "Types.h"
+#include "path_finder/graphs/Graph.h"
+#include "path_finder/helper/Types.h"
 #include <optional>
 
 namespace pathFinder {

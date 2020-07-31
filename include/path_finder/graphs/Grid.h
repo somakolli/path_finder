@@ -4,9 +4,9 @@
 
 #ifndef MASTER_ARBEIT_GRID_H
 #define MASTER_ARBEIT_GRID_H
-#include "CHGraph.h"
 #include "Graph.h"
-#include "GraphReader.h"
+#include "path_finder/graphs/CHGraph.h"
+#include "path_finder/storage/GraphReader.h"
 #include <cmath>
 #include <map>
 #include <utility>
@@ -14,35 +14,35 @@ namespace pathFinder {
 template<typename GridNode = CHNode, typename Graph = CHGraph<std::vector>>
 class Grid {
   using GridKey = std::pair<Lat, Lng>;
-  std::vector<GridNode> nodes;
+  Graph& graph;
   int gridSizeX;
   int gridSizeY;
 
 public:
-  std::map<GridKey, std::vector<GridNode>> grid;
+  std::map<GridKey, std::vector<GridNode>> mapGrid;
   std::map<GridKey, std::pair<NodeId, NodeId>> pointerGrid;
-  Grid(const std::vector<GridNode> nodes, int gridSizeX, int gridSizeY):
-    nodes(nodes), gridSizeX(gridSizeX), gridSizeY(gridSizeY) {};
-  void reorderNodes(Graph& graph);
+  Grid(Graph& graph, int gridSizeX, int gridSizeY):
+    graph(graph), gridSizeX(gridSizeX), gridSizeY(gridSizeY) {};
+  void reorderNodes();
   void buildGrid();
 };
 template <typename GridNode, typename Graph>
 void Grid<GridNode, Graph>::buildGrid() {
   double divLat = 180.0f / static_cast<float>(gridSizeX);
   double divLng = 360.0f / static_cast<float>(gridSizeY);
-  for (const auto& node: nodes){
+  for (const auto& node: graph.getNodes()){
     auto latPositionInGrid = floor(node.latLng.lat / divLat);
     auto lngPositionInGrid = floor(node.latLng.lng / divLng);
     auto latLng = std::make_pair(latPositionInGrid, lngPositionInGrid);
-    grid[latLng].emplace_back(std::move(node));
+    mapGrid[latLng].emplace_back(std::move(node));
   }
 }
 template <typename GridNode, typename Graph>
-void Grid<GridNode, Graph>::reorderNodes(Graph &graph) {
+void Grid<GridNode, Graph>::reorderNodes() {
   std::map<NodeId, NodeId> oldIdToNewId;
   graph.getNodes().clear();
   NodeId i = 0;
-  for(auto& [latLng, nodeVector] : grid) {
+  for(auto& [latLng, nodeVector] : mapGrid) {
     auto pointerPair = std::make_pair(i, i);
     for(auto& node: nodeVector) {
       oldIdToNewId[node.id] = i;
