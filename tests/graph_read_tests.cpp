@@ -77,7 +77,9 @@ TEST(CHGraph, ReadFromDiskWorks) {
 TEST(CHGraph, GridWorks) {
   CHGraph graph;
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", true);
-  auto edges = graph.edgesFor(1, EdgeDirection::FORWARD);
+  FileWriter::writeGraph(graph, "test", "testGraph/");
+  auto graphLoaded = FileLoader::loadGraph("testGraph");
+  auto edges = graphLoaded->edgesFor(1, EdgeDirection::FORWARD);
   auto edge0 = CHEdge(*edges.begin());
   auto edge1 = CHEdge(*(edges.begin() + 1));
   auto edge2 = CHEdge(*(edges.begin() + 2));

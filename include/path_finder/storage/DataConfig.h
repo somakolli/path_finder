@@ -81,8 +81,8 @@ struct DataConfig {
 };
 
 template <typename T>
-T pathFinder::DataConfig::getFromFile(const std::string &configString) {
-  auto j = nlohmann::json::parse(configString);
+T pathFinder::DataConfig::getFromFile(const std::string &filepath) {
+  auto j = nlohmann::json::parse(filepath);
   return j.get<T>();
 }
 
