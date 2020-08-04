@@ -31,7 +31,8 @@ set(SOURCES
         src/HubLabelCreator.cpp
         src/HybridPathFinder.cpp
         src/Types.cpp
-        src/base64.cpp)
+        src/base64.cpp
+        src/FileWriter.cpp)
 
 set(INCLUDES
         include/path_finder/routing/CHDijkstra.h
@@ -48,7 +49,8 @@ set(INCLUDES
         include/path_finder/helper/Timer.h
         include/path_finder/storage/DataConfig.h
         include/path_finder/graphs/Grid.h
-        include/path_finder/storage/FileLoader.h)
+        include/path_finder/storage/FileLoader.h
+        include/path_finder/storage/FileWriter.h)
 
 find_package(Boost REQUIRED COMPONENTS system iostreams)
 find_package(OpenMP)

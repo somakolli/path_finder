@@ -32,9 +32,13 @@ public:
   pathFinder::MyIterator<CostNode *> retrieve(Id id, EdgeDirection direction);
   size_t numberOfLabels();
   auto &getForwardLabels();
+  auto &getForwardLabels() const;
   auto &getBackwardLabels();
+  auto &getBackwardLabels() const;
   auto &getForwardOffset();
+  auto &getForwardOffset() const;
   auto &getBackwardOffset();
+  auto &getBackwardOffset() const;
   size_t getSpaceConsumption();
 };
 
@@ -103,9 +107,17 @@ template <template <class, class> class Vector, class OffsetVector>
 auto &HubLabelStore<Vector, OffsetVector>::getBackwardLabels() {
   return backwardLabels;
 }
+template <template <class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getBackwardLabels() const{
+  return backwardLabels;
+}
 
 template <template <class, class> class Vector, class OffsetVector>
 auto &HubLabelStore<Vector, OffsetVector>::getForwardLabels() {
+  return forwardLabels;
+}
+template <template <class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getForwardLabels() const{
   return forwardLabels;
 }
 
@@ -113,9 +125,17 @@ template <template <class, class> class Vector, class OffsetVector>
 auto &HubLabelStore<Vector, OffsetVector>::getForwardOffset() {
   return forwardOffset;
 }
+template <template <class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getForwardOffset() const{
+  return forwardOffset;
+}
 
 template <template <class, class> class Vector, class OffsetVector>
 auto &HubLabelStore<Vector, OffsetVector>::getBackwardOffset() {
+  return backwardOffset;
+}
+template <template <class, class> class Vector, class OffsetVector>
+auto &HubLabelStore<Vector, OffsetVector>::getBackwardOffset() const{
   return backwardOffset;
 }
 

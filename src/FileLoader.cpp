@@ -6,7 +6,7 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
-  auto config = pathFinder::DataConfig::getFromFile(str);
+  auto config = pathFinder::DataConfig::getFromFile<DataConfig>(str);
   auto nodes = Static::getFromFileMMap<CHNode>(config.nodes, configFolder);
   auto forwardEdges = Static::getFromFileMMap<CHEdge>(config.forwardEdges, configFolder);
   auto backwardEdges = Static::getFromFileMMap<CHEdge>(config.backwardEdges, configFolder);
@@ -28,4 +28,16 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   auto hubLabelStore = std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels, forwardHublabelOffset, backwardHublabelOffset));
   pathFinder::Timer timer;
   return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.calculatedUntilLevel));
+}
+std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
+  std::ifstream t(graphFolder + "/config.json");
+  std::string str((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+  auto config = pathFinder::DataConfig::getFromFile<GraphDataInfo>(str);
+  auto nodes = Static::getFromFileMMap<CHNode>(config.nodes, graphFolder);
+  auto forwardEdges = Static::getFromFileMMap<CHEdge>(config.forwardEdges, graphFolder);
+  auto backwardEdges = Static::getFromFileMMap<CHEdge>(config.backwardEdges, graphFolder);
+  auto forwardOffset = Static::getFromFileMMap<NodeId>(config.forwardOffset, graphFolder);
+  auto backwardOffset = Static::getFromFileMMap<NodeId>(config.backwardOffset, graphFolder);
+  return std::make_shared<MMapGraph>(CHGraph(nodes, forwardEdges, backwardEdges, forwardOffset, backwardOffset, nodes.size()));
 }

@@ -61,11 +61,16 @@ public:
   void sortEdges();
   NodeId getNodeIdFor(LatLng latLng);
   NodeVector &getNodes();
+  const NodeVector &getNodes() const;
   CHNode getNode(NodeId id) const;
   EdgeVector &getForwardEdges();
+  const EdgeVector &getForwardEdges() const;
   OffsetVector &getForwardOffset();
+  const OffsetVector &getForwardOffset() const;
   EdgeVector &getBackEdges();
+  const EdgeVector &getBackEdges() const;
   OffsetVector &getBackOffset();
+  const OffsetVector &getBackOffset() const;
   std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
   std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength);
   double getDistance(NodeId node1, NodeId node2);
@@ -91,12 +96,26 @@ pathFinder::CHGraph<Vector, OffsetVector>::getNodes() {
   return m_nodes;
 }
 template <template <class, class> class Vector, class OffsetVector>
+const Vector<CHNode, std::allocator<CHNode>> &
+ pathFinder::CHGraph<Vector, OffsetVector>::getNodes() const{
+  return m_nodes;
+}
+template <template <class, class> class Vector, class OffsetVector>
 Vector<CHEdge, std::allocator<CHEdge>> &
 pathFinder::CHGraph<Vector, OffsetVector>::getBackEdges() {
   return m_backEdges;
 }
 template <template <class, class> class Vector, class OffsetVector>
+const Vector<CHEdge, std::allocator<CHEdge>> &
+pathFinder::CHGraph<Vector, OffsetVector>::getBackEdges() const {
+  return m_backEdges;
+}
+template <template <class, class> class Vector, class OffsetVector>
 OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getBackOffset() {
+  return m_backOffset;
+}
+template <template <class, class> class Vector, class OffsetVector>
+const OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getBackOffset() const {
   return m_backOffset;
 }
 template <template <class, class> class Vector, class OffsetVector>
@@ -105,7 +124,16 @@ pathFinder::CHGraph<Vector, OffsetVector>::getForwardEdges() {
   return m_edges;
 }
 template <template <class, class> class Vector, class OffsetVector>
+const Vector<CHEdge, std::allocator<CHEdge>> &
+pathFinder::CHGraph<Vector, OffsetVector>::getForwardEdges() const {
+  return m_edges;
+}
+template <template <class, class> class Vector, class OffsetVector>
 OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getForwardOffset() {
+  return m_offset;
+}
+template <template <class, class> class Vector, class OffsetVector>
+const OffsetVector &pathFinder::CHGraph<Vector, OffsetVector>::getForwardOffset() const {
   return m_offset;
 }
 

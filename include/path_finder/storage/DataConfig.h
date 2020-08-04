@@ -24,6 +24,36 @@ struct GridMapEntry {
 
 void from_json(const nlohmann::json &j, BinaryFileDescription &d);
 void to_json(nlohmann::json &j, const BinaryFileDescription &d);
+
+struct DataInfo {
+  std::string graphName;
+  std::string timestamp;
+};
+
+struct GraphDataInfo  : DataInfo{
+  BinaryFileDescription nodes;
+  bool gridCalculated;
+  BinaryFileDescription forwardEdges;
+  BinaryFileDescription forwardOffset;
+  BinaryFileDescription backwardEdges;
+  BinaryFileDescription backwardOffset;
+  std::vector<GridMapEntry> gridMapEntries;
+};
+
+struct HubLabelDataInfo : DataInfo {
+  size_t calculatedUntilLevel;
+  BinaryFileDescription forwardHublabels;
+  BinaryFileDescription forwardHublabelOffset;
+  BinaryFileDescription backwardHublabels;
+  BinaryFileDescription backwardHublabelOffset;
+};
+
+struct CellDataInfo : DataInfo {
+  BinaryFileDescription cellIds;
+  BinaryFileDescription cellIdsOffset;
+};
+
+
 struct DataConfig {
   std::string graphName;
 
@@ -46,9 +76,15 @@ struct DataConfig {
   std::vector<GridMapEntry> gridMapEntries;
 
   std::string toJson();
-
-  static DataConfig getFromFile(const std::string &filepath);
+  template <typename T>
+  static T getFromFile(const std::string &filepath);
 };
+
+template <typename T>
+T pathFinder::DataConfig::getFromFile(const std::string &configString) {
+  auto j = nlohmann::json::parse(configString);
+  return j.get<T>();
+}
 
 void to_json(nlohmann::json &j, const pathFinder::DataConfig &d);
 
@@ -57,5 +93,22 @@ void from_json(const nlohmann::json &j, pathFinder::DataConfig &d);
 void to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d);
 
 void from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d);
+
+void to_json(nlohmann::json &j, const pathFinder::DataInfo &d);
+
+void from_json(const nlohmann::json &j, pathFinder::DataInfo &d);
+
+void to_json(nlohmann::json &j, const pathFinder::GraphDataInfo &d);
+
+void from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d);
+
+void to_json(nlohmann::json &j, const pathFinder::HubLabelDataInfo &d);
+
+void from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo &d);
+
+void to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d);
+
+void from_json(const nlohmann::json &j, pathFinder::CellDataInfo &d);
+
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_DATACONFIG_H

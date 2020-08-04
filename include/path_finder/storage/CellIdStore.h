@@ -22,10 +22,12 @@ public:
   explicit CellIdStore(size_t numberOfEdges);
   CellIdStore(Vector<CellId_t, std::allocator<CellId_t>> cellIds, OffsetVector offsetVector);
   void storeCellIds(size_t edgeId, const std::vector<CellId_t>&cellToAdd);
-  size_t cellIdSize();
-  size_t offsetSize();
+  size_t cellIdSize() const;
+  size_t offsetSize() const;
   auto &cellIdsVec();
+  const auto &cellIdsVec() const;
   auto &offsetVec();
+  const auto &offsetVec() const;
   MyIterator<CellId_t*> getCellIds(size_t edgeId);
 };
 template <template <class, class> class Vector,
@@ -59,13 +61,13 @@ CellIdStore<Vector, OffsetVector, CellId_t>::getCellIds(size_t edgeId) {
 template <template <class, class> class Vector,
     class OffsetVector,
     class CellId_t>
-size_t CellIdStore<Vector, OffsetVector, CellId_t>::cellIdSize() {
+size_t CellIdStore<Vector, OffsetVector, CellId_t>::cellIdSize() const{
   return _cellIds.size();
 }
 template <template <class, class> class Vector,
     class OffsetVector,
     class CellId_t>
-size_t CellIdStore<Vector, OffsetVector, CellId_t>::offsetSize() {
+size_t CellIdStore<Vector, OffsetVector, CellId_t>::offsetSize() const{
   return _offsetVector.size();
 }
 template <template <class, class> class Vector,
@@ -77,7 +79,19 @@ auto &CellIdStore<Vector, OffsetVector, CellId_t>::cellIdsVec() {
 template <template <class, class> class Vector,
     class OffsetVector,
     class CellId_t>
+const auto &CellIdStore<Vector, OffsetVector, CellId_t>::cellIdsVec() const{
+  return _cellIds;
+}
+template <template <class, class> class Vector,
+    class OffsetVector,
+    class CellId_t>
 auto &CellIdStore<Vector, OffsetVector, CellId_t>::offsetVec() {
+  return _offsetVector;
+}
+template <template <class, class> class Vector,
+    class OffsetVector,
+    class CellId_t>
+const auto &CellIdStore<Vector, OffsetVector, CellId_t>::offsetVec() const{
   return _offsetVector;
 }
 template <template <class, class> class Vector,

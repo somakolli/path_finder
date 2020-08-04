@@ -8,8 +8,11 @@
 #include "path_finder/storage/MmapVector.h"
 #include <any>
 #include <cstddef>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <sys/mman.h>
+#include <time.h>
 #include <vector>
 
 namespace pathFinder {
@@ -73,7 +76,7 @@ public:
   }
 
   template <typename T>
-  static inline void writeVectorToFile(std::vector<T> vector,
+  static inline void writeVectorToFile(const std::vector<T>& vector,
                                        const char *filename) {
     FILE *file = fopen64(filename, "w+");
     if (fwrite(vector.data(), sizeof(T), vector.size(), file) == 0)
@@ -157,6 +160,15 @@ public:
     auto copyEdge = edge;
     edge.source = copyEdge.target;
     edge.target = copyEdge.source;
+  }
+
+  static std::string getTimeStampString() {
+    auto t = time(nullptr);
+    auto tm = *localtime(&t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    return oss.str();
   }
 };
 } // namespace pathFinder
