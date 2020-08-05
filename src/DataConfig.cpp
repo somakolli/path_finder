@@ -130,3 +130,29 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d) {
   j.push_back({"cellIds", d.cellIds});
   j.push_back({{"cellIdsOffset", d.cellIdsOffset}});
 }
+
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::CellDataInfo &d) {
+  from_json(j, static_cast<DataInfo&>(d));
+  j.at("cellIds").get_to(d.cellIds);
+  j.at("cellIdsOffset").get_to(d.cellIdsOffset);
+}
+
+void pathFinder::to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &d){
+  j = nlohmann::json{
+      {"hubLabelFolder", d.hubLabelFolder},
+      {"cellIdFolder", d.cellIdFolder},
+      {"graphFolder", d.graphFolder},
+      {"labelsUntilLevel", d.labelsUntilLevel},
+      {"cellIdsCalculated", d.cellIdsCalculated},
+      {"hubLabelsCalculated", d.hubLabelsCalculated},
+  };
+}
+
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo &d){
+    j.at("hubLabelFolder").get_to(d.hubLabelFolder);
+    j.at("cellIdFolder").get_to(d.cellIdFolder);
+    j.at("graphFolder").get_to(d.graphFolder);
+    j.at("labelsUntilLevel").get_to(d.labelsUntilLevel);
+    j.at("cellIdsCalculated").get_to(d.cellIdsCalculated);
+    j.at("hubLabelsCalculated").get_to(d.hubLabelsCalculated);
+}

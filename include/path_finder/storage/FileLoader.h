@@ -10,6 +10,8 @@ public:
                        CellIdStore<MmapVector, MmapVector<OffsetElement>>>;
   static std::shared_ptr<HybridPF> loadHubLabelsShared(const std::string& configFolder);
   static std::shared_ptr<MMapGraph> loadGraph(const std::string& graphFolder);
+  static std::shared_ptr<MMapCellIdStore> loadCellIds(const std::string& cellIdFolder);
+  static std::shared_ptr<MMapHubLabelStore> loadHubLabels(const std::string& hubLabelFolder);
 };
 }
 

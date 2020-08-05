@@ -41,7 +41,7 @@ struct GraphDataInfo  : DataInfo{
 };
 
 struct HubLabelDataInfo : DataInfo {
-  size_t calculatedUntilLevel;
+  size_t calculatedUntilLevel = -1;
   BinaryFileDescription forwardHublabels;
   BinaryFileDescription forwardHublabelOffset;
   BinaryFileDescription backwardHublabels;
@@ -51,6 +51,15 @@ struct HubLabelDataInfo : DataInfo {
 struct CellDataInfo : DataInfo {
   BinaryFileDescription cellIds;
   BinaryFileDescription cellIdsOffset;
+};
+
+struct HybridPfDataInfo {
+  std::string graphFolder;
+  std::string hubLabelFolder;
+  std::string cellIdFolder;
+  int labelsUntilLevel = -1;
+  bool cellIdsCalculated = false;
+  bool hubLabelsCalculated = false;
 };
 
 
@@ -109,6 +118,10 @@ void from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo &d);
 void to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d);
 
 void from_json(const nlohmann::json &j, pathFinder::CellDataInfo &d);
+
+void to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &d);
+
+void from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo &d);
 
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_DATACONFIG_H

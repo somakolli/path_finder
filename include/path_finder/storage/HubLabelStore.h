@@ -20,11 +20,11 @@ class HubLabelStore {
   CostNodeVector backwardLabels;
   OffsetVector forwardOffset;
   OffsetVector backwardOffset;
-
 public:
+  int calculatedUntilLevel;
   explicit HubLabelStore(size_t numberOfLabels);
   HubLabelStore(CostNodeVector &forwardLabels, CostNodeVector &backwardLabels,
-                OffsetVector &forwardOffset, OffsetVector &backwardOffset);
+                OffsetVector &forwardOffset, OffsetVector &backwardOffset, int calculatedUntilLevel);
   template <typename Id>
   void store(const std::vector<CostNode> &label, Id id,
              EdgeDirection direction);
@@ -96,11 +96,12 @@ size_t HubLabelStore<Vector, OffsetVector>::numberOfLabels() {
 template <template <class, class> class Vector, class OffsetVector>
 HubLabelStore<Vector, OffsetVector>::HubLabelStore(
     CostNodeVector &forwardLabels, CostNodeVector &backwardLabels,
-    OffsetVector &forwardOffset, OffsetVector &backwardOffset) {
+    OffsetVector &forwardOffset, OffsetVector &backwardOffset, int calculatedUntilLevel) {
   this->forwardLabels = forwardLabels;
   this->backwardLabels = backwardLabels;
   this->forwardOffset = forwardOffset;
   this->backwardOffset = backwardOffset;
+  this->calculatedUntilLevel = calculatedUntilLevel;
 }
 
 template <template <class, class> class Vector, class OffsetVector>

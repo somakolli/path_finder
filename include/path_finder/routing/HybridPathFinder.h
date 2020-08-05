@@ -30,7 +30,58 @@ template <typename HubLabelStore = HubLabelStore<std::vector>,
           typename Graph = CHGraph<std::vector>,
           typename CellIdStore = CellIdStore<std::vector>>
 class HybridPathFinder : public PathFinderBase {
+public:
+  /**
+   * @brief
+   * Initialize stores, graph, level, cost array.
+   * @param hubLabelStore store with computed hubLabels
+   * @param graph contraction hierarchy graph
+   * @param cellIdStore store for egde -> oscar cell id
+   * @param labelsUntilLevel level until the labels are computed in the store
+   */
+  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<Graph> graph,
+                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel,
+                   bool hubLabelsCalculated = false, bool cellIdsCalculated = false)
+      : m_hubLabelStore(hubLabelStore), m_graph(graph),
+        m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel), m_hubLabelsCalculated(hubLabelsCalculated),
+        m_cellIdsCalculated(cellIdsCalculated){
+    m_cost.reserve(graph->getNodes().size());
+    while (m_cost.size() < graph->getNodes().size())
+      m_cost.push_back(MAX_DISTANCE);
+  }
 
+  /**
+   * @brief
+   * Computes the shortest path and distance from one node id to another.
+   * @details
+   * Does a contraction hierarchy query until the level for which the labels are
+   * precomputed. Then merges those found labels to get the path and distance.
+   * Also finds all the oscar cells which are visited while traversing the path.
+   * @param source node id of the source node
+   * @param target node id of the target node
+   * @return RoutingResult object with path, distance, cell ids
+   */
+  RoutingResult getShortestPath(NodeId source, NodeId target) override;
+
+  /**
+   * @brief
+   * Computes the shortest path and distance from one coordinate to another.
+   * @details
+   * Finds the corresponding node ids for the coordinates.
+   * Does a contraction hierarchy query until the level for which the labels are
+   * precomputed. Then merges those found labels to get the path and distance.
+   * Also finds all the oscar cells which are visited while traversing the path.
+   * @param source coordinates of the source node
+   * @param target coordinates of the target node
+   * @param distance the distance will be stored in this variable
+   * @param cellIds the oscar cell ids of the path will be stored in this
+   * container
+   * @return RoutingResult object with path, distance, cell ids
+   */
+  RoutingResult getShortestPath(LatLng source, LatLng target) override;
+  size_t graphNodeSize();
+  Level labelsUntilLevel();
+  auto getGraph();
 private:
   typedef std::vector<CostNode> costNodeVec_t;
 
@@ -95,56 +146,8 @@ private:
   std::optional<CostNode> findElementInLabel(NodeId nodeId,
                                              const costNodeVec_t &label);
 
-public:
-  /**
-   * @brief
-   * Initialize stores, graph, level, cost array.
-   * @param hubLabelStore store with computed hubLabels
-   * @param graph contraction hierarchy graph
-   * @param cellIdStore store for egde -> oscar cell id
-   * @param labelsUntilLevel level until the labels are computed in the store
-   */
-  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<Graph> graph,
-                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel)
-      : m_hubLabelStore(hubLabelStore), m_graph(graph),
-        m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel) {
-    m_cost.reserve(graph->getNodes().size());
-    while (m_cost.size() < graph->getNodes().size())
-      m_cost.push_back(MAX_DISTANCE);
-  }
-
-  /**
-   * @brief
-   * Computes the shortest path and distance from one node id to another.
-   * @details
-   * Does a contraction hierarchy query until the level for which the labels are
-   * precomputed. Then merges those found labels to get the path and distance.
-   * Also finds all the oscar cells which are visited while traversing the path.
-   * @param source node id of the source node
-   * @param target node id of the target node
-   * @return RoutingResult object with path, distance, cell ids
-   */
-  RoutingResult getShortestPath(NodeId source, NodeId target) override;
-
-  /**
-   * @brief
-   * Computes the shortest path and distance from one coordinate to another.
-   * @details
-   * Finds the corresponding node ids for the coordinates.
-   * Does a contraction hierarchy query until the level for which the labels are
-   * precomputed. Then merges those found labels to get the path and distance.
-   * Also finds all the oscar cells which are visited while traversing the path.
-   * @param source coordinates of the source node
-   * @param target coordinates of the target node
-   * @param distance the distance will be stored in this variable
-   * @param cellIds the oscar cell ids of the path will be stored in this
-   * container
-   * @return RoutingResult object with path, distance, cell ids
-   */
-  RoutingResult getShortestPath(LatLng source, LatLng target) override;
-  size_t graphNodeSize();
-  Level labelsUntilLevel();
-  auto getGraph();
+  bool m_cellIdsCalculated = false;
+  bool m_hubLabelsCalculated = false;
 };
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
@@ -182,10 +185,15 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
       newFinalForwardEdgePath.emplace_back(e);
   }
 
-  // find cell ids
-  for (auto edge : newFinalForwardEdgePath) {
-    addCellIds(edge, routingResult.cellIds);
+  for(auto e : newFinalForwardEdgePath) {
+    routingResult.edgeIds.emplace_back(m_graph->getEdgePosition(e, EdgeDirection::FORWARD).value());
   }
+
+  // find cell ids
+  if(m_cellIdsCalculated)
+    for (auto edge : newFinalForwardEdgePath) {
+      addCellIds(edge, routingResult.cellIds);
+    }
 
   // get lat longs
   std::vector<LatLng> newLatLngVector;
@@ -202,69 +210,6 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
              routingResult.cellIds.end());
   routingResult.path = newLatLngVector;
   return routingResult;
-
-
-
-  /*
-  // reverse the backward path
-  std::vector<NodeId> reverseBackwardPath;
-  for (int i = backwardPath.size() - 1; i >= 0; --i) {
-    reverseBackwardPath.push_back(backwardPath[i]);
-  }
-
-
-  // get edges to unpack them
-  std::vector<CHEdge> forwardEdges =
-      getEdgeVectorFromNodeIdPath(forwardPath, EdgeDirection::FORWARD);
-  std::vector<CHEdge> backwardEdges =
-      getEdgeVectorFromNodeIdPath(reverseBackwardPath, EdgeDirection::BACKWARD);
-
-
-  // unpack edges
-  std::vector<CHEdge> finalForwardEdgePath;
-  for (auto edge : forwardEdges) {
-    for (auto e : m_graph->getPathFromShortcut(edge, 0))
-      finalForwardEdgePath.emplace_back(e);
-  }
-
-  std::vector<CHEdge> finalBackwardEdgePath;
-  for (auto edge : backwardEdges) {
-    for (auto e : m_graph->getPathFromShortcut(edge, 0))
-      finalBackwardEdgePath.emplace_back(e);
-  }
-  // find cell ids
-
-  // forward
-  for (auto edge : finalForwardEdgePath) {
-    addCellIds(edge, routingResult.cellIds);
-  }
-  // backward
-  for (auto edge : finalBackwardEdgePath) {
-    addCellIds(edge, routingResult.cellIds);
-  }
-  // get lat longs
-  std::vector<LatLng> latLngVector;
-  if (!finalForwardEdgePath.empty())
-    latLngVector.push_back(
-        m_graph->getNodes()[finalForwardEdgePath[0].source].latLng);
-  for (auto edge : finalForwardEdgePath) {
-    latLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
-  }
-  if (!finalBackwardEdgePath.empty())
-    latLngVector.push_back(
-        m_graph->getNodes()[finalBackwardEdgePath[0].source].latLng);
-  for (auto edge : finalBackwardEdgePath) {
-    latLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
-  }
-
-  // remove duplicates from cellIds
-  sort(routingResult.cellIds.begin(), routingResult.cellIds.end());
-  (routingResult.cellIds)
-      .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
-             routingResult.cellIds.end());
-  routingResult.path = latLngVector;
-  return routingResult;
-   */
 }
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
@@ -280,7 +225,7 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 std::vector<CostNode>
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
     NodeId source, EdgeDirection direction) {
-  if (m_graph->getLevel(source) >= m_labelsUntilLevel) {
+  if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
     const auto &sourceLabel = m_hubLabelStore->retrieve(source, direction);
     costNodeVec_t vec;
     for (const auto entry : sourceLabel)

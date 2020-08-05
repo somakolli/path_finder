@@ -18,6 +18,7 @@ using MMapGraph = CHGraph<MmapVector, MmapVector<NodeId>>;
 using MMapCellIdStore = CellIdStore<MmapVector, MmapVector<OffsetElement>, unsigned int>;
 using MMapHubLabelStore = HubLabelStore<MmapVector, MmapVector<OffsetElement>>;
 struct RoutingResult {
+    std::vector<uint32_t> edgeIds;
     std::vector<LatLng> path;
     std::vector<CellId_t> cellIds;
     Distance distance;

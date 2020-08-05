@@ -70,5 +70,34 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   out << j.dump();
   out.close();
 }
+void FileWriter::writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
+                          RamCellIdStore* cellIdStore, const std::string &folder) {
+  std::string command = "mkdir " + folder;
+  system(command.c_str());
+  pathFinder::HybridPfDataInfo dataInfo;
+  if(graph != nullptr) {
+    dataInfo.graphFolder = "graph";
+    writeGraph(*graph, "stgt", folder + '/' + dataInfo.graphFolder);
+  }
+
+  if(hubLabelStore != nullptr) {
+    dataInfo.hubLabelFolder = "hubLabels";
+    writeHubLabels(*hubLabelStore, dataInfo.labelsUntilLevel, "stgt", folder + '/' + dataInfo.hubLabelFolder);
+    dataInfo.hubLabelsCalculated = true;
+  }
+
+  if(cellIdStore != nullptr){
+    dataInfo.cellIdFolder = "cellIds";
+    writeCells(*cellIdStore, "stgt", folder + '/' + dataInfo.cellIdFolder);
+    dataInfo.cellIdsCalculated = true;
+  }
+  //write config to file
+  std::ofstream out(folder + "/config.json");
+  nlohmann::json j;
+  to_json(j, dataInfo);
+  std::string jsonString = j.dump();
+  out << j.dump();
+  out.close();
+}
 }
 
