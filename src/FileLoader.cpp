@@ -48,6 +48,5 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   auto forwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
   auto backwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
   return std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
-                                                           forwardHublabelOffset, backwardHublabelOffset,
-                                                           config.calculatedUntilLevel));
+                                                           forwardHublabelOffset, backwardHublabelOffset));
 }

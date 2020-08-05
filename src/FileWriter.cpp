@@ -76,18 +76,18 @@ void FileWriter::writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
   system(command.c_str());
   pathFinder::HybridPfDataInfo dataInfo;
   if(graph != nullptr) {
-    dataInfo.graphFolder = "graph";
+    dataInfo.graphFolder = "graph/";
     writeGraph(*graph, "stgt", folder + '/' + dataInfo.graphFolder);
   }
 
   if(hubLabelStore != nullptr) {
-    dataInfo.hubLabelFolder = "hubLabels";
+    dataInfo.hubLabelFolder = "hubLabels/";
     writeHubLabels(*hubLabelStore, dataInfo.labelsUntilLevel, "stgt", folder + '/' + dataInfo.hubLabelFolder);
     dataInfo.hubLabelsCalculated = true;
   }
 
   if(cellIdStore != nullptr){
-    dataInfo.cellIdFolder = "cellIds";
+    dataInfo.cellIdFolder = "cellIds/";
     writeCells(*cellIdStore, "stgt", folder + '/' + dataInfo.cellIdFolder);
     dataInfo.cellIdsCalculated = true;
   }
