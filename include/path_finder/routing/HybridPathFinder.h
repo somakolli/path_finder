@@ -43,7 +43,8 @@ public:
                    std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel,
                    bool hubLabelsCalculated = false, bool cellIdsCalculated = false)
       : m_hubLabelStore(hubLabelStore), m_graph(graph),
-        m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel), m_hubLabelsCalculated(hubLabelsCalculated),
+        m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel),
+        m_hubLabelsCalculated(hubLabelsCalculated),
         m_cellIdsCalculated(cellIdsCalculated){
     m_cost.reserve(graph->getNodes().size());
     while (m_cost.size() < graph->getNodes().size())
