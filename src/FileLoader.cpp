@@ -10,12 +10,14 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   auto chGraph = loadGraph(configFolder + "/graph/");
   std::shared_ptr<MMapHubLabelStore> hubLabelStore;
   std::shared_ptr<MMapCellIdStore> cellIdStore;
-  if(config.cellIdsCalculated)
+  if(config.cellIdsCalculated){
     cellIdStore = loadCellIds(configFolder + "/cellIds/");
+  }
   if(config.hubLabelsCalculated)
     hubLabelStore = loadHubLabels(configFolder + "/hubLabels/");
 
-  return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.labelsUntilLevel));
+  return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.labelsUntilLevel,
+                                             config.hubLabelsCalculated, config.cellIdsCalculated));
 }
 std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
   std::ifstream t(graphFolder + "/config.json");

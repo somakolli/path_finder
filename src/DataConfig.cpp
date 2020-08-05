@@ -128,7 +128,7 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d) {
   to_json(j, static_cast<const DataInfo&>(d));
   j.push_back({"cellIds", d.cellIds});
-  j.push_back({{"cellIdsOffset", d.cellIdsOffset}});
+  j.push_back({"cellIdsOffset", d.cellIdsOffset});
 }
 
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::CellDataInfo &d) {

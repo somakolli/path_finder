@@ -38,10 +38,10 @@ void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, Level lev
   dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffset().size(), false};
 
   // write hub label files
-  Static::writeVectorToFile(hubLabelStore.getForwardLabels(), ("data/" + dataConfig.forwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), ("data/" + dataConfig.backwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getForwardOffset(), ("data/" + dataConfig.forwardHublabelOffset.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardOffset(), ("data/" + dataConfig.backwardHublabelOffset.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getForwardLabels(), (folder + dataConfig.forwardHublabels.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), (folder + dataConfig.backwardHublabels.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getForwardOffset(), (folder + dataConfig.forwardHublabelOffset.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getBackwardOffset(), (folder + dataConfig.backwardHublabelOffset.path).c_str());
 
   //write config to file
   std::ofstream out(folder + "/config.json");
@@ -60,8 +60,8 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   dataConfig.timestamp = Static::getTimeStampString();
   dataConfig.cellIds = {"cellIds", cellIdStore.cellIdSize()};
   dataConfig.cellIdsOffset = {"cellIdsOffset", cellIdStore.offsetSize()};
-  Static::writeVectorToFile(cellIdStore.cellIdsVec(), ("data/" + dataConfig.cellIds.path).c_str());
-  Static::writeVectorToFile(cellIdStore.offsetVec(), ("data/" + dataConfig.cellIdsOffset.path).c_str());
+  Static::writeVectorToFile(cellIdStore.cellIdsVec(), (folder + dataConfig.cellIds.path).c_str());
+  Static::writeVectorToFile(cellIdStore.offsetVec(), (folder + dataConfig.cellIdsOffset.path).c_str());
   //write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;
