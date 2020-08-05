@@ -3,11 +3,19 @@
 #include <path_finder/storage/FileLoader.h>
 std::shared_ptr<pathFinder::FileLoader::HybridPF>
 pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
+  std::ifstream t(configFolder + "/config.json");
+  std::string str((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+  auto config = pathFinder::DataConfig::getFromFile<HybridPfDataInfo>(str);
   auto chGraph = loadGraph(configFolder + "/graph/");
-  auto cellIdStore = loadCellIds(configFolder + "/cellIds/");
-  auto hubLabelStore = loadHubLabels(configFolder + "/hubLabels/");
+  std::shared_ptr<MMapHubLabelStore> hubLabelStore;
+  std::shared_ptr<MMapCellIdStore> cellIdStore;
+  if(config.cellIdsCalculated)
+    cellIdStore = loadCellIds(configFolder + "/cellIds/");
+  if(config.hubLabelsCalculated)
+    hubLabelStore = loadHubLabels(configFolder + "/hubLabels/");
 
-  return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel));
+  return std::make_shared<HybridPF>(HybridPF(hubLabelStore, chGraph, cellIdStore, config.labelsUntilLevel));
 }
 std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
   std::ifstream t(graphFolder + "/config.json");
