@@ -27,6 +27,10 @@ using Level = uint16_t;
 struct LatLng {
   Lat lat;
   Lng lng;
+
+  bool operator==(LatLng other) const {
+    return other.lat == lat && other.lng == lng;
+  }
 };
 
 constexpr Distance MAX_DISTANCE = std::numeric_limits<Distance>::max();

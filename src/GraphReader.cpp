@@ -92,11 +92,12 @@ void pathFinder::GraphReader::readCHFmiFile(
       fdDevice.close();
     }
   }
+  if(reorderWithGrid)
+    gridReorder(graph);
   buildOffset(graph.m_edges, graph.m_offset);
   buildBackEdges(graph.m_edges, graph.getBackEdges());
   buildOffset(graph.getBackEdges(), graph.getBackOffset());
-  if(reorderWithGrid)
-    gridReorder(graph);
+
 }
 
 void pathFinder::GraphReader::buildBackEdges(

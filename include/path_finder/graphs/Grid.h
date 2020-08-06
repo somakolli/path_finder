@@ -59,7 +59,6 @@ void Grid<GridNode, Graph>::reorderNodes() {
   }
   graph.sortEdges();
   graph.m_offset.clear();
-  GraphReader::buildOffset(graph.m_edges, graph.m_offset);
 }
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_GRID_H

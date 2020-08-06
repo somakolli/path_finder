@@ -4,10 +4,37 @@
 #include <path_finder/storage/FileLoader.h>
 #include <path_finder/storage/FileWriter.h>
 #include <path_finder/storage/GraphReader.h>
+#include <ctime>
 
 namespace pathFinder {
 namespace GraphTest {
-const std::string PATH = "/home/sokol/Uni/master-arbeit/vendor/path_finder/test-data/";
+const std::string PATH = "/home/sokol/Uni/path_finder/test-data/";
+
+template <typename Edges>
+bool edgeExists(const pathFinder::RamGraph & graph, Edges edges, LatLng source, LatLng target) {
+  for(const auto& edge : edges) {
+    const auto& source = graph.getNodes()[edge.source];
+    const auto& target = graph.getNodes()[edge.target];
+    if(source.latLng == source.latLng && target.latLng == target.latLng)
+      return true;
+  }
+  return false;
+}
+
+void randomizeLatLngs(RamGraph& graph) {
+  srand (static_cast <unsigned> (time(nullptr)));
+
+  for(auto& node : graph.getNodes()) {
+    auto LOlat = 45;
+    auto HIlat = 46;
+    auto lat = LOlat + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlat-LOlat)));
+    auto LOlng = 8;
+    auto HIlng = 9;
+    auto lng = LOlng + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlng-LOlng)));
+    node.latLng = LatLng{lat, lng};
+  }
+}
+
 
 TEST(Graph, ReadWorks) {
   Graph graph;
@@ -74,30 +101,31 @@ TEST(CHGraph, ReadFromDiskWorks) {
   ASSERT_EQ(edge5.target, 7);
 
 }
-TEST(CHGraph, GridWorks) {
+TEST(CHGraph, GridReorderWorks) {
   CHGraph graph;
-  GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", true);
-  FileWriter::writeGraph(graph, "test", "testGraph/");
-  auto graphLoaded = FileLoader::loadGraph("testGraph");
-  auto edges = graphLoaded->edgesFor(1, EdgeDirection::FORWARD);
-  auto edge0 = CHEdge(*edges.begin());
-  auto edge1 = CHEdge(*(edges.begin() + 1));
-  auto edge2 = CHEdge(*(edges.begin() + 2));
-  auto edge3 = CHEdge(*(edges.begin() + 3));
-  auto edge4 = CHEdge(*(edges.begin() + 4));
-  auto edge5 = CHEdge(*(edges.begin() + 5));
-  ASSERT_EQ(edge0.source, 1);
-  ASSERT_EQ(edge0.target, 0);
-  ASSERT_EQ(edge1.source, 1);
-  ASSERT_EQ(edge1.target, 2);
-  ASSERT_EQ(edge2.source, 1);
-  ASSERT_EQ(edge2.target, 3);
-  ASSERT_EQ(edge3.source, 1);
-  ASSERT_EQ(edge3.target, 5);
-  ASSERT_EQ(edge4.source, 1);
-  ASSERT_EQ(edge4.target, 6);
-  ASSERT_EQ(edge5.source, 1);
-  ASSERT_EQ(edge5.target, 7);
+  GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
+  randomizeLatLngs(graph);
+
+  std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
+  std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;
+  for(const auto& edge :graph.m_edges) {
+    const auto& sourceNode = graph.getNodes()[edge.source];
+    const auto& targetNode = graph.getNodes()[edge.target];
+    forwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
+  }
+  for(const auto& edge :graph.getBackEdges()) {
+    const auto& sourceNode = graph.getNodes()[edge.source];
+    const auto& targetNode = graph.getNodes()[edge.target];
+    backwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
+  }
+  CHGraph reorderedGraph;
+  GraphReader::readCHFmiFile(reorderedGraph, PATH + "test.chfmi", true);
+  for(const auto& [source, target]: forwardEdgesBeforeReorder) {
+      ASSERT_TRUE(edgeExists(graph, reorderedGraph.m_edges, source, target));
+  }
+  for(const auto& [source, target]: backwardEdgesBeforeReorder) {
+      ASSERT_TRUE(edgeExists(graph, reorderedGraph.getBackEdges(), source, target));
+  }
 }
 }
 }
