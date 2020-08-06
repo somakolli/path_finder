@@ -13,6 +13,7 @@
 #include "path_finder/routing/HubLabelCreator.h"
 #include "path_finder/storage/CellIdStore.h"
 #include "path_finder/storage/HubLabelStore.h"
+#include <path_finder/helper/Stopwatch.h>
 #include <queue>
 #include <vector>
 
@@ -159,11 +160,14 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD);
   auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD);
   NodeId topNode;
+  Stopwatch stopwatch;
   routingResult.distance = Static::getShortestDistance(
       MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
       MyIterator(backwardLabel.begin().base(), backwardLabel.end().base()),
       topNode).value();
+  routingResult.distanceTime = stopwatch.elapsedMil();
 
+  stopwatch.reset();
   // the forward path is in reverse the backward path is correct
   auto reverseForwardPath =
       getShortestPathFromLabel(forwardLabel, topNode, source);
@@ -190,12 +194,6 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     routingResult.edgeIds.emplace_back(m_graph->getEdgePosition(e, EdgeDirection::FORWARD).value());
   }
 
-  // find cell ids
-  if(m_cellIdsCalculated)
-    for (auto edge : newFinalForwardEdgePath) {
-      addCellIds(edge, routingResult.cellIds);
-    }
-
   // get lat longs
   std::vector<LatLng> newLatLngVector;
   if (!newFinalForwardEdgePath.empty())
@@ -204,12 +202,21 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   for (auto edge : newFinalForwardEdgePath) {
     newLatLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
   }
+  routingResult.path = newLatLngVector;
+  routingResult.pathTime = stopwatch.elapsedMil();
+
+  stopwatch.reset();
+  // find cell ids
+  if(m_cellIdsCalculated)
+    for (auto edge : newFinalForwardEdgePath) {
+      addCellIds(edge, routingResult.cellIds);
+    }
   // remove duplicates from cellIds
   sort(routingResult.cellIds.begin(), routingResult.cellIds.end());
   (routingResult.cellIds)
       .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
              routingResult.cellIds.end());
-  routingResult.path = newLatLngVector;
+  routingResult.cellTime = stopwatch.elapsedMil();
   return routingResult;
 }
 

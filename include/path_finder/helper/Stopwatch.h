@@ -14,6 +14,8 @@ public:
   void reset() { *this = Stopwatch(); }
 
   typename Clock::duration elapsed() const { return Clock::now() - _last; }
+  double elapsedMil() const { return std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - _last).count(); }
+  double elapsedMicro() const { return std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - _last).count(); }
 };
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_STOPWATCH_H

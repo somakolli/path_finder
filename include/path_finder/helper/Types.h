@@ -22,6 +22,9 @@ struct RoutingResult {
     std::vector<LatLng> path;
     std::vector<CellId_t> cellIds;
     Distance distance;
+    double distanceTime;
+    double pathTime;
+    double cellTime;
 };
 }
 #endif // MASTER_ARBEIT_TYPES_H
