@@ -4,8 +4,7 @@
 
 #ifndef MASTER_ARBEIT_OSCARINTEGRATION_H
 #define MASTER_ARBEIT_OSCARINTEGRATION_H
-#include "../../../../liboscar/vendor/sserialize/include/sserialize/utility/exceptions.h"
-#include "path_finder/graphs/CHGraph.h"
+#include <path_finder/graphs/CHGraph.h>
 #include "path_finder/storage/CellIdStore.h"
 namespace pathFinder{
 class CellIdDiskWriter {
@@ -40,8 +39,8 @@ public:
       std::vector<uint32_t > cellIds;
       try {
         cellIds = cellIdsForEdge(sourcePoint, targetPoint);
-      } catch (sserialize::OutOfBoundsException& e) {
-        
+      } catch (std::exception& e) {
+
       }
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
  //#pragma omp critical
