@@ -4,7 +4,7 @@
 
 #ifndef MASTER_ARBEIT_OSCARINTEGRATION_H
 #define MASTER_ARBEIT_OSCARINTEGRATION_H
-#include "path_finder/graphs/CHGraph.h"
+#include <path_finder/graphs/CHGraph.h>
 #include "path_finder/storage/CellIdStore.h"
 namespace pathFinder{
 class CellIdDiskWriter {
@@ -21,7 +21,7 @@ public:
   template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
   static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
     int progress = 0;
-#pragma omp parallel for
+//#pragma omp parallel for
     for(int i = 0; i < graph.m_edges.size(); ++i) {
       const auto& edge = graph.m_edges[i];
       if(edge.child1.has_value()){
@@ -36,10 +36,14 @@ public:
       GeoPoint targetPoint;
       targetPoint.lat() = targetNode.latLng.lat;
       targetPoint.lon() = targetNode.latLng.lng;
+      std::vector<uint32_t > cellIds;
+      try {
+        cellIds = cellIdsForEdge(sourcePoint, targetPoint);
+      } catch (std::exception& e) {
 
-      auto cellIds = cellIdsForEdge(sourcePoint, targetPoint);
+      }
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
- #pragma omp critical
+ //#pragma omp critical
       {
         diskWriter(i, cellIds);
         ++progress;
