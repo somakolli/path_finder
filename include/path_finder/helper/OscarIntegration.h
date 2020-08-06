@@ -21,7 +21,7 @@ public:
   template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
   static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
     int progress = 0;
-//#pragma omp parallel for
+#pragma omp parallel for
     for(int i = 0; i < graph.m_edges.size(); ++i) {
       const auto& edge = graph.m_edges[i];
       if(edge.child1.has_value()){
@@ -43,7 +43,7 @@ public:
 
       }
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
- //#pragma omp critical
+ #pragma omp critical
       {
         diskWriter(i, cellIds);
         ++progress;
