@@ -25,6 +25,7 @@ struct RoutingResult {
     double distanceTime;
     double pathTime;
     double cellTime;
+    double nodeSearchTime;
 };
 }
 #endif // MASTER_ARBEIT_TYPES_H

@@ -165,7 +165,7 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
       MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
       MyIterator(backwardLabel.begin().base(), backwardLabel.end().base()),
       topNode).value();
-  routingResult.distanceTime = stopwatch.elapsedMil();
+  routingResult.distanceTime = stopwatch.elapsedMicro();
 
   stopwatch.reset();
   // the forward path is in reverse the backward path is correct
@@ -203,7 +203,7 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     newLatLngVector.push_back(m_graph->getNodes()[edge.target].latLng);
   }
   routingResult.path = newLatLngVector;
-  routingResult.pathTime = stopwatch.elapsedMil();
+  routingResult.pathTime = stopwatch.elapsedMicro();
 
   stopwatch.reset();
   // find cell ids
@@ -216,7 +216,7 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   (routingResult.cellIds)
       .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
              routingResult.cellIds.end());
-  routingResult.cellTime = stopwatch.elapsedMil();
+  routingResult.cellTime = stopwatch.elapsedMicro();
   return routingResult;
 }
 
@@ -224,9 +224,13 @@ template <typename HubLabelStore, typename Graph, typename CellIdStore>
 RoutingResult
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     LatLng source, LatLng target) {
+  Stopwatch stopwatch;
   NodeId sourceId = m_graph->getNodeIdFor(source);
   NodeId targetId = m_graph->getNodeIdFor(target);
-  return getShortestPath(sourceId, targetId);
+  auto nodeSearchTime = stopwatch.elapsedMicro();
+  RoutingResult routingResult = getShortestPath(sourceId, targetId);
+  routingResult.nodeSearchTime = nodeSearchTime;
+  return routingResult;
 }
 
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
