@@ -59,6 +59,7 @@ public:
   }
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
+  void randomizeLatLngs();
   NodeId getNodeIdFor(LatLng latLng);
   NodeVector &getNodes();
   const NodeVector &getNodes() const;
@@ -246,6 +247,20 @@ std::shared_ptr<CHGraph<Vector, OffsetVector>> CHGraph<Vector, OffsetVector>::ma
   return std::make_shared<CHGraph<Vector, OffsetVector>>(CHGraph(
       nodes, edges, backEdges, offset, backOffset, numberOfNodes
       ));
+}
+template <template <class, class> class Vector, class OffsetVector>
+void CHGraph<Vector, OffsetVector>::randomizeLatLngs() {
+  srand (static_cast <unsigned> (time(nullptr)));
+
+  for(auto& node : getNodes()) {
+    auto LOlat = 45;
+    auto HIlat = 46;
+    auto lat = LOlat + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlat-LOlat)));
+    auto LOlng = 8;
+    auto HIlng = 9;
+    auto lng = LOlng + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlng-LOlng)));
+    node.latLng = LatLng{lat, lng};
+  }
 }
 } // namespace pathFinder
 #endif // ALG_ENG_PROJECT_CHGRAPH_H

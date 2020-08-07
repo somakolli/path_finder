@@ -92,6 +92,9 @@ void pathFinder::GraphReader::readCHFmiFile(
       fdDevice.close();
     }
   }
+#if TEST
+  graph.randomizeLatLngs();
+#endif
   if(reorderWithGrid)
     gridReorder(graph);
   buildOffset(graph.m_edges, graph.m_offset);

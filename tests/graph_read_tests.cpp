@@ -13,12 +13,27 @@ const std::string PATH = "/home/sokol/Uni/path_finder/test-data/";
 template <typename Edges>
 bool edgeExists(const pathFinder::RamGraph & graph, Edges edges, LatLng source, LatLng target) {
   for(const auto& edge : edges) {
-    const auto& source = graph.getNodes()[edge.source];
-    const auto& target = graph.getNodes()[edge.target];
-    if(source.latLng == source.latLng && target.latLng == target.latLng)
+    const auto& source1 = graph.getNodes()[edge.source];
+    const auto& target1 = graph.getNodes()[edge.target];
+    if(source == source1.latLng && target == target1.latLng)
       return true;
   }
   return false;
+}
+
+
+
+bool haveSameEdges(pathFinder::RamGraph & graph, CHNode node,
+                   pathFinder::RamGraph & reorderedGraph, CHNode reorderedNode) {
+  const auto& edges = graph.edgesFor(node.id, EdgeDirection::FORWARD);
+  const auto& reorderEdges = reorderedGraph.edgesFor(reorderedNode.id, EdgeDirection::FORWARD);
+  for(const auto& edge : edges) {
+    const auto& source = graph.getNodes()[edge.source];
+    const auto& target = graph.getNodes()[edge.target];
+    if(!edgeExists(reorderedGraph, reorderEdges, source.latLng, target.latLng))
+      return false;
+  }
+  return true;
 }
 
 void randomizeLatLngs(RamGraph& graph) {
@@ -108,6 +123,7 @@ TEST(CHGraph, GridReorderWorks) {
 
   std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
   std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;
+
   for(const auto& edge :graph.m_edges) {
     const auto& sourceNode = graph.getNodes()[edge.source];
     const auto& targetNode = graph.getNodes()[edge.target];
@@ -120,12 +136,21 @@ TEST(CHGraph, GridReorderWorks) {
   }
   CHGraph reorderedGraph;
   GraphReader::readCHFmiFile(reorderedGraph, PATH + "test.chfmi", true);
+  for(const auto& node : graph.getNodes()) {
+    auto reorderedNode = reorderedGraph.getNode(reorderedGraph.getNodeIdFor(node.latLng));
+    ASSERT_TRUE(haveSameEdges(graph, node, reorderedGraph, reorderedNode));
+  }
+
+
   for(const auto& [source, target]: forwardEdgesBeforeReorder) {
       ASSERT_TRUE(edgeExists(graph, reorderedGraph.m_edges, source, target));
   }
   for(const auto& [source, target]: backwardEdgesBeforeReorder) {
       ASSERT_TRUE(edgeExists(graph, reorderedGraph.getBackEdges(), source, target));
   }
+
+
+
 }
 }
 }
