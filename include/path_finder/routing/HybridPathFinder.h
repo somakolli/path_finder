@@ -157,10 +157,10 @@ RoutingResult
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     NodeId source, NodeId target) {
   RoutingResult routingResult;
+  Stopwatch stopwatch;
   auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD);
   auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD);
   NodeId topNode;
-  Stopwatch stopwatch;
   routingResult.distance = Static::getShortestDistance(
       MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
       MyIterator(backwardLabel.begin().base(), backwardLabel.end().base()),
