@@ -17,15 +17,39 @@ using RamHubLabelStore = HubLabelStore<std::vector, std::vector<OffsetElement>>;
 using MMapGraph = CHGraph<MmapVector, MmapVector<NodeId>>;
 using MMapCellIdStore = CellIdStore<MmapVector, MmapVector<OffsetElement>, unsigned int>;
 using MMapHubLabelStore = HubLabelStore<MmapVector, MmapVector<OffsetElement>>;
+struct CalcLabelTimingInfo{
+  double mergeTime = 0;
+  double graphSearchTime = 0;
+  double lookUpTime = 0;
+
+  void operator+=(const CalcLabelTimingInfo& other) {
+    mergeTime += other.mergeTime;
+    graphSearchTime += other.graphSearchTime;
+    lookUpTime += other.lookUpTime;
+  }
+  void operator/=(double other) {
+    mergeTime /= other;
+    lookUpTime /= other;
+    graphSearchTime /= other;
+  }
+  friend std::ostream& operator<<(std::ostream& os, const CalcLabelTimingInfo& calcLabelTimingInfo) {
+    os << "mergeTime: " << calcLabelTimingInfo.mergeTime << '\n';
+    os << "lookUpTime: " << calcLabelTimingInfo.lookUpTime << '\n';
+    os << "graphSearchTime: " << calcLabelTimingInfo.graphSearchTime << '\n';
+    return os;
+  }
+};
+
 struct RoutingResult {
     std::vector<uint32_t> edgeIds;
     std::vector<LatLng> path;
     std::vector<CellId_t> cellIds;
     Distance distance;
     double distanceTime;
-    double pathTime;
-    double cellTime;
-    double nodeSearchTime;
+    double pathTime = 0;
+    double cellTime = 0;
+    double nodeSearchTime = 0;
+    CalcLabelTimingInfo calcLabelTimingInfo{};
 };
 }
 #endif // MASTER_ARBEIT_TYPES_H

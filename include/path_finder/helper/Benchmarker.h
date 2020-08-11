@@ -22,7 +22,6 @@ private:
   std::string m_outputPath;
   std::shared_ptr<HybridPF> m_pathFinderMMap;
   std::shared_ptr<HybridPFRam> m_pathFinderRam;
-
 };
 }
 

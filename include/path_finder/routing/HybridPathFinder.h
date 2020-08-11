@@ -109,7 +109,7 @@ private:
    * @return returns a vector which contains the label elements [nodeId, cost,
    * previousNode]
    */
-  costNodeVec_t calcLabelHybrid(NodeId source, EdgeDirection direction);
+  costNodeVec_t calcLabelHybrid(NodeId source, EdgeDirection direction, CalcLabelTimingInfo& calcLabelTimingInfo);
 
   /**
    * @brief
@@ -160,8 +160,8 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
     NodeId source, NodeId target) {
   RoutingResult routingResult;
   Stopwatch stopwatch;
-  auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD);
-  auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD);
+  auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD, routingResult.calcLabelTimingInfo);
+  auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD, routingResult.calcLabelTimingInfo);
   NodeId topNode;
   routingResult.distance = Static::getShortestDistance(
       MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
@@ -238,12 +238,14 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 std::vector<CostNode>
 HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
-    NodeId source, EdgeDirection direction) {
+    NodeId source, EdgeDirection direction, CalcLabelTimingInfo& calcLabelTimingInfo) {
+  Stopwatch stopwatch;
   if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
     const auto &sourceLabel = m_hubLabelStore->retrieve(source, direction);
     costNodeVec_t vec;
     for (const auto entry : sourceLabel)
       vec.push_back(entry);
+    calcLabelTimingInfo.lookUpTime = stopwatch.elapsedMicro();
     return vec;
   }
 
@@ -286,17 +288,24 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
     }
   }
   Static::sortLabel(settledNodes);
+  calcLabelTimingInfo.graphSearchTime = stopwatch.elapsedMicro();
+  Stopwatch stopwatch1;
   for (auto [previousNodeId, labelsToCollect] : labelsToCollectMap) {
     for (auto id : labelsToCollect) {
+      stopwatch1.reset();
       costNodeVec_t targetLabel;
-      for (const auto &entry : m_hubLabelStore->retrieve(id, direction))
+      auto label = m_hubLabelStore->retrieve(id, direction);
+      for (const auto &entry : label)
         targetLabel.push_back(entry);
+      calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
+      stopwatch1.reset();
       costNodeVec_t resultVec;
       resultVec.reserve(settledNodes.size() + targetLabel.size());
       Static::merge(settledNodes.begin(), settledNodes.end(),
                     targetLabel.begin(), targetLabel.end(), m_cost[id],
                     resultVec, PreviousReplacer(previousNodeId));
       settledNodes = std::move(resultVec);
+      calcLabelTimingInfo.mergeTime += stopwatch1.elapsedMicro();
     }
   }
   return settledNodes;

@@ -36,6 +36,8 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
   std::uniform_int_distribution<> distr(0, numberOfNodes-1);
   double totalRamTime = 0;
   double totalMMapTime = 0;
+  CalcLabelTimingInfo totalCalCLabelRamTimingInfo{};
+  CalcLabelTimingInfo totalCalCLabelMMapTimingInfo{};
   for(uint32_t i = 0 ; i < numberOfQueries; ++i) {
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
@@ -45,16 +47,29 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
       auto mmapResult = m_pathFinderMMap->getShortestPath(sourceId, targetId);
       totalRamTime += ramResult.distanceTime;
       totalMMapTime += mmapResult.distanceTime;
+      totalCalCLabelRamTimingInfo += ramResult.calcLabelTimingInfo;
+      totalCalCLabelMMapTimingInfo += mmapResult.calcLabelTimingInfo;
     } catch (const std::runtime_error& error) {
       // std::cout << error.what() << '\n';
     }
   }
   double averageRamTime = totalRamTime / numberOfQueries;
   double averageMMapTime = totalMMapTime / numberOfQueries;
+  totalCalCLabelRamTimingInfo /= numberOfQueries;
+  totalCalCLabelMMapTimingInfo /= numberOfQueries;
 
+  std::string line {"----------------------"};
   std::cout << "level:" << level << '\n';
-  std::cout << "ramTime: " << averageRamTime << '\n';
-  std::cout << "mmapTime: " << averageMMapTime << '\n';
+  std::cout << line << '\n';
+  std::cout << "ram" << '\n';
+  std::cout << totalCalCLabelRamTimingInfo << '\n';
+  std::cout << "totalTime: " << averageRamTime << '\n';
+  std::cout << line << '\n';
+  std::cout << "mmap" << '\n';
+  std::cout << totalCalCLabelMMapTimingInfo << '\n';
+  std::cout << "totalTime: " << averageMMapTime << '\n';
+  std::cout << line << '\n';
+
 }
 }
 
