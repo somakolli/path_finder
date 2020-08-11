@@ -85,6 +85,7 @@ public:
   Level labelsUntilLevel();
   auto getGraph();
   Level getMaxLevel();
+  void setLabelsUntilLevel(Level level);
 private:
   typedef std::vector<CostNode> costNodeVec_t;
 
@@ -379,6 +380,10 @@ auto HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getGraph() {
 template <typename HubLabelStore, typename Graph, typename CellIdStore>
 Level HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getMaxLevel() {
   return m_hubLabelStore->maxLevel;
+}
+template <typename HubLabelStore, typename Graph, typename CellIdStore>
+void HybridPathFinder<HubLabelStore, Graph, CellIdStore>::setLabelsUntilLevel(Level level) {
+  m_labelsUntilLevel = level;
 }
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_HYBRIDPATHFINDER_H

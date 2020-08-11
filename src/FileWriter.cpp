@@ -25,18 +25,18 @@ void FileWriter::writeGraph(const pathFinder::RamGraph &graph, const std::string
   out << j.dump();
   out.close();
 }
-void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, Level level, const std::string& graphName, const std::string& folder) {
+void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, const std::string& graphName, const std::string& folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::HubLabelDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.calculatedUntilLevel = level;
   dataConfig.forwardHublabels = {"forwardHubLabels", hubLabelStore.getForwardLabels().size(), true};
   dataConfig.backwardHublabels = { "backwardHubLabels", hubLabelStore.getBackwardLabels().size(), true};
   dataConfig.forwardHublabelOffset = { "forwardHubLabelOffset", hubLabelStore.getForwardOffset().size(), false};
   dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffset().size(), false};
   dataConfig.maxLevel = hubLabelStore.maxLevel;
+  dataConfig.calculatedUntilLevel = hubLabelStore.calculatedUntilLevel;
   // write hub label files
   Static::writeVectorToFile(hubLabelStore.getForwardLabels(), (folder + dataConfig.forwardHublabels.path).c_str());
   Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), (folder + dataConfig.backwardHublabels.path).c_str());
@@ -82,8 +82,9 @@ void FileWriter::writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
 
   if(hubLabelStore != nullptr) {
     dataInfo.hubLabelFolder = "hubLabels/";
-    writeHubLabels(*hubLabelStore, dataInfo.labelsUntilLevel, "stgt", folder + '/' + dataInfo.hubLabelFolder);
+    writeHubLabels(*hubLabelStore, "stgt", folder + '/' + dataInfo.hubLabelFolder);
     dataInfo.hubLabelsCalculated = true;
+    dataInfo.labelsUntilLevel = hubLabelStore->calculatedUntilLevel;
   }
 
   if(cellIdStore != nullptr){

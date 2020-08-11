@@ -12,6 +12,7 @@ HubLabelCreator::HubLabelCreator(
 void HubLabelCreator::create(Level untilLevel) {
   m_labelsUntilLevel = untilLevel;
   m_graph.sortByLevel(m_sortedNodes);
+  m_hubLabelStore.calculatedUntilLevel = untilLevel;
 
   // calculate node ranges with same level
   std::vector<std::pair<uint32_t, uint32_t>> sameLevelRanges;

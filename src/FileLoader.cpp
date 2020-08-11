@@ -57,8 +57,10 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   auto backwardHublabels = Static::getFromFileMMap<CostNode>(config.backwardHublabels, hubLabelFolder);
   auto forwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
   auto backwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
-  return std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
+  auto hls = std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
                                                            forwardHublabelOffset, backwardHublabelOffset));
+  hls->maxLevel = config.maxLevel;
+  return hls;
 }
 std::shared_ptr<pathFinder::HybridPFRam>
 pathFinder::FileLoader::loadHubLabelsSharedRam(const std::string &configFolder) {
@@ -116,6 +118,8 @@ std::shared_ptr<pathFinder::RamHubLabelStore> pathFinder::FileLoader::loadHubLab
   auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder);
   auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
   auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
-  return std::make_shared<RamHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
+  auto hls =  std::make_shared<RamHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
                                                            forwardHublabelOffset, backwardHublabelOffset));
+  hls->maxLevel = config.maxLevel;
+  return hls;
 }
