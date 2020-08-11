@@ -4,14 +4,16 @@
 namespace pathFinder{
 class FileLoader {
 public:
-  using HybridPF = HybridPathFinder<HubLabelStore<MmapVector, MmapVector<OffsetElement>>,
-                  CHGraph<MmapVector,
-                               MmapVector<NodeId>>,
-                       CellIdStore<MmapVector, MmapVector<OffsetElement>>>;
+  using HybridPF = HybridPathFinder<MMapHubLabelStore,MMapGraph,MMapCellIdStore>;
+  using HybridPFRam = HybridPathFinder<RamHubLabelStore,RamGraph,RamCellIdStore>;
   static std::shared_ptr<HybridPF> loadHubLabelsShared(const std::string& configFolder);
   static std::shared_ptr<MMapGraph> loadGraph(const std::string& graphFolder);
   static std::shared_ptr<MMapCellIdStore> loadCellIds(const std::string& cellIdFolder);
   static std::shared_ptr<MMapHubLabelStore> loadHubLabels(const std::string& hubLabelFolder);
+  static std::shared_ptr<HybridPFRam> loadHubLabelsSharedRam(const std::string& configFolder);
+  static std::shared_ptr<RamGraph> loadGraphRam(const std::string& graphFolder);
+  static std::shared_ptr<RamCellIdStore> loadCellIdsRam(const std::string& cellIdFolder);
+  static std::shared_ptr<RamHubLabelStore> loadHubLabelsRam(const std::string& hubLabelFolder);
 };
 }
 

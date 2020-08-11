@@ -11,7 +11,7 @@ macro(package_add_test TESTNAME)
     add_executable(${TESTNAME} ${ARGN})
     # link the Google test infrastructure, mocking library, and a default main function to
     # the test executable.  Remove g_test_main if writing your own main function.
-    target_compile_definitions(${TESTNAME} PRIVATE TEST=1)
+    target_compile_definitions(${TESTNAME} PRIVATE TEST=0)
     target_link_libraries(${TESTNAME} gtest gmock gtest_main ${Boost_LIBRARIES} nlohmann_json::nlohmann_json path_finder)
     gtest_discover_tests(${TESTNAME}
             # set a working directory so your project root so that you can find test data via paths relative to the project root

@@ -69,7 +69,7 @@ if(PACKAGE_TESTS)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
-target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(CMAKE_CXX_FLAGS "-pthread")

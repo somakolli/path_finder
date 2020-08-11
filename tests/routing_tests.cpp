@@ -31,7 +31,7 @@ TEST(RoutingTest, DistanceWorks) {
   ASSERT_EQ(22, graph.nodes.size());
 }
 TEST(RoutingTest, PathFindingWorks) {
-  std::string path = "../test-data/";
+  std::string path = "/home/sokol/Uni/path_finder/test-data/";
   Graph graph;
   GraphReader::readFmiFile(graph, path + "test.fmi");
   CHGraph chGraph;
