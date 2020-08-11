@@ -16,6 +16,7 @@ void HubLabelCreator::create(Level untilLevel) {
   // calculate node ranges with same level
   std::vector<std::pair<uint32_t, uint32_t>> sameLevelRanges;
   auto maxLevel = m_sortedNodes.begin()->level;
+  m_hubLabelStore.maxLevel = maxLevel;
   auto currentLevel = m_sortedNodes.begin()->level;
   for (auto j = 0; j < m_sortedNodes.size(); ++j) {
     auto i = j;

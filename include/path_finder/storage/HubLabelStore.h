@@ -22,6 +22,7 @@ class HubLabelStore {
   OffsetVector backwardOffset;
 public:
   int calculatedUntilLevel;
+  uint32_t maxLevel;
   explicit HubLabelStore(size_t numberOfLabels);
   HubLabelStore(CostNodeVector &forwardLabels, CostNodeVector &backwardLabels,
                 OffsetVector &forwardOffset, OffsetVector &backwardOffset);

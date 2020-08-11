@@ -1,7 +1,7 @@
 #include <fstream>
 #include <path_finder/helper/Timer.h>
 #include <path_finder/storage/FileLoader.h>
-std::shared_ptr<pathFinder::FileLoader::HybridPF>
+std::shared_ptr<pathFinder::HybridPF>
 pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)),
@@ -60,7 +60,7 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   return std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
                                                            forwardHublabelOffset, backwardHublabelOffset));
 }
-std::shared_ptr<pathFinder::FileLoader::HybridPFRam>
+std::shared_ptr<pathFinder::HybridPFRam>
 pathFinder::FileLoader::loadHubLabelsSharedRam(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)),

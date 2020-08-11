@@ -115,7 +115,7 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::HubLabelDataInfo &
   j.push_back({"forwardHublabelOffset", d.forwardHublabelOffset});
   j.push_back({"backwardHublabelOffset", d.backwardHublabelOffset});
   j.push_back({"calculatedUntilLevel", d.calculatedUntilLevel});
-
+  j.push_back({"maxLevel", d.maxLevel});
 }
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo &d) {
   from_json(j, static_cast<DataInfo&>(d));
@@ -124,6 +124,7 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo
   j.at("forwardHublabelOffset").get_to(d.forwardHublabelOffset);
   j.at("backwardHublabelOffset").get_to(d.backwardHublabelOffset);
   j.at("calculatedUntilLevel").get_to(d.calculatedUntilLevel);
+  j.at("maxLevel").get_to(d.maxLevel);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d) {
   to_json(j, static_cast<const DataInfo&>(d));

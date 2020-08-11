@@ -36,7 +36,7 @@ void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, Level lev
   dataConfig.backwardHublabels = { "backwardHubLabels", hubLabelStore.getBackwardLabels().size(), true};
   dataConfig.forwardHublabelOffset = { "forwardHubLabelOffset", hubLabelStore.getForwardOffset().size(), false};
   dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffset().size(), false};
-
+  dataConfig.maxLevel = hubLabelStore.maxLevel;
   // write hub label files
   Static::writeVectorToFile(hubLabelStore.getForwardLabels(), (folder + dataConfig.forwardHublabels.path).c_str());
   Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), (folder + dataConfig.backwardHublabels.path).c_str());

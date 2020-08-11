@@ -42,6 +42,7 @@ struct GraphDataInfo  : DataInfo{
 
 struct HubLabelDataInfo : DataInfo {
   size_t calculatedUntilLevel = -1;
+  size_t maxLevel = -1;
   BinaryFileDescription forwardHublabels;
   BinaryFileDescription forwardHublabelOffset;
   BinaryFileDescription backwardHublabels;

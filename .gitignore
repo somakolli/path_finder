@@ -3,5 +3,6 @@ cmake-build-debug/*
 *.o
 .idea/*
 test-data/test/*
+tests/testGraph/*
 
 

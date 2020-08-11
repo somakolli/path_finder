@@ -32,7 +32,7 @@ set(SOURCES
         src/HybridPathFinder.cpp
         src/Types.cpp
         src/base64.cpp
-        src/FileWriter.cpp)
+        src/FileWriter.cpp src/Benchmarker.cpp)
 
 set(INCLUDES
         include/path_finder/routing/CHDijkstra.h
@@ -66,6 +66,11 @@ if(PACKAGE_TESTS)
     enable_testing()
     include(GoogleTest)
     add_subdirectory(tests)
+endif()
+
+option(PACKAGE_BENCHMARKS "Build benchmark" ON)
+if(PACKAGE_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
