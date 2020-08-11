@@ -15,7 +15,8 @@ public:
   Benchmarker(std::shared_ptr<HybridPFRam>& pathFinderRam,
               std::shared_ptr<HybridPF>& pathFinderMMap,
               std::string  outPutPath);
-  void runPathBenchmark(uint32_t numberOfQueries);
+  void benchmarkAllLevel(uint32_t numberOfQueries);
+  void benchmarkLevel(uint32_t level, uint32_t numberOfQueries);
 private:
   std::string m_dataPath;
   std::string m_outputPath;
