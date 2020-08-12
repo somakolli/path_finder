@@ -76,7 +76,16 @@ public:
   }
 
   template <typename T>
-  static inline void writeVectorToFile(const std::vector<T>& vector,
+  static inline void writeVectorToFile(const T* data,
+                                       const size_t size,
+                                       const char *filename) {
+    FILE *file = fopen64(filename, "w+");
+    if (fwrite(data, sizeof(T), size, file) == 0)
+      std::cerr << "could not write file " << filename << std::endl;
+    fflush(file);
+  }
+  template <typename T>
+  static inline void writeVectorToFile(std::vector<T> vector,
                                        const char *filename) {
     FILE *file = fopen64(filename, "w+");
     if (fwrite(vector.data(), sizeof(T), vector.size(), file) == 0)
@@ -131,8 +140,9 @@ public:
    * @param topNode store for node id of the topNode (see details)
    * @return
    */
+   template <typename pointerType>
   static inline std::optional<pathFinder::Distance> getShortestDistance(
-      MyIterator<CostNode *> forwardLabels, MyIterator<CostNode *> backwardLabels,
+      MyIterator<pointerType> forwardLabels, MyIterator<pointerType> backwardLabels,
       NodeId &topNode) {
     Distance shortestDistance = MAX_DISTANCE;
     topNode = 0;

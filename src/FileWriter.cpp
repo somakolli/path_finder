@@ -31,17 +31,21 @@ void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, const std
   pathFinder::HubLabelDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.forwardHublabels = {"forwardHubLabels", hubLabelStore.getForwardLabels().size(), true};
-  dataConfig.backwardHublabels = { "backwardHubLabels", hubLabelStore.getBackwardLabels().size(), true};
-  dataConfig.forwardHublabelOffset = { "forwardHubLabelOffset", hubLabelStore.getForwardOffset().size(), false};
-  dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffset().size(), false};
+  dataConfig.forwardHublabels = {"forwardHubLabels", hubLabelStore.getForwardLabelsSize(), true};
+  dataConfig.backwardHublabels = { "backwardHubLabels", hubLabelStore.getBackwardLabelsSize(), true};
+  dataConfig.forwardHublabelOffset = { "forwardHubLabelOffset", hubLabelStore.getForwardOffsetSize(), false};
+  dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffsetSize(), false};
   dataConfig.maxLevel = hubLabelStore.maxLevel;
   dataConfig.calculatedUntilLevel = hubLabelStore.calculatedUntilLevel;
   // write hub label files
-  Static::writeVectorToFile(hubLabelStore.getForwardLabels(), (folder + dataConfig.forwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), (folder + dataConfig.backwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getForwardOffset(), (folder + dataConfig.forwardHublabelOffset.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardOffset(), (folder + dataConfig.backwardHublabelOffset.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getForwardLabels(), hubLabelStore.getForwardLabelsSize(),
+                            (folder + dataConfig.forwardHublabels.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), hubLabelStore.getBackwardLabelsSize(),
+                            (folder + dataConfig.backwardHublabels.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getForwardOffset(), hubLabelStore.getForwardOffsetSize(),
+                            (folder + dataConfig.forwardHublabelOffset.path).c_str());
+  Static::writeVectorToFile(hubLabelStore.getBackwardOffset(), hubLabelStore.getBackwardOffsetSize(),
+                            (folder + dataConfig.backwardHublabelOffset.path).c_str());
 
   //write config to file
   std::ofstream out(folder + "/config.json");

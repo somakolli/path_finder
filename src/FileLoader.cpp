@@ -57,8 +57,17 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   auto backwardHublabels = Static::getFromFileMMap<CostNode>(config.backwardHublabels, hubLabelFolder);
   auto forwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
   auto backwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
-  auto hls = std::make_shared<MMapHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
-                                                           forwardHublabelOffset, backwardHublabelOffset));
+
+  HubLabelStoreInfo hubLabelStoreInfo{};
+  hubLabelStoreInfo.numberOfLabels = forwardHublabelOffset.size();
+  hubLabelStoreInfo.forwardLabelSize = forwardHublabels.size();
+  hubLabelStoreInfo.backwardLabelSize = forwardHublabels.size();
+  hubLabelStoreInfo.forwardLabels = forwardHublabels.data();
+  hubLabelStoreInfo.backwardLabels = backwardHublabels.data();
+  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset.data();
+  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset.data();
+
+  auto hls = std::make_shared<MMapHubLabelStore>(HubLabelStore(hubLabelStoreInfo));
   hls->maxLevel = config.maxLevel;
   return hls;
 }
@@ -118,8 +127,17 @@ std::shared_ptr<pathFinder::RamHubLabelStore> pathFinder::FileLoader::loadHubLab
   auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder);
   auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
   auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
-  auto hls =  std::make_shared<RamHubLabelStore>(HubLabelStore(forwardHublabels, backwardHublabels,
-                                                           forwardHublabelOffset, backwardHublabelOffset));
+
+  HubLabelStoreInfo hubLabelStoreInfo{};
+  hubLabelStoreInfo.numberOfLabels = forwardHublabelOffset.size();
+  hubLabelStoreInfo.forwardLabelSize = forwardHublabels.size();
+  hubLabelStoreInfo.backwardLabelSize = forwardHublabels.size();
+  hubLabelStoreInfo.forwardLabels = forwardHublabels.data();
+  hubLabelStoreInfo.backwardLabels = backwardHublabels.data();
+  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset.data();
+  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset.data();
+
+  auto hls =  std::make_shared<RamHubLabelStore>(HubLabelStore(hubLabelStoreInfo));
   hls->maxLevel = config.maxLevel;
   return hls;
 }

@@ -2,8 +2,8 @@
 #define MASTER_ARBEIT_FILELOADER_H
 #include "path_finder/routing/HybridPathFinder.h"
 namespace pathFinder{
-using HybridPF = HybridPathFinder<MMapHubLabelStore,MMapGraph,MMapCellIdStore>;
-using HybridPFRam = HybridPathFinder<RamHubLabelStore,RamGraph,RamCellIdStore>;
+using HybridPF = HybridPathFinder<MMapGraph,MMapCellIdStore>;
+using HybridPFRam = HybridPathFinder<RamGraph,RamCellIdStore>;
 class FileLoader {
 public:
   static std::shared_ptr<HybridPF> loadHubLabelsShared(const std::string& configFolder);

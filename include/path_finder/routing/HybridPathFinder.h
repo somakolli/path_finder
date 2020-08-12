@@ -15,6 +15,7 @@
 #include "path_finder/storage/HubLabelStore.h"
 #include <path_finder/helper/Stopwatch.h>
 #include <queue>
+#include <utility>
 #include <vector>
 
 namespace pathFinder {
@@ -27,8 +28,7 @@ namespace pathFinder {
  * @tparam Graph
  * @tparam CellIdStore
  */
-template <typename HubLabelStore = HubLabelStore<std::vector>,
-          typename Graph = CHGraph<std::vector>,
+template <typename Graph = CHGraph<std::vector>,
           typename CellIdStore = CellIdStore<std::vector>>
 class HybridPathFinder : public PathFinderBase {
 public:
@@ -43,7 +43,7 @@ public:
   HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<Graph> graph,
                    std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel,
                    bool hubLabelsCalculated = false, bool cellIdsCalculated = false)
-      : m_hubLabelStore(hubLabelStore), m_graph(graph),
+      : m_hubLabelStore(std::move(hubLabelStore)), m_graph(graph),
         m_cellIdStore(cellIdStore), m_labelsUntilLevel(labelsUntilLevel),
         m_hubLabelsCalculated(hubLabelsCalculated),
         m_cellIdsCalculated(cellIdsCalculated){
@@ -154,9 +154,9 @@ private:
   bool m_hubLabelsCalculated = false;
 };
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
+template <typename Graph, typename CellIdStore>
 RoutingResult
-HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
+HybridPathFinder<Graph, CellIdStore>::getShortestPath(
     NodeId source, NodeId target) {
   RoutingResult routingResult;
   Stopwatch stopwatch;
@@ -222,9 +222,9 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   return routingResult;
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
+template <typename Graph, typename CellIdStore>
 RoutingResult
-HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
+HybridPathFinder<Graph, CellIdStore>::getShortestPath(
     LatLng source, LatLng target) {
   Stopwatch stopwatch;
   NodeId sourceId = m_graph->getNodeIdFor(source);
@@ -235,9 +235,9 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPath(
   return routingResult;
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
+template <typename Graph, typename CellIdStore>
 std::vector<CostNode>
-HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
+HybridPathFinder<Graph, CellIdStore>::calcLabelHybrid(
     NodeId source, EdgeDirection direction, CalcLabelTimingInfo& calcLabelTimingInfo) {
   Stopwatch stopwatch;
   if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
@@ -311,8 +311,8 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::calcLabelHybrid(
   return settledNodes;
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-std::vector<CHEdge> HybridPathFinder<HubLabelStore, Graph, CellIdStore>::
+template <typename Graph, typename CellIdStore>
+std::vector<CHEdge> HybridPathFinder<Graph, CellIdStore>::
     getEdgeVectorFromNodeIdPath(const std::vector<NodeId> &path,
                                 EdgeDirection direction) {
   std::vector<CHEdge> edgePath;
@@ -330,8 +330,8 @@ std::vector<CHEdge> HybridPathFinder<HubLabelStore, Graph, CellIdStore>::
   return edgePath;
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-void HybridPathFinder<HubLabelStore, Graph, CellIdStore>::addCellIds(
+template <typename Graph, typename CellIdStore>
+void HybridPathFinder<Graph, CellIdStore>::addCellIds(
     const CHEdge &edge, std::vector<CellId_t> &result) {
   // edge always needs to be in forward order
   auto edgeId = m_graph->getEdgePosition(edge, EdgeDirection::FORWARD);
@@ -344,9 +344,9 @@ void HybridPathFinder<HubLabelStore, Graph, CellIdStore>::addCellIds(
   }
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
+template <typename Graph, typename CellIdStore>
 std::vector<NodeId>
-HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPathFromLabel(
+HybridPathFinder<Graph, CellIdStore>::getShortestPathFromLabel(
     const costNodeVec_t &label, NodeId topNodeId, NodeId sourceId) {
   std::vector<NodeId> path;
   std::optional<CostNode> topNode = findElementInLabel(topNodeId, label);
@@ -363,9 +363,9 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getShortestPathFromLabel(
   return path;
 }
 
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
+template <typename Graph, typename CellIdStore>
 std::optional<CostNode>
-HybridPathFinder<HubLabelStore, Graph, CellIdStore>::findElementInLabel(
+HybridPathFinder<Graph, CellIdStore>::findElementInLabel(
     NodeId nodeId, const costNodeVec_t &label) {
   // TODO: binary search here with std::lower_bound
   for (auto l : label) {
@@ -374,24 +374,24 @@ HybridPathFinder<HubLabelStore, Graph, CellIdStore>::findElementInLabel(
   }
   return std::nullopt;
 }
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-size_t HybridPathFinder<HubLabelStore, Graph, CellIdStore>::graphNodeSize() {
+template <typename Graph, typename CellIdStore>
+size_t HybridPathFinder<Graph, CellIdStore>::graphNodeSize() {
   return m_graph->getNodes().size();
 }
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-Level HybridPathFinder<HubLabelStore, Graph, CellIdStore>::labelsUntilLevel() {
+template <typename Graph, typename CellIdStore>
+Level HybridPathFinder<Graph, CellIdStore>::labelsUntilLevel() {
   return m_labelsUntilLevel;
 }
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-auto HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getGraph() {
+template <typename Graph, typename CellIdStore>
+auto HybridPathFinder<Graph, CellIdStore>::getGraph() {
   return m_graph;
 }
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-Level HybridPathFinder<HubLabelStore, Graph, CellIdStore>::getMaxLevel() {
+template <typename Graph, typename CellIdStore>
+Level HybridPathFinder<Graph, CellIdStore>::getMaxLevel() {
   return m_hubLabelStore->maxLevel;
 }
-template <typename HubLabelStore, typename Graph, typename CellIdStore>
-void HybridPathFinder<HubLabelStore, Graph, CellIdStore>::setLabelsUntilLevel(Level level) {
+template <typename Graph, typename CellIdStore>
+void HybridPathFinder<Graph, CellIdStore>::setLabelsUntilLevel(Level level) {
   m_labelsUntilLevel = level;
 }
 } // namespace pathFinder

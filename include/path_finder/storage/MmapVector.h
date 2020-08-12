@@ -30,6 +30,7 @@ public:
   size_t size();
 
   void push_back(T element);
+  T *data();
 };
 
 template <typename T, typename Allocator>
@@ -72,6 +73,7 @@ size_t MmapVector<T, Allocator>::size() {
 }
 template <typename T, typename Allocator>
 MmapVector<T, Allocator>::MmapVector() {}
+template <typename T, typename Allocator> T *MmapVector<T, Allocator>::data() { return _data; }
 
 template <typename T, typename Allocator>
 void MmapVector<T, Allocator>::push_back(T element) {

@@ -1,9 +1,11 @@
 //
 // Created by sokol on 11.08.20.
 //
-#include <path_finder/helper/Benchmarker.h>
 #include <iostream>
+#include <path_finder/helper/Benchmarker.h>
+#include <path_finder/storage/GraphReader.h>
 int main(int argc, char* argv[]) {
+
   std::string dataPath = "/home/sokol/Uni/master-arbeit/build/data";
   int level = -1;
   int numberOfQueries = 100;
@@ -25,5 +27,6 @@ int main(int argc, char* argv[]) {
     benchmarker.benchmarkLevel(level, numberOfQueries);
   else
     benchmarker.benchmarkAllLevel(numberOfQueries);
+
   return 0;
 }
