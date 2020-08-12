@@ -110,8 +110,7 @@ public:
   LatLng getLatLng(NodeId nodeId) const;
 };
 // used for dijkstra PQ
-class CostNode {
-public:
+struct CostNode {
   NodeId id;
   Distance cost;
   NodeId previousNode;

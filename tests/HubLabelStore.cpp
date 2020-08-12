@@ -27,8 +27,11 @@ TEST(HubLabelStore, StoreAndRetrieveTest) {
     };
     hubLabelStore.store(vec1, 0, pathFinder::EdgeDirection::FORWARD);
     hubLabelStore.store(vec2, 1, pathFinder::EdgeDirection::BACKWARD);
-    auto resultVec1 = hubLabelStore.retrieve(0, pathFinder::EdgeDirection::FORWARD);
-    auto resultVec2 = hubLabelStore.retrieve(1, pathFinder::EdgeDirection::BACKWARD);
+
+    std::vector<pathFinder::CostNode> resultVec1;
+    std::vector<pathFinder::CostNode> resultVec2;
+    hubLabelStore.retrieve(0, pathFinder::EdgeDirection::FORWARD, resultVec1);
+    hubLabelStore.retrieve(1, pathFinder::EdgeDirection::BACKWARD, resultVec2);
     int i = 0;
     for(pathFinder::CostNode costNode : resultVec1) {
       ASSERT_EQ(vec1[i++],costNode);
@@ -57,8 +60,10 @@ TEST(HubLabelStore, StoreAndRetrieveMmap) {
     pathFinder::FileWriter::writeHubLabels(hubLabelStore, "testGraph", "testGraph/");
     auto mmapHubLabelStore = pathFinder::FileLoader::loadHubLabels("testGraph");
 
-    auto resultVec1 = mmapHubLabelStore->retrieve(0, pathFinder::EdgeDirection::FORWARD);
-    auto resultVec2 = mmapHubLabelStore->retrieve(1, pathFinder::EdgeDirection::BACKWARD);
+    pathFinder::costNodeVec_t resultVec1;
+    pathFinder::costNodeVec_t resultVec2;
+    mmapHubLabelStore->retrieve(0, pathFinder::EdgeDirection::FORWARD, resultVec1);
+    mmapHubLabelStore->retrieve(1, pathFinder::EdgeDirection::BACKWARD, resultVec2);
     int i = 0;
     for(pathFinder::CostNode costNode : resultVec1) {
       ASSERT_EQ(vec1[i++],costNode);

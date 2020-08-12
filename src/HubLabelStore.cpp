@@ -39,14 +39,16 @@ void HubLabelStore::store(
       forwardOffset[id] =
           OffsetElement{forwardLabelSize, (uint32_t)label.size()};
       forwardLabels = (CostNode*) std::realloc(forwardLabels, sizeof(CostNode) * (forwardLabelSize + label.size()));
-      std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-      forwardLabelSize += label.size();
+      //std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      for(const auto& entry : label)
+        forwardLabels[forwardLabelSize++] = entry;
     } else {
       backwardOffset[id] =
           OffsetElement{backwardLabelSize, (uint32_t)label.size()};
       backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + label.size()));
-      std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-      backwardLabelSize += label.size();
+      //std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      for(const auto& entry : label)
+        backwardLabels[backwardLabelSize++] = entry;
     }
   }
 }
@@ -60,7 +62,7 @@ void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, std::vector<Cos
     auto labelEnd = offsetElement.position + offsetElement.size;
     for(auto i = offsetElement.position; i < labelEnd; ++i) {
       CostNode costNode = forwardLabels[i];
-      storeVec.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
+      storeVec.emplace_back(costNode);
     }
   } else if(direction == EdgeDirection::BACKWARD) {
     auto offsetElement = backwardOffset[id];
@@ -68,7 +70,7 @@ void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, std::vector<Cos
     auto labelEnd = offsetElement.position + offsetElement.size;
     for(auto i = offsetElement.position; i < labelEnd; ++i) {
       CostNode costNode = backwardLabels[i];
-      storeVec.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
+      storeVec.emplace_back(costNode);
     }
   }
 }

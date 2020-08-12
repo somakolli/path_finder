@@ -53,11 +53,11 @@ void HubLabelCreator::constructAllLabels(
 
 void HubLabelCreator::processRangeParallel(
     const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
-#pragma omp parallel for
+//#pragma omp parallel for num_threads(2)
   for (auto i = range.first; i < range.second; ++i) {
     auto id = m_sortedNodes[i].id;
     auto label = calcLabel(id, edgeDirection);
-#pragma omp critical
+//#pragma omp critical
     m_hubLabelStore->store(label, id,
                            edgeDirection);
   }
