@@ -241,7 +241,8 @@ HybridPathFinder<Graph, CellIdStore>::calcLabelHybrid(
     NodeId source, EdgeDirection direction, CalcLabelTimingInfo& calcLabelTimingInfo) {
   Stopwatch stopwatch;
   if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
-    const auto &sourceLabel = m_hubLabelStore->retrieve(source, direction);
+    std::vector<CostNode> sourceLabel;
+    m_hubLabelStore->retrieve(source, direction, sourceLabel);
     costNodeVec_t vec;
     for (const auto entry : sourceLabel)
       vec.push_back(entry);
@@ -294,7 +295,8 @@ HybridPathFinder<Graph, CellIdStore>::calcLabelHybrid(
     for (auto id : labelsToCollect) {
       stopwatch1.reset();
       costNodeVec_t targetLabel;
-      auto label = m_hubLabelStore->retrieve(id, direction);
+      costNodeVec_t label;
+       m_hubLabelStore->retrieve(id, direction, label);
       for (const auto &entry : label)
         targetLabel.push_back(entry);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();

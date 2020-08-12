@@ -44,35 +44,33 @@ void HubLabelStore::store(
     } else {
       backwardOffset[id] =
           OffsetElement{backwardLabelSize, (uint32_t)label.size()};
-      backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + forwardLabelSize));
+      backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + label.size()));
       std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
       backwardLabelSize += label.size();
     }
   }
 }
 
-std::vector<CostNode> HubLabelStore::retrieve(NodeId id, EdgeDirection direction) {
-  std::vector<CostNode> returnVec;
+void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, std::vector<CostNode>& storeVec) {
   if(id > numberOfLabels - 1)
     throw std::runtime_error("[HublabelStore] node id does not exist.");
   if (direction == EdgeDirection::FORWARD) {
     auto offsetElement = forwardOffset[id];
-    returnVec.reserve(offsetElement.size);
-    auto i = offsetElement.position;
+    storeVec.reserve(offsetElement.size);
     auto labelEnd = offsetElement.position + offsetElement.size;
-    for(; i < labelEnd; ++i) {
-      returnVec.emplace_back(forwardLabels[i]);
+    for(auto i = offsetElement.position; i < labelEnd; ++i) {
+      CostNode costNode = forwardLabels[i];
+      storeVec.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
     }
-  } else {
+  } else if(direction == EdgeDirection::BACKWARD) {
     auto offsetElement = backwardOffset[id];
-    returnVec.reserve(offsetElement.size);
-    auto i = offsetElement.position;
+    storeVec.reserve(offsetElement.size);
     auto labelEnd = offsetElement.position + offsetElement.size;
-    for(; i < labelEnd; ++i) {
-      returnVec.emplace_back(backwardLabels[i]);
+    for(auto i = offsetElement.position; i < labelEnd; ++i) {
+      CostNode costNode = backwardLabels[i];
+      storeVec.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
     }
   }
-  return returnVec;
 }
 
 size_t HubLabelStore::getNumberOfLabels() const  {
@@ -145,15 +143,17 @@ std::string HubLabelStore::printStore() {
   std::stringstream ss;
 
   for(NodeId i = 0; i < numberOfLabels; ++i) {
-    auto forwardVec = retrieve(i, EdgeDirection::FORWARD);
-    auto backwardVec = retrieve(i, EdgeDirection::BACKWARD);
+    std::vector<CostNode> forwardVec;
+    std::vector<CostNode> backwardVec;
+    retrieve(i, EdgeDirection::FORWARD, forwardVec);
+    retrieve(i, EdgeDirection::BACKWARD, backwardVec);
     ss << "label for id: " << i << '\n';
     ss << "forward:" << '\n';
-    for(const auto& [id, cost , previousNode]: retrieve(i, EdgeDirection::FORWARD)) {
+    for(const auto& [id, cost , previousNode]: forwardVec) {
       ss << id << ' ' << cost << ' ' << previousNode << '\n';
     }
     ss << "backward:" << '\n';
-    for(const auto& [id, cost , previousNode]: retrieve(i, EdgeDirection::BACKWARD)) {
+    for(const auto& [id, cost , previousNode]: backwardVec) {
       ss << id << ' ' << cost << ' ' << previousNode << '\n';
     }
   }

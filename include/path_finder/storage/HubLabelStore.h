@@ -44,7 +44,7 @@ public:
   void store(const std::vector<CostNode> &label, NodeId id,
              EdgeDirection direction);
 
-  std::vector<CostNode> retrieve(NodeId id, EdgeDirection direction);
+  void retrieve(NodeId id, EdgeDirection direction, std::vector<CostNode>& storeVec);
   size_t getNumberOfLabels() const;
   CostNode* getForwardLabels();
   CostNode* getForwardLabels() const;

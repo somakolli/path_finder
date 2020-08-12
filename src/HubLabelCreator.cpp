@@ -53,13 +53,15 @@ void HubLabelCreator::constructAllLabels(
 
 void HubLabelCreator::processRangeParallel(
     const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(static) num_threads(2)
   for (auto i = range.first; i < range.second; ++i) {
     auto id = m_sortedNodes[i].id;
     auto label = calcLabel(id, edgeDirection);
 #pragma omp critical
+    {
     m_hubLabelStore->store(label, id,
-                          edgeDirection);
+                           edgeDirection);
+    }
   }
 }
 
@@ -72,7 +74,8 @@ HubLabelCreator::calcLabel(NodeId nodeId,
   label.reserve(100);
   for (const auto &edge : m_graph.edgesFor(nodeId, direction)) {
     if (level < m_graph.getLevel(edge.target)) {
-      auto targetLabel = m_hubLabelStore->retrieve(edge.target, direction);
+      std::vector<CostNode> targetLabel;
+      m_hubLabelStore->retrieve(edge.target, direction, targetLabel);
       newLabel.clear();
       newLabel.reserve(targetLabel.size() + label.size());
       Static::merge(label.begin(), label.end(), targetLabel.begin(),
@@ -95,8 +98,8 @@ void HubLabelCreator::selfPrune(costNodeVec_t &label,
   bool forward = (direction == EdgeDirection::FORWARD);
   for (int i = (int)label.size() - 1; i >= 0; --i) {
     auto &[id, cost, previousNode] = label[i];
-    const auto &otherLabels =
-        m_hubLabelStore->retrieve(id, (EdgeDirection)!direction);
+    std::vector<CostNode> otherLabels;
+    m_hubLabelStore->retrieve(id, (EdgeDirection)!direction, otherLabels);
     std::optional<Distance> d = forward ? getShortestDistance(nodeId, id)
                                         : getShortestDistance(id, nodeId);
     if (d.has_value() && d.value() < cost) {
@@ -111,8 +114,10 @@ HubLabelCreator::getShortestDistance(NodeId source, NodeId target) {
   if (source >= m_graph.getNodes().size() ||
       target >= m_graph.getNodes().size())
     return std::nullopt;
-  auto forwardLabels = m_hubLabelStore->retrieve(source, EdgeDirection::FORWARD);
-  auto backwardLabels = m_hubLabelStore->retrieve(target, EdgeDirection::BACKWARD);
+  std::vector<CostNode> forwardLabels;
+  std::vector<CostNode> backwardLabels;
+  m_hubLabelStore->retrieve(source, EdgeDirection::FORWARD, forwardLabels);
+  m_hubLabelStore->retrieve(target, EdgeDirection::BACKWARD, backwardLabels);
   NodeId topNode;
   auto d = Static::getShortestDistance(
       MyIterator(forwardLabels.begin(), forwardLabels.end()),
