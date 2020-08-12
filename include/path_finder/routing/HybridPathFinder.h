@@ -29,7 +29,7 @@ namespace pathFinder {
  * @tparam CellIdStore
  */
 template <typename Graph = CHGraph<std::vector>,
-          typename CellIdStore = CellIdStore<std::vector>>
+          typename CellIdStore = CellIdStore<CellId_t>>
 class HybridPathFinder : public PathFinderBase {
 public:
   /**

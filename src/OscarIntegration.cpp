@@ -3,5 +3,5 @@
 //
 #include "path_finder/helper/OscarIntegration.h"
 pathFinder::CellIdDiskWriter::CellIdDiskWriter(
-    pathFinder::CellIdStore<std::vector> &cellIdStore) :_cellIdStore(cellIdStore){
+    pathFinder::CellIdStore<CellId_t> &cellIdStore) :_cellIdStore(cellIdStore){
 }

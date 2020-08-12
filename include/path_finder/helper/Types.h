@@ -12,10 +12,10 @@
 namespace pathFinder {
 using costNodeVec_t = std::vector<CostNode>;
 using RamGraph = CHGraph<std::vector, std::vector<NodeId>>;
-using RamCellIdStore = CellIdStore<std::vector, std::vector<OffsetElement>, unsigned int>;
+using RamCellIdStore = CellIdStore<CellId_t>;
 using RamHubLabelStore = HubLabelStore;
 using MMapGraph = CHGraph<MmapVector, MmapVector<NodeId>>;
-using MMapCellIdStore = CellIdStore<MmapVector, MmapVector<OffsetElement>, unsigned int>;
+using MMapCellIdStore = CellIdStore<CellId_t>;
 using MMapHubLabelStore = HubLabelStore;
 struct CalcLabelTimingInfo{
   double mergeTime = 0;

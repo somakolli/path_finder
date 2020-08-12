@@ -9,9 +9,9 @@
 namespace pathFinder{
 class CellIdDiskWriter {
 private:
-  CellIdStore<std::vector>& _cellIdStore;
+  CellIdStore<CellId_t>& _cellIdStore;
 public:
-  CellIdDiskWriter(CellIdStore<std::vector>& cellIdStore);
+  CellIdDiskWriter(CellIdStore<CellId_t>& cellIdStore);
   void operator()(const NodeId i, const std::vector<unsigned int>& cellIds) {
     _cellIdStore.storeCellIds(i, cellIds);
   }

@@ -33,20 +33,21 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
   }
 
   BinaryFileDescription ids{};
-  ids.size = store.cellIdsVec().size();
+  ids.size = store.cellIdSize();
   ids.path = "ids";
 
   BinaryFileDescription offset{};
   offset.size = store.offsetSize();
   offset.path = "offset";
 
-  Static::writeVectorToFile(store.cellIdsVec(), (ids.path).c_str());
-  Static::writeVectorToFile(store.offsetVec(), (offset.path).c_str());
+  Static::writeVectorToFile(store.cellIdsVec(), store.cellIdSize(), (ids.path).c_str());
+  Static::writeVectorToFile(store.offsetVec(), store.offsetSize(), (offset.path).c_str());
 
   auto cellIds = Static::getFromFileMMap<CellId_t>(ids, "");
   auto cellIdsOffset = Static::getFromFileMMap<OffsetElement>(offset, "");
 
-  auto mmapStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds, cellIdsOffset));
+  auto mmapStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds.data(), cellIds.size(),
+                                                                 cellIdsOffset.data(), cellIdsOffset.size()));
   {
     int i = 0;
     for (auto cellId : mmapStore->getCellIds(0)) {

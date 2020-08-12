@@ -64,8 +64,8 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   dataConfig.timestamp = Static::getTimeStampString();
   dataConfig.cellIds = {"cellIds", cellIdStore.cellIdSize()};
   dataConfig.cellIdsOffset = {"cellIdsOffset", cellIdStore.offsetSize()};
-  Static::writeVectorToFile(cellIdStore.cellIdsVec(), (folder + dataConfig.cellIds.path).c_str());
-  Static::writeVectorToFile(cellIdStore.offsetVec(), (folder + dataConfig.cellIdsOffset.path).c_str());
+  Static::writeVectorToFile(cellIdStore.cellIdsVec(), cellIdStore.cellIdSize(),(folder + dataConfig.cellIds.path).c_str());
+  Static::writeVectorToFile(cellIdStore.offsetVec(), cellIdStore.offsetSize(), (folder + dataConfig.cellIdsOffset.path).c_str());
   //write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;

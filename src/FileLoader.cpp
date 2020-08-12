@@ -44,7 +44,8 @@ std::shared_ptr<pathFinder::MMapCellIdStore> pathFinder::FileLoader::loadCellIds
   auto config = pathFinder::DataConfig::getFromFile<CellDataInfo>(str);
   auto cellIds = Static::getFromFileMMap<CellId_t>(config.cellIds, cellIdFolder);
   auto cellIdsOffset = Static::getFromFileMMap<OffsetElement>(config.cellIdsOffset, cellIdFolder);
-  auto cellIdStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds, cellIdsOffset));
+  auto cellIdStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds.data(), cellIds.size(),
+                                                                   cellIdsOffset.data(), cellIdsOffset.size()));
   return cellIdStore;
 }
 std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLabels(const std::string &hubLabelFolder) {
@@ -114,7 +115,8 @@ std::shared_ptr<pathFinder::RamCellIdStore> pathFinder::FileLoader::loadCellIdsR
   auto config = pathFinder::DataConfig::getFromFile<CellDataInfo>(str);
   auto cellIds = Static::getFromFile<CellId_t>(config.cellIds, cellIdFolder);
   auto cellIdsOffset = Static::getFromFile<OffsetElement>(config.cellIdsOffset, cellIdFolder);
-  auto cellIdStore = std::make_shared<RamCellIdStore>(CellIdStore(cellIds, cellIdsOffset));
+  auto cellIdStore = std::make_shared<RamCellIdStore>(CellIdStore(cellIds.data(), cellIds.size(),
+                                                                  cellIdsOffset.data(), cellIdsOffset.size()));
   return cellIdStore;
 }
 std::shared_ptr<pathFinder::RamHubLabelStore> pathFinder::FileLoader::loadHubLabelsRam(const std::string &hubLabelFolder) {
