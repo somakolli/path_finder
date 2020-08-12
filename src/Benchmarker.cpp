@@ -42,9 +42,10 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
     try {
+      m_pathFinderMMap->setLabelsUntilLevel(level);
+      auto mmapResult = m_pathFinderMMap->getShortestPath(sourceId, targetId);
       m_pathFinderRam->setLabelsUntilLevel(level);
       auto ramResult = m_pathFinderRam->getShortestPath(sourceId, targetId);
-      auto mmapResult = m_pathFinderMMap->getShortestPath(sourceId, targetId);
       totalRamTime += ramResult.distanceTime;
       totalMMapTime += mmapResult.distanceTime;
       totalCalCLabelRamTimingInfo += ramResult.calcLabelTimingInfo;
