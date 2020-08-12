@@ -39,16 +39,14 @@ void HubLabelStore::store(
       forwardOffset[id] =
           OffsetElement{forwardLabelSize, (uint32_t)label.size()};
       forwardLabels = (CostNode*) std::realloc(forwardLabels, sizeof(CostNode) * (forwardLabelSize + label.size()));
-      //std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-      for(const auto& entry : label)
-        forwardLabels[forwardLabelSize++] = entry;
+      std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      forwardLabelSize += label.size();
     } else {
       backwardOffset[id] =
           OffsetElement{backwardLabelSize, (uint32_t)label.size()};
       backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + label.size()));
-      //std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-      for(const auto& entry : label)
-        backwardLabels[backwardLabelSize++] = entry;
+      std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      backwardLabelSize += label.size();
     }
   }
 }
