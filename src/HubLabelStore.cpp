@@ -5,31 +5,49 @@
 #include "path_finder/storage/HubLabelStore.h"
 #include <cstring>
 #include <memory>
+#include <path_finder/helper/Static.h>
 #include <sstream>
+#include <utility>
 
 namespace pathFinder {
-HubLabelStore::HubLabelStore(size_t numberOfLabels) {
+HubLabelStore::HubLabelStore(size_t numberOfLabels, bool mmap, std::string folder) {
   forwardOffset = (OffsetElement*) std::calloc( numberOfLabels , sizeof(OffsetElement));
   backwardOffset = (OffsetElement*) std::calloc( numberOfLabels , sizeof(OffsetElement));
   backwardLabels = nullptr;
   forwardLabels = nullptr;
   this->numberOfLabels = numberOfLabels;
+  _mmap = mmap;
+  _folder = std::move(folder);
+  if(mmap) {
+    std::string command = "mkdir " + _folder;
+    system(command.c_str());
+    command = "touch " + _folder + "/forwardHubLabels";
+    system(command.c_str());
+    command = "touch " + _folder + "/backwardHubLabels";
+    system(command.c_str());
+    command = "touch " + _folder + "/forwardHubLabelOffset";
+    system(command.c_str());
+    command = "touch " + _folder + "/backwardHubLabelOffset";
+    system(command.c_str());
+  }
 }
 
 void HubLabelStore::store(
     const std::vector<CostNode> &label, NodeId id, EdgeDirection direction) {
-  if (direction == EdgeDirection::FORWARD) {
-    forwardOffset[id] =
-        OffsetElement{forwardLabelSize, (uint32_t)label.size()};
-    forwardLabels = (CostNode*) std::realloc(forwardLabels, sizeof(CostNode) * (forwardLabelSize + label.size()));
-    std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-    forwardLabelSize += label.size();
-  } else {
-    backwardOffset[id] =
-        OffsetElement{backwardLabelSize, (uint32_t)label.size()};
-    backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + forwardLabelSize));
-    std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
-    backwardLabelSize += label.size();
+  if(!_mmap) {
+    if (direction == EdgeDirection::FORWARD) {
+      forwardOffset[id] =
+          OffsetElement{forwardLabelSize, (uint32_t)label.size()};
+      forwardLabels = (CostNode*) std::realloc(forwardLabels, sizeof(CostNode) * (forwardLabelSize + label.size()));
+      std::memcpy(forwardLabels + forwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      forwardLabelSize += label.size();
+    } else {
+      backwardOffset[id] =
+          OffsetElement{backwardLabelSize, (uint32_t)label.size()};
+      backwardLabels = (CostNode*) std::realloc(backwardLabels, sizeof(CostNode) * (backwardLabelSize + forwardLabelSize));
+      std::memcpy(backwardLabels + backwardLabelSize, label.data(), sizeof(CostNode) * label.size());
+      backwardLabelSize += label.size();
+    }
   }
 }
 
@@ -112,10 +130,12 @@ size_t HubLabelStore::getSpaceConsumption() {
          backwardLabelSize * sizeof(CostNode);
 }
 HubLabelStore::~HubLabelStore() {
+  /*std::cout << "[HubLabelStore] destruct" << '\n';
   free(forwardLabels);
   free(backwardLabels);
   free(forwardOffset);
   free(backwardOffset);
+   */
 }
 size_t HubLabelStore::getForwardLabelsSize() const { return forwardLabelSize; }
 size_t HubLabelStore::getBackwardLabelsSize() const { return backwardLabelSize; }

@@ -31,10 +31,12 @@ private:
   size_t forwardLabelSize = 0;
   size_t backwardLabelSize = 0;
   size_t numberOfLabels;
+  bool _mmap = false;
+  std::string _folder = "";
 public:
   int calculatedUntilLevel;
   uint32_t maxLevel;
-  explicit HubLabelStore(size_t numberOfLabels);
+  explicit HubLabelStore(size_t numberOfLabels, bool mmap = false, std::string folder = "hubLabels");
   static std::shared_ptr<HubLabelStore> makeShared(size_t numberOfLabels);
   ~HubLabelStore();
   explicit HubLabelStore(HubLabelStoreInfo hubLabelStoreInfo);
