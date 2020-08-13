@@ -3,8 +3,10 @@
 //
 #include <path_finder/helper/Benchmarker.h>
 
+#include <fstream>
 #include <random>
 #include <utility>
+#include <zconf.h>
 
 namespace pathFinder{
 [[maybe_unused]] Benchmarker::Benchmarker(const std::string &dataPath, std::string outPutPath):
@@ -17,19 +19,23 @@ namespace pathFinder{
                          std::string  outPutPath)
                         : m_pathFinderMMap(pathFinderMMap), m_pathFinderRam(pathFinderRam), m_outputPath(std::move(outPutPath))
 {}
-void Benchmarker::benchmarkAllLevel(uint32_t numberOfQueries) {
-  std::random_device rd; // obtain a random number from hardware
-  std::mt19937 gen(rd()); // seed the generator
+void Benchmarker::benchmarkAllLevel(uint32_t numberOfQueries,
+            std::vector<BenchResult>& ramResult,std::vector<BenchResult>& mmapResult) {
   uint32_t numberOfNodes = m_pathFinderRam->graphNodeSize();
   std::uniform_int_distribution<> distr(0, numberOfNodes-1);
   auto maxLevel = m_pathFinderRam->getMaxLevel();
-  auto labelsUntilLevel = m_pathFinderRam->labelsUntilLevel(); // define the range
+  auto labelsUntilLevel = m_pathFinderRam->labelsUntilLevel();
   for(int level = maxLevel; level >= labelsUntilLevel; --level) {
-    benchmarkLevel(level, numberOfQueries);
+    BenchResult ramResultForOneLevel;
+    BenchResult mmapResultForOneLevel;
+    benchmarkLevel(level, numberOfQueries, ramResultForOneLevel, mmapResultForOneLevel);
+    ramResult.push_back(ramResultForOneLevel);
+    mmapResult.push_back(mmapResultForOneLevel);
   }
 
 }
-void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
+void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries,
+                                 BenchResult& ramResult, BenchResult& mmapResult) {
   std::random_device rd; // obtain a random number from hardware
   std::mt19937 gen(rd()); // seed the generator
   uint32_t numberOfNodes = m_pathFinderRam->graphNodeSize();
@@ -42,22 +48,35 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
     try {
-      m_pathFinderMMap->setLabelsUntilLevel(level);
-      auto mmapResult = m_pathFinderMMap->getShortestPath(sourceId, targetId);
-      m_pathFinderRam->setLabelsUntilLevel(level);
-      auto ramResult = m_pathFinderRam->getShortestPath(sourceId, targetId);
-      totalRamTime += ramResult.distanceTime;
-      totalMMapTime += mmapResult.distanceTime;
-      totalCalCLabelRamTimingInfo += ramResult.calcLabelTimingInfo;
-      totalCalCLabelMMapTimingInfo += mmapResult.calcLabelTimingInfo;
-    } catch (const std::runtime_error& error) {
-      // std::cout << error.what() << '\n';
+      m_pathFinderMMap->setLabelsUntilLevel((Level)level);
+      auto mmapResultReturn = m_pathFinderMMap->getShortestPath(sourceId, targetId);
+      dropCaches();
+      m_pathFinderRam->setLabelsUntilLevel((Level)level);
+      auto ramResultReturn = m_pathFinderRam->getShortestPath(sourceId, targetId);
+      dropCaches();
+      totalRamTime += ramResultReturn.distanceTime;
+      totalMMapTime += mmapResultReturn.distanceTime;
+      totalCalCLabelRamTimingInfo += ramResultReturn.calcLabelTimingInfo;
+      totalCalCLabelMMapTimingInfo += mmapResultReturn.calcLabelTimingInfo;
+    } catch (const std::runtime_error& e) {
+
     }
   }
   double averageRamTime = totalRamTime / numberOfQueries;
   double averageMMapTime = totalMMapTime / numberOfQueries;
   totalCalCLabelRamTimingInfo /= numberOfQueries;
   totalCalCLabelMMapTimingInfo /= numberOfQueries;
+
+  RoutingResult mmapAverageRoutingResult{};
+  mmapAverageRoutingResult.calcLabelTimingInfo = totalCalCLabelMMapTimingInfo;
+  mmapAverageRoutingResult.distanceTime = averageMMapTime;
+
+  RoutingResult ramAverageRoutingResult{};
+  ramAverageRoutingResult.calcLabelTimingInfo = totalCalCLabelRamTimingInfo;
+  ramAverageRoutingResult.distanceTime = averageRamTime;
+
+  mmapResult = std::make_pair(level , mmapAverageRoutingResult);
+  ramResult = std::make_pair(level , ramAverageRoutingResult);
 
   std::string line {"----------------------"};
   std::cout << "level:" << level << '\n';
@@ -71,6 +90,12 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
   std::cout << "totalTime: " << averageMMapTime << '\n';
   std::cout << line << '\n';
 
+}
+void Benchmarker::dropCaches() {
+  sync();
+
+  std::ofstream ofs("/proc/sys/vm/drop_caches");
+  ofs << "3" << std::endl;
 }
 }
 

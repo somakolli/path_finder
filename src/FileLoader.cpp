@@ -16,7 +16,7 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   if(config.hubLabelsCalculated)
     hubLabelStore = loadHubLabels(configFolder + "/hubLabels/");
 
-  return std::make_shared<HybridPF>(hubLabelStore, chGraph, cellIdStore, config.labelsUntilLevel,
+  return std::make_shared<HybridPF>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
                                              config.hubLabelsCalculated, config.cellIdsCalculated);
 }
 std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
@@ -67,9 +67,10 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   hubLabelStoreInfo.backwardLabels = backwardHublabels.data();
   hubLabelStoreInfo.forwardOffset = forwardHublabelOffset.data();
   hubLabelStoreInfo.backwardOffset = backwardHublabelOffset.data();
-
+  hubLabelStoreInfo.calculatedUntilLevel = config.calculatedUntilLevel;
   auto hls = std::make_shared<MMapHubLabelStore>(hubLabelStoreInfo);
   hls->maxLevel = config.maxLevel;
+  hls->calculatedUntilLevel = config.calculatedUntilLevel;
   return hls;
 }
 std::shared_ptr<pathFinder::HybridPFRam>
@@ -87,7 +88,7 @@ pathFinder::FileLoader::loadHubLabelsSharedRam(const std::string &configFolder) 
   if(config.hubLabelsCalculated)
     hubLabelStore = loadHubLabelsRam(configFolder + "/hubLabels/");
 
-  return std::make_shared<HybridPFRam>(hubLabelStore, chGraph, cellIdStore, config.labelsUntilLevel,
+  return std::make_shared<HybridPFRam>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
                                              config.hubLabelsCalculated, config.cellIdsCalculated);
 }
 std::shared_ptr<pathFinder::RamGraph> pathFinder::FileLoader::loadGraphRam(const std::string &graphFolder) {
@@ -125,19 +126,20 @@ std::shared_ptr<pathFinder::RamHubLabelStore> pathFinder::FileLoader::loadHubLab
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HubLabelDataInfo>(str);
-  auto forwardHublabels = Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder);
-  auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder);
-  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
-  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
+  auto forwardHublabels = Static::getFromFilePointer<CostNode>(config.forwardHublabels, hubLabelFolder);
+  auto backwardHublabels = Static::getFromFilePointer<CostNode>(config.backwardHublabels, hubLabelFolder);
+  auto forwardHublabelOffset = Static::getFromFilePointer<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
+  auto backwardHublabelOffset = Static::getFromFilePointer<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
 
   HubLabelStoreInfo hubLabelStoreInfo{};
-  hubLabelStoreInfo.numberOfLabels = forwardHublabelOffset.size();
-  hubLabelStoreInfo.forwardLabelSize = forwardHublabels.size();
-  hubLabelStoreInfo.backwardLabelSize = forwardHublabels.size();
-  hubLabelStoreInfo.forwardLabels = forwardHublabels.data();
-  hubLabelStoreInfo.backwardLabels = backwardHublabels.data();
-  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset.data();
-  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset.data();
+  hubLabelStoreInfo.numberOfLabels = config.forwardHublabelOffset.size;
+  hubLabelStoreInfo.forwardLabelSize = config.forwardHublabels.size;
+  hubLabelStoreInfo.backwardLabelSize = config.backwardHublabels.size;
+  hubLabelStoreInfo.forwardLabels = forwardHublabels;
+  hubLabelStoreInfo.backwardLabels = backwardHublabels;
+  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset;
+  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset;
+  hubLabelStoreInfo.calculatedUntilLevel = config.calculatedUntilLevel;
 
   auto hls =  std::make_shared<RamHubLabelStore>(hubLabelStoreInfo);
   hls->maxLevel = config.maxLevel;

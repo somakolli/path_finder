@@ -94,6 +94,19 @@ public:
   }
 
   template <typename T>
+  static inline T*
+  getFromFilePointer(pathFinder::BinaryFileDescription fileDescription,
+              const std::string& folderPrefix) {
+    std::string path = !folderPrefix.empty() ? folderPrefix  + '/' + fileDescription.path : fileDescription.path;
+    FILE *file = fopen64(
+        path.c_str(), "r");
+
+    T* buf = (T*) std::calloc(fileDescription.size, sizeof(T));
+    std::fread(buf, sizeof(T), fileDescription.size, file);
+    return buf;
+  }
+
+  template <typename T>
   static inline std::vector<T>
   getFromFile(pathFinder::BinaryFileDescription fileDescription,
               const std::string& folderPrefix) {
@@ -104,6 +117,7 @@ public:
     std::fread(&buf[0], sizeof(buf[0]), buf.size(), file);
     return buf;
   }
+
   template <typename T>
   static inline auto
   getFromFileMMap(pathFinder::BinaryFileDescription fileDescription,

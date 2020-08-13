@@ -21,6 +21,7 @@ struct HubLabelStoreInfo {
   size_t forwardLabelSize;
   size_t backwardLabelSize;
   size_t numberOfLabels;
+  size_t calculatedUntilLevel;
 };
 class HubLabelStore {
 private:
@@ -34,8 +35,8 @@ private:
   bool _mmap = false;
   std::string _folder = "";
 public:
-  int calculatedUntilLevel;
-  uint32_t maxLevel;
+  size_t calculatedUntilLevel;
+  size_t maxLevel;
   explicit HubLabelStore(size_t numberOfLabels, bool mmap = false, std::string folder = "hubLabels");
   static std::shared_ptr<HubLabelStore> makeShared(size_t numberOfLabels);
   ~HubLabelStore();

@@ -84,6 +84,9 @@ HubLabelStore::HubLabelStore(HubLabelStoreInfo hubLabelStoreInfo) {
   this->forwardOffset = hubLabelStoreInfo.forwardOffset;
   this->backwardOffset = hubLabelStoreInfo.backwardOffset;
   this->numberOfLabels = hubLabelStoreInfo.numberOfLabels;
+  this->forwardLabelSize = hubLabelStoreInfo.forwardLabelSize;
+  this->backwardLabelSize = hubLabelStoreInfo.backwardLabelSize;
+  this->calculatedUntilLevel = hubLabelStoreInfo.calculatedUntilLevel;
 }
 
 
