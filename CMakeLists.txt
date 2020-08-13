@@ -52,7 +52,7 @@ set(INCLUDES
         include/path_finder/storage/FileLoader.h
         include/path_finder/storage/FileWriter.h)
 
-find_package(Boost REQUIRED COMPONENTS system iostreams)
+find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenMP)
 
 include_directories(${Boost_INCLUDE_DIRS})
