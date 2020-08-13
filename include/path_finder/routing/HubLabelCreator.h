@@ -10,6 +10,7 @@
 #include "path_finder/storage/CellIdStore.h"
 #include "path_finder/storage/HubLabelStore.h"
 #include <memory>
+#include <mutex>
 #include <vector>
 namespace pathFinder {
 
@@ -22,11 +23,14 @@ class HubLabelCreator {
 private:
   Level m_labelsUntilLevel = 0;
   std::vector<CHNode> m_sortedNodes;
+  std::mutex labelStoreMutex;
+
 
 public:
   CHGraph<std::vector> &m_graph;
   std::shared_ptr<HubLabelStore> m_hubLabelStore;
   std::shared_ptr<SpaceMeasurer> spaceMeasurer;
+
   /**
    * @brief
    * Constructs class and sets graph and hubLabelStore

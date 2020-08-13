@@ -4,6 +4,8 @@
 #include <path_finder/helper/Static.h>
 #include <path_finder/routing/HubLabelCreator.h>
 
+#include <execution>
+#include <mutex>
 #include <utility>
 namespace pathFinder {
 HubLabelCreator::HubLabelCreator(
@@ -53,14 +55,17 @@ void HubLabelCreator::constructAllLabels(
 
 void HubLabelCreator::processRangeParallel(
     const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
-//#pragma omp parallel for num_threads(2)
-  for (auto i = range.first; i < range.second; ++i) {
-    auto id = m_sortedNodes[i].id;
-    auto label = calcLabel(id, edgeDirection);
-//#pragma omp critical
-    m_hubLabelStore->store(label, id,
-                           edgeDirection);
-  }
+  auto begin = &m_sortedNodes[range.first];
+  auto end = &m_sortedNodes[range.second];
+  std::for_each(std::execution::par_unseq,
+                begin, end,
+                [&](auto&& item){
+                  auto id = item.id;
+                  auto label = calcLabel(id, edgeDirection);
+                  labelStoreMutex.lock();
+                  m_hubLabelStore->store(label, id, edgeDirection);
+                  labelStoreMutex.unlock();
+                });
 }
 
 std::vector<CostNode>
