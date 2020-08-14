@@ -18,10 +18,10 @@
 #endif
 
 namespace pathFinder {
-using NodeId = uint32_t;
+using NodeId = uint32_t ;
 using Lat = float;
 using Lng = float;
-using Distance = uint32_t;
+using Distance = uint32_t ;
 using Level = uint16_t;
 
 struct LatLng {
@@ -83,8 +83,8 @@ private:
 public:
   // typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
   // typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
-  uint32_t numberOfNodes{};
-  std::vector<uint32_t> offset;
+  NodeId numberOfNodes{};
+  std::vector<NodeId> offset;
   edgeVector edges;
   nodeVector nodes;
   Graph() = default;

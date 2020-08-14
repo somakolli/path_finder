@@ -34,7 +34,7 @@ set(SOURCES
         src/base64.cpp
         src/FileWriter.cpp
         src/Benchmarker.cpp
-        src/ThreadPool.cpp include/path_finder/helper/ctpl_stl.h)
+        src/ThreadPool.cpp)
 
 set(INCLUDES
         include/path_finder/routing/CHDijkstra.h
@@ -78,7 +78,7 @@ endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")

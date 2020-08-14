@@ -57,15 +57,24 @@ void HubLabelCreator::processRangeParallel(
     const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
   auto begin = &m_sortedNodes[range.first];
   auto end = &m_sortedNodes[range.second];
+#pragma omp parallel for default(shared) num_threads(2)
+  for(auto i = begin; i < end; ++i) {
+    auto label = calcLabel(i->id, edgeDirection);
+#pragma omp critical
+    m_hubLabelStore->store(label, i->id, edgeDirection);
+  }
+  /*
   std::for_each(std::execution::par_unseq,
                 begin, end,
                 [&](auto&& item){
                   auto id = item.id;
                   auto label = calcLabel(id, edgeDirection);
-                  labelStoreMutex.lock();
-                  m_hubLabelStore->store(label, id, edgeDirection);
-                  labelStoreMutex.unlock();
+                  {
+                    std::unique_lock<std::mutex> {labelStoreMutex};
+                    m_hubLabelStore->store(label, id, edgeDirection);
+                  }
                 });
+                */
 }
 
 std::vector<CostNode>
