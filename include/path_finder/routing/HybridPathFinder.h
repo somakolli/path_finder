@@ -245,8 +245,9 @@ HybridPathFinder<Graph, CellIdStore>::calcLabelHybrid(
     size_t size;
     m_hubLabelStore->retrieve(source, direction, sourceLabel, size);
     costNodeVec_t vec;
-    for (auto i = sourceLabel; sourceLabel < sourceLabel + size; ++sourceLabel)
+    for (auto i = sourceLabel; i < sourceLabel + size; ++i)
       vec.push_back(*i);
+    free(sourceLabel);
     calcLabelTimingInfo.lookUpTime = stopwatch.elapsedMicro();
     return vec;
   }
@@ -295,15 +296,17 @@ HybridPathFinder<Graph, CellIdStore>::calcLabelHybrid(
   for (auto [previousNodeId, labelsToCollect] : labelsToCollectMap) {
     for (auto id : labelsToCollect) {
       stopwatch1.reset();
-      costNodeVec_t label;
-      m_hubLabelStore->retrieve(id, direction, label);
+      CostNode* label;
+      size_t labelSize;
+      m_hubLabelStore->retrieve(id, direction, label, labelSize);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
       stopwatch1.reset();
       costNodeVec_t resultVec;
-      resultVec.reserve(settledNodes.size() + label.size());
+      resultVec.reserve(settledNodes.size() + labelSize);
       Static::merge(settledNodes.begin(), settledNodes.end(),
-                    label.begin(), label.end(), m_cost[id],
+                    label, label + labelSize, m_cost[id],
                     resultVec, PreviousReplacer(previousNodeId));
+      free(label);
       settledNodes = std::move(resultVec);
       calcLabelTimingInfo.mergeTime += stopwatch1.elapsedMicro();
     }
