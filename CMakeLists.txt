@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 project(path_finder)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 if( NOT CMAKE_BUILD_TYPE )
     set( CMAKE_BUILD_TYPE Release)
 endif()
@@ -32,7 +32,9 @@ set(SOURCES
         src/HybridPathFinder.cpp
         src/Types.cpp
         src/base64.cpp
-        src/FileWriter.cpp src/Benchmarker.cpp)
+        src/FileWriter.cpp
+        src/Benchmarker.cpp
+        src/ThreadPool.cpp include/path_finder/helper/ctpl_stl.h)
 
 set(INCLUDES
         include/path_finder/routing/CHDijkstra.h
@@ -50,7 +52,8 @@ set(INCLUDES
         include/path_finder/storage/DataConfig.h
         include/path_finder/graphs/Grid.h
         include/path_finder/storage/FileLoader.h
-        include/path_finder/storage/FileWriter.h)
+        include/path_finder/storage/FileWriter.h
+        include/path_finder/helper/ThreadPool.h)
 
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenMP)
@@ -75,7 +78,7 @@ endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} nlohmann_json::nlohmann_json)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")
