@@ -72,6 +72,41 @@ void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, std::vector<Cos
     }
   }
 }
+void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size) {
+  if(id > numberOfLabels - 1)
+    throw std::runtime_error("[HublabelStore] node id does not exist.");
+  if (direction == EdgeDirection::FORWARD) {
+    auto offsetElement = forwardOffset[id];
+    if(offsetElement.size == 0) {
+      storeVec = nullptr;
+      size = 0;
+      return;
+    }
+    auto labelEnd = offsetElement.position + offsetElement.size;
+    storeVec = (CostNode*) malloc(sizeof(CostNode) * offsetElement.size);
+    size = offsetElement.size;
+    int j = 0;
+    for(auto i = offsetElement.position; i < labelEnd; ++i) {
+//#pragma omp critical
+      std::memcpy(storeVec + j++,forwardLabels + i, sizeof(CostNode));
+    }
+  } else if(direction == EdgeDirection::BACKWARD) {
+    auto offsetElement = backwardOffset[id];
+    if(offsetElement.size == 0) {
+      storeVec = nullptr;
+      size = 0;
+      return;
+    }
+    auto labelEnd = offsetElement.position + offsetElement.size;
+    storeVec = (CostNode*) malloc(sizeof(CostNode) * offsetElement.size);
+    size = offsetElement.size;
+    int j = 0;
+    for(auto i = offsetElement.position; i < labelEnd; ++i) {
+//#pragma omp critical
+      std::memcpy(storeVec + j++, backwardLabels + i, sizeof(CostNode));
+    }
+  }
+}
 
 size_t HubLabelStore::getNumberOfLabels() const  {
   return numberOfLabels;

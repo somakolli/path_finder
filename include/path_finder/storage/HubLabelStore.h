@@ -46,6 +46,8 @@ public:
              EdgeDirection direction);
 
   void retrieve(NodeId id, EdgeDirection direction, std::vector<CostNode>& storeVec);
+  void retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size);
+  size_t getSize(NodeId, EdgeDirection direction);
   size_t getNumberOfLabels() const;
   CostNode* getForwardLabels();
   CostNode* getForwardLabels() const;
