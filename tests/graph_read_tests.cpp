@@ -13,47 +13,32 @@ const std::string PATH = "/home/sokol/Uni/path_finder/test-data/";
 template <typename Edges>
 bool edgeExists(const pathFinder::RamGraph & graph, Edges edges, LatLng source, LatLng target) {
   for(const auto& edge : edges) {
-    const auto& source1 = graph.getNodes()[edge.source];
-    const auto& target1 = graph.getNodes()[edge.target];
+    const auto& source1 = graph.getNode(edge.source);
+    const auto& target1 = graph.getNode(edge.target);
     if(source == source1.latLng && target == target1.latLng)
       return true;
   }
   return false;
 }
 
-
-
 bool haveSameEdges(pathFinder::RamGraph & graph, CHNode node,
                    pathFinder::RamGraph & reorderedGraph, CHNode reorderedNode) {
   const auto& edges = graph.edgesFor(node.id, EdgeDirection::FORWARD);
   const auto& reorderEdges = reorderedGraph.edgesFor(reorderedNode.id, EdgeDirection::FORWARD);
   for(const auto& edge : edges) {
-    const auto& source = graph.getNodes()[edge.source];
-    const auto& target = graph.getNodes()[edge.target];
+    const auto& source = graph.getNode(edge.source);
+    const auto& target = graph.getNode(edge.target);
     if(!edgeExists(reorderedGraph, reorderEdges, source.latLng, target.latLng))
       return false;
   }
   return true;
 }
 
-void randomizeLatLngs(RamGraph& graph) {
-  srand (static_cast <unsigned> (time(nullptr)));
+class GraphTests {
 
-  for(auto& node : graph.getNodes()) {
-    auto LOlat = 45;
-    auto HIlat = 46;
-    auto lat = LOlat + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlat-LOlat)));
-    auto LOlng = 8;
-    auto HIlng = 9;
-    auto lng = LOlng + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(HIlng-LOlng)));
-    node.latLng = LatLng{lat, lng};
-  }
-}
-
-
+};
 TEST(Graph, ReadWorks) {
   Graph graph;
-  std::cout << "Current path is " << std::filesystem::current_path() << '\n';
   GraphReader::readFmiFile(graph, PATH + "test.fmi");
   auto edges = graph.edgesFor(1);
   auto edge0 = Edge(*edges.begin());
@@ -119,19 +104,19 @@ TEST(CHGraph, ReadFromDiskWorks) {
 TEST(CHGraph, GridReorderWorks) {
   CHGraph graph;
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
-  randomizeLatLngs(graph);
+  graph.randomizeLatLngs();
 
   std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
   std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;
 
-  for(const auto& edge :graph.m_edges) {
-    const auto& sourceNode = graph.getNodes()[edge.source];
-    const auto& targetNode = graph.getNodes()[edge.target];
+  for(const auto& edge :graph.getEdges()) {
+    const auto& sourceNode = graph.getNode(edge.source);
+    const auto& targetNode = graph.getNode(edge.target);
     forwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
   for(const auto& edge :graph.getBackEdges()) {
-    const auto& sourceNode = graph.getNodes()[edge.source];
-    const auto& targetNode = graph.getNodes()[edge.target];
+    const auto& sourceNode = graph.getNode(edge.source);
+    const auto& targetNode = graph.getNode(edge.target);
     backwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
   CHGraph reorderedGraph;
@@ -143,14 +128,11 @@ TEST(CHGraph, GridReorderWorks) {
 
 
   for(const auto& [source, target]: forwardEdgesBeforeReorder) {
-      ASSERT_TRUE(edgeExists(graph, reorderedGraph.m_edges, source, target));
+      ASSERT_TRUE(edgeExists(graph, reorderedGraph.getEdges(), source, target));
   }
   for(const auto& [source, target]: backwardEdgesBeforeReorder) {
       ASSERT_TRUE(edgeExists(graph, reorderedGraph.getBackEdges(), source, target));
   }
-
-
-
 }
 }
 }

@@ -1,22 +1,22 @@
 #include <fstream>
 #include <path_finder/storage/FileWriter.h>
 namespace pathFinder{
-void FileWriter::writeGraph(const pathFinder::RamGraph &graph, const std::string& graphName, const std::string& folder) {
+void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, const std::string& folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::GraphDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.nodes = {"nodes", graph.getNodes().size(), true};
-  dataConfig.forwardEdges = {"forwardEdges", graph.getForwardEdges().size(), true};
-  dataConfig.forwardOffset = {"forwardOffset", graph.getForwardOffset().size(), false};
-  dataConfig.backwardEdges = {"backwardEdges", graph.getBackEdges().size(), true};
-  dataConfig.backwardOffset = {"backwardOffset", graph.getBackOffset().size(), false};
-  Static::writeVectorToFile(graph.getNodes(), (folder + dataConfig.nodes.path).c_str());
-  Static::writeVectorToFile(graph.getForwardEdges(), (folder + dataConfig.forwardEdges.path).c_str());
-  Static::writeVectorToFile(graph.getForwardOffset(), (folder + dataConfig.forwardOffset.path).c_str());
-  Static::writeVectorToFile(graph.getBackEdges(), (folder + dataConfig.backwardEdges.path).c_str());
-  Static::writeVectorToFile(graph.getBackOffset(), (folder + dataConfig.backwardOffset.path).c_str());
+  dataConfig.nodes = {"nodes", graph.m_numberOfNodes, true};
+  dataConfig.forwardEdges = {"forwardEdges", graph.m_numberOfEdges, true};
+  dataConfig.forwardOffset = {"forwardOffset", graph.m_numberOfNodes + 1, false};
+  dataConfig.backwardEdges = {"backwardEdges", graph.m_numberOfEdges, true};
+  dataConfig.backwardOffset = {"backwardOffset", graph.m_numberOfNodes + 1, false};
+  Static::writeVectorToFile(graph.m_nodes, graph.m_numberOfNodes, (folder + dataConfig.nodes.path).c_str());
+  Static::writeVectorToFile(graph.m_edges, graph.m_numberOfEdges, (folder + dataConfig.forwardEdges.path).c_str());
+  Static::writeVectorToFile(graph.m_offset, graph.m_numberOfNodes + 1, (folder + dataConfig.forwardOffset.path).c_str());
+  Static::writeVectorToFile(graph.m_backEdges, graph.m_numberOfEdges, (folder + dataConfig.backwardEdges.path).c_str());
+  Static::writeVectorToFile(graph.m_backOffset, graph.m_numberOfNodes + 1, (folder + dataConfig.backwardOffset.path).c_str());
   //write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;

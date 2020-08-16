@@ -27,7 +27,7 @@ private:
 
 
 public:
-  CHGraph<std::vector> &m_graph;
+  CHGraph &m_graph;
   std::shared_ptr<HubLabelStore> m_hubLabelStore;
   std::shared_ptr<SpaceMeasurer> spaceMeasurer;
 
@@ -38,7 +38,7 @@ public:
    * @param graph input graph in ch form
    * @param hubLabelStore empty store to be filled will labels
    */
-  HubLabelCreator(CHGraph<std::vector> &graph, std::shared_ptr<HubLabelStore> hubLabelStore);
+  HubLabelCreator(CHGraph &graph, std::shared_ptr<HubLabelStore> hubLabelStore);
   /**
    * @brief
    * starts hub label creation

@@ -4,12 +4,12 @@
 #include <path_finder/helper/Static.h>
 #include <path_finder/routing/HubLabelCreator.h>
 
-#include <execution>
+
 #include <mutex>
 #include <utility>
 namespace pathFinder {
 HubLabelCreator::HubLabelCreator(
-    CHGraph<std::vector> &graph, std::shared_ptr<HubLabelStore> hubLabelStore)
+    CHGraph &graph, std::shared_ptr<HubLabelStore> hubLabelStore)
     : m_graph(graph), m_hubLabelStore(std::move(hubLabelStore)) {}
 
 
@@ -123,8 +123,8 @@ void HubLabelCreator::selfPrune(costNodeVec_t &label,
 
 std::optional<Distance>
 HubLabelCreator::getShortestDistance(NodeId source, NodeId target) {
-  if (source >= m_graph.getNodes().size() ||
-      target >= m_graph.getNodes().size())
+  if (!m_graph.isValidNodeId(source) ||
+      !m_graph.isValidNodeId(target))
     return std::nullopt;
   CostNode* forwardLabels;
   size_t forwardSize;

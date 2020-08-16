@@ -5,7 +5,6 @@
 #ifndef PATH_FINDER_BENCHMARKER_H
 #define PATH_FINDER_BENCHMARKER_H
 
-#include <memory>
 #include <path_finder/storage/FileLoader.h>
 #include <string>
 namespace pathFinder {

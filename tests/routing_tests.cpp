@@ -16,7 +16,7 @@ TEST(RoutingTest, DistanceWorks) {
   HubLabelCreator hlc(chGraph, hubLabelStore);
   int labelsUntilLevel = 0;
   hlc.create(labelsUntilLevel);
-  RamCellIdStore ramCellIdStore(chGraph.getForwardEdges().size());
+  RamCellIdStore ramCellIdStore(chGraph.getNumberOfEdges());
   HybridPathFinder hybridPathFinder(hubLabelStore, std::make_shared<RamGraph>(chGraph), std::make_shared<RamCellIdStore>(ramCellIdStore), labelsUntilLevel);
 
   Dijkstra dijkstra(graph);
@@ -36,11 +36,11 @@ TEST(RoutingTest, PathFindingWorks) {
   GraphReader::readFmiFile(graph, path + "test.fmi");
   CHGraph chGraph;
   GraphReader::readCHFmiFile(chGraph, path + "test.chfmi", false);
-  std::shared_ptr<HubLabelStore> hubLabelStore = HubLabelStore::makeShared(chGraph.m_numberOfNodes);
+  std::shared_ptr<HubLabelStore> hubLabelStore = HubLabelStore::makeShared(chGraph.getNumberOfNodes());
   HubLabelCreator hlc(chGraph, hubLabelStore);
   int labelsUntilLevel = 0;
   hlc.create(labelsUntilLevel);
-  RamCellIdStore ramCellIdStore(chGraph.getForwardEdges().size());
+  RamCellIdStore ramCellIdStore(chGraph.getNumberOfEdges());
   HybridPathFinder hybridPathFinder(hubLabelStore, std::make_shared<RamGraph>(chGraph), std::make_shared<RamCellIdStore>(ramCellIdStore), labelsUntilLevel);
 
   auto routingResult = hybridPathFinder.getShortestPath(0, 0);

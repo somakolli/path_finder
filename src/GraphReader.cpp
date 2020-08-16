@@ -35,12 +35,11 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph,
                         type >> maxSpeed) {
     graph.edges.push_back(edge);
   }
-  buildOffset(graph.edges, graph.offset);
+  buildOffset(graph.edges.begin().base(), graph.edges.size(), graph.offset);
 }
 
 void pathFinder::GraphReader::readCHFmiFile(
-    pathFinder::CHGraph<std::vector> &graph, const std::string &filepath, bool reorderWithGrid) {
-  uint32_t numberOfEdges{};
+    pathFinder::CHGraph &graph, const std::string &filepath, bool reorderWithGrid) {
   std::ifstream in(filepath);
   std::string line;
   // ignore first 10 lines
@@ -48,7 +47,10 @@ void pathFinder::GraphReader::readCHFmiFile(
     std::getline(in, line);
   }
   in >> graph.m_numberOfNodes;
-  in >> numberOfEdges;
+  in >> graph.m_numberOfEdges;
+  graph.m_nodes = (CHNode*)std::calloc(graph.m_numberOfNodes, sizeof(CHNode));
+  graph.m_edges = (CHEdge*)std::calloc(graph.m_numberOfEdges, sizeof(CHEdge));
+
   uint32_t type;
   uint32_t maxSpeed;
   uint32_t child1;
@@ -58,19 +60,21 @@ void pathFinder::GraphReader::readCHFmiFile(
   Lng lng;
   uint32_t el;
   int i = graph.m_numberOfNodes + 1;
+  int j = 0;
   CHNode node{};
   while (--i > 0 &&
          in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
     node.latLng = {lat, lng};
-    graph.getNodes().push_back(node);
+    graph.m_nodes[j++] = node;
   }
-  i = numberOfEdges + 1;
+  i = graph.m_numberOfEdges + 1;
+  j = 0;
   CHEdge edge{};
   while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >>
                         type >> maxSpeed >> child1 >> child2) {
     child1 == -1 ? edge.child1 = std::nullopt : edge.child1 = child1;
     child2 == -1 ? edge.child2 = std::nullopt : edge.child2 = child2;
-    graph.m_edges.push_back(edge);
+    graph.m_edges[j++] = edge;
   }
 
 #if TEST
@@ -78,24 +82,13 @@ void pathFinder::GraphReader::readCHFmiFile(
 #endif
   if(reorderWithGrid)
     gridReorder(graph);
-  buildOffset(graph.m_edges, graph.m_offset);
-  buildBackEdges(graph.m_edges, graph.getBackEdges());
-  buildOffset(graph.getBackEdges(), graph.getBackOffset());
-
+  buildOffset(graph.m_edges, graph.m_numberOfEdges, graph.m_offset);
+  buildBackEdges(graph.m_edges, graph.m_backEdges, graph.m_numberOfEdges);
+  buildOffset(graph.m_backEdges, graph.m_numberOfEdges, graph.m_backOffset);
 }
 
-void pathFinder::GraphReader::buildBackEdges(
-    const std::vector<CHEdge> &forwardEdges, std::vector<CHEdge> &backEdges) {
-  for (const auto &edge : forwardEdges) {
-    auto backWardEdge = edge;
-    backWardEdge.source = edge.target;
-    backWardEdge.target = edge.source;
-    backEdges.push_back(backWardEdge);
-  }
-  sortEdges(backEdges);
-}
 
-void pathFinder::GraphReader::sortEdges(std::vector<CHEdge> &edges) {
+void pathFinder::GraphReader::sortEdges(MyIterator<CHEdge*> edges) {
   std::sort(edges.begin(), edges.end(),
             [](const auto &edge1, const auto &edge2) -> bool {
               return (edge1.source == edge2.source)
@@ -103,10 +96,89 @@ void pathFinder::GraphReader::sortEdges(std::vector<CHEdge> &edges) {
                          : edge1.source < edge2.source;
             });
 }
-void pathFinder::GraphReader::gridReorder(pathFinder::CHGraph<std::vector>& graph) {
+void pathFinder::GraphReader::gridReorder(pathFinder::CHGraph& graph) {
   Grid grid(graph, 3600, 1800);
   grid.buildGrid();
   grid.reorderNodes();
   std::cout << "pointer grid length " << grid.pointerGrid.size() << std::endl;
   graph.gridMap = grid.pointerGrid;
+}
+void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge* edges, size_t edgeSize, NodeId *&offset) {
+  if (edgeSize == 0)
+    return;
+  NodeId numberOfNodes = edges[edgeSize - 1].source + 1;
+  free(offset);
+  offset = (NodeId*)std::calloc((numberOfNodes + 1), sizeof(NodeId));
+  size_t offsetSize = numberOfNodes + 1;
+  offset[numberOfNodes] = edgeSize;
+  for (int i = edgeSize - 1; i >= 0; --i) {
+    offset[edges[i].source] = i;
+  }
+  for (int i = edges[0].source + 1; i < offsetSize - 2; ++i) {
+
+    if (offset[i] == 0) {
+      size_t j = i + 1;
+      while (offset[j] == 0) {
+        ++j;
+      }
+      size_t offsetToSet = offset[j];
+      --j;
+      size_t firstNullPosition = i;
+      while (j >= firstNullPosition) {
+        offset[j] = offsetToSet;
+        --j;
+        ++i;
+      }
+    }
+  }
+  offset[0] = 0;
+  offset[offsetSize] = edgeSize;
+}
+void pathFinder::GraphReader::buildBackEdges(const pathFinder::CHEdge *forwardEdges, pathFinder::CHEdge *&backEdges,
+                                             size_t numberOfEdges) {
+  free(backEdges);
+  backEdges = (CHEdge*)calloc(numberOfEdges, sizeof(CHEdge));
+  for (size_t i = 0; i < numberOfEdges; ++i) {
+    backEdges[i].source = forwardEdges[i].target;
+    backEdges[i].target = forwardEdges[i].source;
+    backEdges[i].distance = forwardEdges[i].distance;
+    backEdges[i].child1 = forwardEdges[i].child1;
+    backEdges[i].child2 = forwardEdges[i].child2;
+  }
+  sortEdges(MyIterator(backEdges, backEdges + numberOfEdges));
+}
+void pathFinder::GraphReader::buildOffset(const pathFinder::Edge* edges, size_t edgeSize,
+                                          std::vector<NodeId> &offset) {
+  if (edgeSize == 0)
+    return;
+
+  NodeId numberOfNodes = edges[edgeSize - 1].source + 1;
+  offset.reserve(numberOfNodes + 1);
+  for(int i = 0; i < numberOfNodes + 1; ++i) {
+    offset.emplace_back(0);
+  }
+  size_t offsetSize = numberOfNodes + 1;
+  offset[numberOfNodes] = edgeSize;
+  for (int i = edgeSize - 1; i >= 0; --i) {
+    offset[edges[i].source] = i;
+  }
+  for (int i = edges[0].source + 1; i < offsetSize - 2; ++i) {
+
+    if (offset[i] == 0) {
+      size_t j = i + 1;
+      while (offset[j] == 0) {
+        ++j;
+      }
+      size_t offsetToSet = offset[j];
+      --j;
+      size_t firstNullPosition = i;
+      while (j >= firstNullPosition) {
+        offset[j] = offsetToSet;
+        --j;
+        ++i;
+      }
+    }
+  }
+  offset[0] = 0;
+  offset[offsetSize] = edgeSize;
 }

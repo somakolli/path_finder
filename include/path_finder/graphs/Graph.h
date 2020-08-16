@@ -64,6 +64,7 @@ private:
   MyPointerType _end;
 
 public:
+
   MyIterator(MyPointerType begin, MyPointerType end)
       : _begin(begin), _end(end) {}
   bool empty() const { return _begin == _end; };
@@ -72,7 +73,6 @@ public:
   MyPointerType end() { return _end; };
   MyPointerType end() const { return _end; };
   size_t size() { return _end - _begin; }
-
 };
 class Graph {
 public:
@@ -143,7 +143,6 @@ public:
   CostNode operator() (NodeId id, Distance cost, NodeId previousNode) {
     return (*this)(CostNode(id, cost, previousNode));
   }
-
 };
 } // namespace pathFinder
 #endif // ALG_END_PROJECT_GRAPH_H

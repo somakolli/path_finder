@@ -19,7 +19,7 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   return std::make_shared<HybridPF>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
                                              config.hubLabelsCalculated, config.cellIdsCalculated);
 }
-std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
+std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {
   std::ifstream t(graphFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
@@ -29,8 +29,17 @@ std::shared_ptr<pathFinder::MMapGraph> pathFinder::FileLoader::loadGraph(const s
   auto backwardEdges = Static::getFromFileMMap<CHEdge>(config.backwardEdges, graphFolder);
   auto forwardOffset = Static::getFromFileMMap<NodeId>(config.forwardOffset, graphFolder);
   auto backwardOffset = Static::getFromFileMMap<NodeId>(config.backwardOffset, graphFolder);
-  auto chGraph = std::make_shared<MMapGraph>(nodes, forwardEdges, backwardEdges,
-                                                     forwardOffset, backwardOffset, nodes.size());
+
+  CHGraphCreateInfo chGraphCreateInfo{};
+  chGraphCreateInfo.nodes = nodes.data();
+  chGraphCreateInfo.edges = forwardEdges.data();
+  chGraphCreateInfo.backEdges = backwardEdges.data();
+  chGraphCreateInfo.offset = forwardOffset.data();
+  chGraphCreateInfo.backOffset = backwardOffset.data();
+  chGraphCreateInfo.numberOfEdges = forwardEdges.size();
+  chGraphCreateInfo.numberOfNodes = nodes.size();
+  chGraphCreateInfo.setAllMMap();
+  auto chGraph = std::make_shared<MMapGraph>(chGraphCreateInfo);
   // set up grid
   for(auto gridEntry : config.gridMapEntries) {
     chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
@@ -101,8 +110,18 @@ std::shared_ptr<pathFinder::RamGraph> pathFinder::FileLoader::loadGraphRam(const
   auto backwardEdges = Static::getFromFile<CHEdge>(config.backwardEdges, graphFolder);
   auto forwardOffset = Static::getFromFile<NodeId>(config.forwardOffset, graphFolder);
   auto backwardOffset = Static::getFromFile<NodeId>(config.backwardOffset, graphFolder);
-  auto chGraph = std::make_shared<RamGraph>(nodes, forwardEdges, backwardEdges,
-                                                     forwardOffset, backwardOffset, nodes.size());
+
+  CHGraphCreateInfo chGraphCreateInfo{};
+  chGraphCreateInfo.nodes = nodes.data();
+  chGraphCreateInfo.edges = forwardEdges.data();
+  chGraphCreateInfo.backEdges = backwardEdges.data();
+  chGraphCreateInfo.offset = forwardOffset.data();
+  chGraphCreateInfo.backOffset = backwardOffset.data();
+  chGraphCreateInfo.numberOfEdges = forwardEdges.size();
+  chGraphCreateInfo.numberOfNodes = nodes.size();
+
+
+  auto chGraph = std::make_shared<RamGraph>(chGraphCreateInfo);
   // set up grid
   for(auto gridEntry : config.gridMapEntries) {
     chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;

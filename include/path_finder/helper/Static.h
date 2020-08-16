@@ -194,6 +194,8 @@ public:
     oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
     return oss.str();
   }
+
+  static void conditionalFree(void* pointer, bool isMMaped, size_t size);
 };
 } // namespace pathFinder
 

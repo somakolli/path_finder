@@ -8,7 +8,7 @@
 namespace pathFinder {
 class FileWriter {
 public:
-  static void writeGraph(const RamGraph & graph, const std::string& graphName, const std::string& folder);
+  static void writeGraph(const CHGraph & graph, const std::string& graphName, const std::string& folder);
   static void writeHubLabels(const RamHubLabelStore & hubLabelStore, const std::string& graphName, const std::string& folder);
   static void writeCells(const RamCellIdStore& cellIdStore, const std::string& graphName, const std::string& folder);
   static void writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
