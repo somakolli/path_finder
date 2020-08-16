@@ -12,8 +12,8 @@ class Benchmarker {
 public:
   using BenchResult = std::pair<Level, RoutingResult>;
   Benchmarker(const std::string& dataPath, std::string  outPutPath);
-  Benchmarker(std::shared_ptr<HybridPFRam>& pathFinderRam,
-              std::shared_ptr<HybridPF>& pathFinderMMap,
+  Benchmarker(std::shared_ptr<HybridPathFinder>& pathFinderRam,
+              std::shared_ptr<HybridPathFinder>& pathFinderMMap,
               std::string  outPutPath);
   void benchmarkAllLevel(uint32_t numberOfQueries, std::vector<BenchResult>& ramResult,std::vector<BenchResult>& mmapResult);
   void benchmarkLevel(uint32_t level, uint32_t numberOfQueries, BenchResult& ramResult, BenchResult& mmapResult);
@@ -54,8 +54,8 @@ public:
 private:
   std::string m_dataPath;
   std::string m_outputPath;
-  std::shared_ptr<HybridPF> m_pathFinderMMap;
-  std::shared_ptr<HybridPFRam> m_pathFinderRam;
+  std::shared_ptr<HybridPathFinder> m_pathFinderMMap;
+  std::shared_ptr<HybridPathFinder> m_pathFinderRam;
   static void dropCaches();
 };
 }

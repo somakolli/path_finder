@@ -3,6 +3,8 @@
 #include <path_finder/helper/Static.h>
 #include <path_finder/helper/Types.h>
 #include <path_finder/storage/CellIdStore.h>
+#include <path_finder/storage/FileLoader.h>
+#include <path_finder/storage/FileWriter.h>
 #include <stdio.h>
 
 namespace pathFinder{
@@ -31,23 +33,9 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ++j;
     }
   }
+  FileWriter::writeCells(store, "testGraph", "testCellIds/");
 
-  BinaryFileDescription ids{};
-  ids.size = store.cellIdSize();
-  ids.path = "ids";
-
-  BinaryFileDescription offset{};
-  offset.size = store.offsetSize();
-  offset.path = "offset";
-
-  Static::writeVectorToFile(store.cellIdsVec(), store.cellIdSize(), (ids.path).c_str());
-  Static::writeVectorToFile(store.offsetVec(), store.offsetSize(), (offset.path).c_str());
-
-  auto cellIds = Static::getFromFileMMap<CellId_t>(ids, "");
-  auto cellIdsOffset = Static::getFromFileMMap<OffsetElement>(offset, "");
-
-  auto mmapStore = std::make_shared<MMapCellIdStore>(CellIdStore(cellIds.data(), cellIds.size(),
-                                                                 cellIdsOffset.data(), cellIdsOffset.size()));
+  auto mmapStore = FileLoader::loadCellIds("testCellIds");
   {
     int i = 0;
     for (auto cellId : mmapStore->getCellIds(0)) {
@@ -61,8 +49,6 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ++j;
     }
   }
-  remove(ids.path.c_str());
-  remove(offset.path.c_str());
 }
 }
 

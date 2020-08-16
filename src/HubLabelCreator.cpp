@@ -9,13 +9,13 @@
 #include <utility>
 namespace pathFinder {
 HubLabelCreator::HubLabelCreator(
-    CHGraph &graph, std::shared_ptr<HubLabelStore> hubLabelStore)
+    std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore)
     : m_graph(graph), m_hubLabelStore(std::move(hubLabelStore)) {}
 
 
 void HubLabelCreator::create(Level untilLevel) {
   m_labelsUntilLevel = untilLevel;
-  m_graph.sortByLevel(m_sortedNodes);
+  m_graph->sortByLevel(m_sortedNodes);
   m_hubLabelStore->calculatedUntilLevel = untilLevel;
 
   // calculate node ranges with same level
@@ -80,12 +80,12 @@ void HubLabelCreator::processRangeParallel(
 std::vector<CostNode>
 HubLabelCreator::calcLabel(NodeId nodeId,
                            EdgeDirection direction) {
-  Level level = m_graph.getLevel(nodeId);
+  Level level = m_graph->getLevel(nodeId);
   costNodeVec_t label;
   costNodeVec_t newLabel;
   label.reserve(100);
-  for (const auto &edge : m_graph.edgesFor(nodeId, direction)) {
-    if (level < m_graph.getLevel(edge.target)) {
+  for (const auto &edge : m_graph->edgesFor(nodeId, direction)) {
+    if (level < m_graph->getLevel(edge.target)) {
       CostNode* targetLabel;
       size_t size;
       m_hubLabelStore->retrieve(edge.target, direction, targetLabel, size);
@@ -123,8 +123,8 @@ void HubLabelCreator::selfPrune(costNodeVec_t &label,
 
 std::optional<Distance>
 HubLabelCreator::getShortestDistance(NodeId source, NodeId target) {
-  if (!m_graph.isValidNodeId(source) ||
-      !m_graph.isValidNodeId(target))
+  if (!m_graph->isValidNodeId(source) ||
+      !m_graph->isValidNodeId(target))
     return std::nullopt;
   CostNode* forwardLabels;
   size_t forwardSize;

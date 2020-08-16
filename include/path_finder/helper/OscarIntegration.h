@@ -9,9 +9,9 @@
 namespace pathFinder{
 class CellIdDiskWriter {
 private:
-  CellIdStore<CellId_t>& _cellIdStore;
+  CellIdStore& _cellIdStore;
 public:
-  CellIdDiskWriter(CellIdStore<CellId_t>& cellIdStore);
+  explicit CellIdDiskWriter(CellIdStore& cellIdStore);
   void operator()(const NodeId i, const std::vector<unsigned int>& cellIds) {
     _cellIdStore.storeCellIds(i, cellIds);
   }
@@ -21,7 +21,7 @@ public:
   template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
   static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
     int progress = 0;
-#pragma omp parallel for
+#pragma omp parallel for default(shared)
     for(int i = 0; i < graph.m_edges.size(); ++i) {
       const auto& edge = graph.m_edges[i];
       if(edge.child1.has_value()){

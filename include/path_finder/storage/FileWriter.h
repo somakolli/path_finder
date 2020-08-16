@@ -14,5 +14,6 @@ public:
   static void writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
                        RamCellIdStore* cellIdStore, const std::string &folder);
 };
+
 }
 #endif // MASTER_ARBEIT_FILEWRITER_H

@@ -38,13 +38,13 @@ void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, const std
   dataConfig.maxLevel = hubLabelStore.maxLevel;
   dataConfig.calculatedUntilLevel = hubLabelStore.calculatedUntilLevel;
   // write hub label files
-  Static::writeVectorToFile(hubLabelStore.getForwardLabels(), hubLabelStore.getForwardLabelsSize(),
+  Static::writeVectorToFile(hubLabelStore.m_forwardLabels, hubLabelStore.m_forwardLabelSize,
                             (folder + dataConfig.forwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardLabels(), hubLabelStore.getBackwardLabelsSize(),
+  Static::writeVectorToFile(hubLabelStore.m_backwardLabels, hubLabelStore.m_backwardLabelSize,
                             (folder + dataConfig.backwardHublabels.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getForwardOffset(), hubLabelStore.getForwardOffsetSize(),
+  Static::writeVectorToFile(hubLabelStore.m_forwardOffset, hubLabelStore.m_numberOfLabels,
                             (folder + dataConfig.forwardHublabelOffset.path).c_str());
-  Static::writeVectorToFile(hubLabelStore.getBackwardOffset(), hubLabelStore.getBackwardOffsetSize(),
+  Static::writeVectorToFile(hubLabelStore.m_backwardOffset, hubLabelStore.m_numberOfLabels,
                             (folder + dataConfig.backwardHublabelOffset.path).c_str());
 
   //write config to file
@@ -64,8 +64,8 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   dataConfig.timestamp = Static::getTimeStampString();
   dataConfig.cellIds = {"cellIds", cellIdStore.cellIdSize()};
   dataConfig.cellIdsOffset = {"cellIdsOffset", cellIdStore.offsetSize()};
-  Static::writeVectorToFile(cellIdStore.cellIdsVec(), cellIdStore.cellIdSize(),(folder + dataConfig.cellIds.path).c_str());
-  Static::writeVectorToFile(cellIdStore.offsetVec(), cellIdStore.offsetSize(), (folder + dataConfig.cellIdsOffset.path).c_str());
+  Static::writeVectorToFile(cellIdStore._cellIds, cellIdStore._cellIdSize,(folder + dataConfig.cellIds.path).c_str());
+  Static::writeVectorToFile(cellIdStore._offsetVector, cellIdStore._offsetVectorSize, (folder + dataConfig.cellIdsOffset.path).c_str());
   //write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;

@@ -15,29 +15,29 @@ struct CHNode : Node {
   Level level;
 };
 struct CHEdge : Edge {
-  std::optional<NodeId> child1;
-  std::optional<NodeId> child2;
+  std::optional<NodeId> child1 = std::nullopt;
+  std::optional<NodeId> child2 = std::nullopt;
 };
 struct CHGraphCreateInfo {
-  CHNode* nodes;
-  CHEdge* edges;
-  CHEdge* backEdges;
-  NodeId* offset;
-  NodeId* backOffset;
-  size_t numberOfNodes;
-  size_t numberOfEdges;
+  CHNode* nodes = nullptr;
+  CHEdge* edges = nullptr;
+  CHEdge* backEdges = nullptr;
+  NodeId* offset = nullptr;
+  NodeId* backOffset = nullptr;
+  size_t numberOfNodes = 0;
+  size_t numberOfEdges = 0;
   bool nodesMMap = false;
   bool edgesMMap = false;
   bool backEdgesMMap = false;
   bool offsetMMap = false;
   bool backOffsetMMap = false;
 
-  void setAllMMap() {
-    nodesMMap = true;
-    edgesMMap = true;
-    backEdgesMMap = true;
-    offsetMMap = true;
-    backOffsetMMap = true;
+  void setAllMMap(bool condition) {
+    nodesMMap = condition;
+    edgesMMap = condition;
+    backEdgesMMap = condition;
+    offsetMMap = condition;
+    backOffsetMMap = condition;
   }
 };
 class CHGraph {
@@ -55,7 +55,7 @@ public:
 
   ~CHGraph();
 
-  CHGraph(CHGraphCreateInfo chGraphCreateInfo);
+  explicit CHGraph(CHGraphCreateInfo chGraphCreateInfo);
 
   static std::shared_ptr<CHGraph> makeShared(CHGraphCreateInfo chGraphCreateInfo);
 
@@ -67,12 +67,12 @@ public:
   void sortEdges();
   void randomizeLatLngs();
   NodeId getNodeIdFor(LatLng latLng);
-  CHNode getNode(NodeId id) const;
+  [[nodiscard]] CHNode getNode(NodeId id) const;
   std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
   std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength);
   double getDistance(NodeId node1, NodeId node2);
   static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
-  bool isValidNodeId(NodeId id) const;
+  [[nodiscard]] bool isValidNodeId(NodeId id) const;
   size_t getNumberOfNodes();
   size_t getNumberOfEdges();
   MyIterator<const CHNode*> getNodes();

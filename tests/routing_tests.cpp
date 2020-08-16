@@ -10,14 +10,16 @@ TEST(RoutingTest, DistanceWorks) {
   std::string path = "/home/sokol/Uni/path_finder/test-data/";
   Graph graph;
   GraphReader::readFmiFile(graph, path + "test.fmi");
-  CHGraph chGraph;
+  std::shared_ptr<CHGraph> chGraph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(chGraph, path + "test.chfmi", false);
-  auto hubLabelStore = HubLabelStore::makeShared(chGraph.getNodes().size());
+  auto hubLabelStore = HubLabelStore::makeShared(chGraph->getNodes().size());
   HubLabelCreator hlc(chGraph, hubLabelStore);
   int labelsUntilLevel = 0;
   hlc.create(labelsUntilLevel);
-  RamCellIdStore ramCellIdStore(chGraph.getNumberOfEdges());
-  HybridPathFinder hybridPathFinder(hubLabelStore, std::make_shared<RamGraph>(chGraph), std::make_shared<RamCellIdStore>(ramCellIdStore), labelsUntilLevel);
+
+  RamCellIdStore ramCellIdStore(chGraph->getNumberOfEdges());
+  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph,
+      std::make_shared<RamCellIdStore>(ramCellIdStore), labelsUntilLevel);
 
   Dijkstra dijkstra(graph);
   for(int i = 0; i < graph.numberOfNodes; ++i) {
@@ -34,14 +36,14 @@ TEST(RoutingTest, PathFindingWorks) {
   std::string path = "/home/sokol/Uni/path_finder/test-data/";
   Graph graph;
   GraphReader::readFmiFile(graph, path + "test.fmi");
-  CHGraph chGraph;
+  std::shared_ptr<CHGraph> chGraph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(chGraph, path + "test.chfmi", false);
-  std::shared_ptr<HubLabelStore> hubLabelStore = HubLabelStore::makeShared(chGraph.getNumberOfNodes());
+  std::shared_ptr<HubLabelStore> hubLabelStore = HubLabelStore::makeShared(chGraph->getNumberOfNodes());
   HubLabelCreator hlc(chGraph, hubLabelStore);
   int labelsUntilLevel = 0;
   hlc.create(labelsUntilLevel);
-  RamCellIdStore ramCellIdStore(chGraph.getNumberOfEdges());
-  HybridPathFinder hybridPathFinder(hubLabelStore, std::make_shared<RamGraph>(chGraph), std::make_shared<RamCellIdStore>(ramCellIdStore), labelsUntilLevel);
+  auto ramCellIdStore = std::make_shared<CellIdStore>(chGraph->getNumberOfEdges());
+  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph, ramCellIdStore, labelsUntilLevel);
 
   auto routingResult = hybridPathFinder.getShortestPath(0, 0);
   ASSERT_TRUE(routingResult.path.empty());

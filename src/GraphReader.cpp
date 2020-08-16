@@ -39,17 +39,17 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph,
 }
 
 void pathFinder::GraphReader::readCHFmiFile(
-    pathFinder::CHGraph &graph, const std::string &filepath, bool reorderWithGrid) {
+    std::shared_ptr<pathFinder::CHGraph> graph, const std::string &filepath, bool reorderWithGrid) {
   std::ifstream in(filepath);
   std::string line;
   // ignore first 10 lines
   for (auto i = 0; i < 10; ++i) {
     std::getline(in, line);
   }
-  in >> graph.m_numberOfNodes;
-  in >> graph.m_numberOfEdges;
-  graph.m_nodes = (CHNode*)std::calloc(graph.m_numberOfNodes, sizeof(CHNode));
-  graph.m_edges = (CHEdge*)std::calloc(graph.m_numberOfEdges, sizeof(CHEdge));
+  in >> graph->m_numberOfNodes;
+  in >> graph->m_numberOfEdges;
+  graph->m_nodes = (CHNode*)std::calloc(graph->m_numberOfNodes, sizeof(CHNode));
+  graph->m_edges = (CHEdge*)std::calloc(graph->m_numberOfEdges, sizeof(CHEdge));
 
   uint32_t type;
   uint32_t maxSpeed;
@@ -59,32 +59,32 @@ void pathFinder::GraphReader::readCHFmiFile(
   Lat lat;
   Lng lng;
   uint32_t el;
-  int i = graph.m_numberOfNodes + 1;
+  int i = graph->m_numberOfNodes + 1;
   int j = 0;
   CHNode node{};
   while (--i > 0 &&
          in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
     node.latLng = {lat, lng};
-    graph.m_nodes[j++] = node;
+    graph->m_nodes[j++] = node;
   }
-  i = graph.m_numberOfEdges + 1;
+  i = graph->m_numberOfEdges + 1;
   j = 0;
   CHEdge edge{};
   while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >>
                         type >> maxSpeed >> child1 >> child2) {
     child1 == -1 ? edge.child1 = std::nullopt : edge.child1 = child1;
     child2 == -1 ? edge.child2 = std::nullopt : edge.child2 = child2;
-    graph.m_edges[j++] = edge;
+    graph->m_edges[j++] = edge;
   }
 
 #if TEST
-  graph.randomizeLatLngs();
+  graph->randomizeLatLngs();
 #endif
   if(reorderWithGrid)
-    gridReorder(graph);
-  buildOffset(graph.m_edges, graph.m_numberOfEdges, graph.m_offset);
-  buildBackEdges(graph.m_edges, graph.m_backEdges, graph.m_numberOfEdges);
-  buildOffset(graph.m_backEdges, graph.m_numberOfEdges, graph.m_backOffset);
+    gridReorder(*graph);
+  buildOffset(graph->m_edges, graph->m_numberOfEdges, graph->m_offset);
+  buildBackEdges(graph->m_edges, graph->m_backEdges, graph->m_numberOfEdges);
+  buildOffset(graph->m_backEdges, graph->m_numberOfEdges, graph->m_backOffset);
 }
 
 

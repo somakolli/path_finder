@@ -15,7 +15,7 @@ namespace pathFinder{
   m_pathFinderRam = FileLoader::loadHubLabelsSharedRam(dataPath);
   m_pathFinderMMap = FileLoader::loadHubLabelsShared(dataPath);
 }
-[[maybe_unused]] Benchmarker::Benchmarker(std::shared_ptr<HybridPFRam>& pathFinderRam, std::shared_ptr<HybridPF>& pathFinderMMap,
+[[maybe_unused]] Benchmarker::Benchmarker(std::shared_ptr<HybridPathFinder>& pathFinderRam, std::shared_ptr<HybridPathFinder>& pathFinderMMap,
                          std::string  outPutPath)
                         : m_pathFinderMMap(pathFinderMMap), m_pathFinderRam(pathFinderRam), m_outputPath(std::move(outPutPath))
 {}

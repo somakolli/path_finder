@@ -52,9 +52,9 @@ TEST(Graph, ReadWorks) {
   ASSERT_EQ(edge2.target, 7);
 }
 TEST(CHGraph, ReadWorks) {
-  CHGraph graph;
+  auto graph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
-  auto edges = graph.edgesFor(1, EdgeDirection::FORWARD);
+  auto edges = graph->edgesFor(1, EdgeDirection::FORWARD);
   auto edge0 = CHEdge(*edges.begin());
   auto edge1 = CHEdge(*(edges.begin() + 1));
   auto edge2 = CHEdge(*(edges.begin() + 2));
@@ -75,10 +75,10 @@ TEST(CHGraph, ReadWorks) {
   ASSERT_EQ(edge5.target, 7);
 }
 TEST(CHGraph, ReadFromDiskWorks) {
-  CHGraph graph;
+  auto graph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
 
-  FileWriter::writeGraph(graph, "test", "testGraph/");
+  FileWriter::writeGraph(*graph, "test", "testGraph/");
   auto graphLoaded = FileLoader::loadGraph("testGraph");
   auto edges = graphLoaded->edgesFor(1, EdgeDirection::FORWARD);
   auto edge0 = CHEdge(*edges.begin());
@@ -102,36 +102,34 @@ TEST(CHGraph, ReadFromDiskWorks) {
 
 }
 TEST(CHGraph, GridReorderWorks) {
-  CHGraph graph;
+  auto graph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
-  graph.randomizeLatLngs();
+  graph->randomizeLatLngs();
 
   std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
   std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;
 
-  for(const auto& edge :graph.getEdges()) {
-    const auto& sourceNode = graph.getNode(edge.source);
-    const auto& targetNode = graph.getNode(edge.target);
+  for(const auto& edge :graph->getEdges()) {
+    const auto& sourceNode = graph->getNode(edge.source);
+    const auto& targetNode = graph->getNode(edge.target);
     forwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
-  for(const auto& edge :graph.getBackEdges()) {
-    const auto& sourceNode = graph.getNode(edge.source);
-    const auto& targetNode = graph.getNode(edge.target);
+  for(const auto& edge :graph->getBackEdges()) {
+    const auto& sourceNode = graph->getNode(edge.source);
+    const auto& targetNode = graph->getNode(edge.target);
     backwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
-  CHGraph reorderedGraph;
+  auto reorderedGraph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(reorderedGraph, PATH + "test.chfmi", true);
-  for(const auto& node : graph.getNodes()) {
-    auto reorderedNode = reorderedGraph.getNode(reorderedGraph.getNodeIdFor(node.latLng));
-    ASSERT_TRUE(haveSameEdges(graph, node, reorderedGraph, reorderedNode));
+  for(const auto& node : graph->getNodes()) {
+    auto reorderedNode = reorderedGraph->getNode(reorderedGraph->getNodeIdFor(node.latLng));
+    ASSERT_TRUE(haveSameEdges(*graph, node, *reorderedGraph, reorderedNode));
   }
-
-
   for(const auto& [source, target]: forwardEdgesBeforeReorder) {
-      ASSERT_TRUE(edgeExists(graph, reorderedGraph.getEdges(), source, target));
+      ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getEdges(), source, target));
   }
   for(const auto& [source, target]: backwardEdgesBeforeReorder) {
-      ASSERT_TRUE(edgeExists(graph, reorderedGraph.getBackEdges(), source, target));
+      ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getBackEdges(), source, target));
   }
 }
 }
