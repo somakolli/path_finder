@@ -24,20 +24,20 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<GraphDataInfo>(str);
-  auto nodes = Static::getFromFileMMap<CHNode>(config.nodes, graphFolder);
-  auto forwardEdges = Static::getFromFileMMap<CHEdge>(config.forwardEdges, graphFolder);
-  auto backwardEdges = Static::getFromFileMMap<CHEdge>(config.backwardEdges, graphFolder);
-  auto forwardOffset = Static::getFromFileMMap<NodeId>(config.forwardOffset, graphFolder);
-  auto backwardOffset = Static::getFromFileMMap<NodeId>(config.backwardOffset, graphFolder);
+  auto nodes = Static::getFromFile<CHNode>(config.nodes, graphFolder, mmap);
+  auto forwardEdges = Static::getFromFile<CHEdge>(config.forwardEdges, graphFolder, mmap);
+  auto backwardEdges = Static::getFromFile<CHEdge>(config.backwardEdges, graphFolder, mmap);
+  auto forwardOffset = Static::getFromFile<NodeId>(config.forwardOffset, graphFolder, mmap);
+  auto backwardOffset = Static::getFromFile<NodeId>(config.backwardOffset, graphFolder, mmap);
 
   CHGraphCreateInfo chGraphCreateInfo{};
-  chGraphCreateInfo.nodes = nodes.data();
-  chGraphCreateInfo.edges = forwardEdges.data();
-  chGraphCreateInfo.backEdges = backwardEdges.data();
-  chGraphCreateInfo.offset = forwardOffset.data();
-  chGraphCreateInfo.backOffset = backwardOffset.data();
-  chGraphCreateInfo.numberOfEdges = forwardEdges.size();
-  chGraphCreateInfo.numberOfNodes = nodes.size();
+  chGraphCreateInfo.nodes = nodes;
+  chGraphCreateInfo.edges = forwardEdges;
+  chGraphCreateInfo.backEdges = backwardEdges;
+  chGraphCreateInfo.offset = forwardOffset;
+  chGraphCreateInfo.backOffset = backwardOffset;
+  chGraphCreateInfo.numberOfEdges = config.forwardEdges.size;
+  chGraphCreateInfo.numberOfNodes = config.nodes.size;
 
   chGraphCreateInfo.setAllMMap(mmap);
 
@@ -53,14 +53,14 @@ std::shared_ptr<pathFinder::MMapCellIdStore> pathFinder::FileLoader::loadCellIds
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<CellDataInfo>(str);
-  auto cellIds = Static::getFromFileMMap<CellId_t>(config.cellIds, cellIdFolder);
-  auto cellIdsOffset = Static::getFromFileMMap<OffsetElement>(config.cellIdsOffset, cellIdFolder);
+  auto cellIds = Static::getFromFile<CellId_t>(config.cellIds, cellIdFolder, mmap);
+  auto cellIdsOffset = Static::getFromFile<OffsetElement>(config.cellIdsOffset, cellIdFolder, mmap);
 
   CellIdStoreCreateInfo cellIdStoreCreateInfo{};
-  cellIdStoreCreateInfo.cellIds = cellIds.data();
-  cellIdStoreCreateInfo.offsetVector = cellIdsOffset.data();
-  cellIdStoreCreateInfo.cellIdSize = cellIds.size();
-  cellIdStoreCreateInfo.offsetSize = cellIdsOffset.size();
+  cellIdStoreCreateInfo.cellIds = cellIds;
+  cellIdStoreCreateInfo.offsetVector = cellIdsOffset;
+  cellIdStoreCreateInfo.cellIdSize = config.cellIds.size;
+  cellIdStoreCreateInfo.offsetSize = config.cellIdsOffset.size;
 
   cellIdStoreCreateInfo.setAllMMap(mmap);
 
@@ -73,19 +73,19 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HubLabelDataInfo>(str);
-  auto forwardHublabels = Static::getFromFileMMap<CostNode>(config.forwardHublabels, hubLabelFolder);
-  auto backwardHublabels = Static::getFromFileMMap<CostNode>(config.backwardHublabels, hubLabelFolder);
-  auto forwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder);
-  auto backwardHublabelOffset = Static::getFromFileMMap<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder);
+  auto forwardHublabels = Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder,mmap);
+  auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder,mmap);
+  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder,mmap);
+  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder,mmap);
 
   HubLabelStoreInfo hubLabelStoreInfo{};
-  hubLabelStoreInfo.numberOfLabels = forwardHublabelOffset.size();
-  hubLabelStoreInfo.forwardLabelSize = forwardHublabels.size();
-  hubLabelStoreInfo.backwardLabelSize = forwardHublabels.size();
-  hubLabelStoreInfo.forwardLabels = forwardHublabels.data();
-  hubLabelStoreInfo.backwardLabels = backwardHublabels.data();
-  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset.data();
-  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset.data();
+  hubLabelStoreInfo.numberOfLabels = config.forwardHublabelOffset.size;
+  hubLabelStoreInfo.forwardLabelSize = config.forwardHublabels.size;
+  hubLabelStoreInfo.backwardLabelSize = config.backwardHublabels.size;
+  hubLabelStoreInfo.forwardLabels = forwardHublabels;
+  hubLabelStoreInfo.backwardLabels = backwardHublabels;
+  hubLabelStoreInfo.forwardOffset = forwardHublabelOffset;
+  hubLabelStoreInfo.backwardOffset = backwardHublabelOffset;
   hubLabelStoreInfo.calculatedUntilLevel = config.calculatedUntilLevel;
 
   hubLabelStoreInfo.setAllMMap(mmap);

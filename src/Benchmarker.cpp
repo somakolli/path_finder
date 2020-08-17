@@ -32,7 +32,6 @@ void Benchmarker::benchmarkAllLevel(uint32_t numberOfQueries,
     ramResult.push_back(ramResultForOneLevel);
     mmapResult.push_back(mmapResultForOneLevel);
   }
-
 }
 void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries,
                                  BenchResult& ramResult, BenchResult& mmapResult) {
@@ -58,9 +57,7 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries,
       totalMMapTime += mmapResultReturn.distanceTime;
       totalCalCLabelRamTimingInfo += ramResultReturn.calcLabelTimingInfo;
       totalCalCLabelMMapTimingInfo += mmapResultReturn.calcLabelTimingInfo;
-    } catch (const std::runtime_error& e) {
-
-    }
+    } catch (const std::runtime_error& e) {}
   }
   double averageRamTime = totalRamTime / numberOfQueries;
   double averageMMapTime = totalMMapTime / numberOfQueries;
@@ -78,7 +75,7 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries,
   mmapResult = std::make_pair(level , mmapAverageRoutingResult);
   ramResult = std::make_pair(level , ramAverageRoutingResult);
 
-  std::string line {"----------------------"};
+  std::string line {"--------------------"};
   std::cout << "level:" << level << '\n';
   std::cout << line << '\n';
   std::cout << "ram" << '\n';
@@ -98,4 +95,3 @@ void Benchmarker::dropCaches() {
   ofs << "3" << std::endl;
 }
 }
-

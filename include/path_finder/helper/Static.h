@@ -107,15 +107,22 @@ public:
   }
 
   template <typename T>
-  static inline std::vector<T>
-  getFromFile(pathFinder::BinaryFileDescription fileDescription,
-              const std::string& folderPrefix) {
+  static inline T*
+  getFromFile(const pathFinder::BinaryFileDescription& fileDescription,
+              const std::string& folderPrefix, bool mmap) {
     std::string path = !folderPrefix.empty() ? folderPrefix  + '/' + fileDescription.path : fileDescription.path;
-    FILE *file = fopen64(
-        path.c_str(), "r");
-    std::vector<T> buf(fileDescription.size);
-    std::fread(&buf[0], sizeof(buf[0]), buf.size(), file);
-    return buf;
+    T* ptr = nullptr;
+    FILE *file = fopen64(path.c_str(), "r");
+    if(!mmap) {
+      ptr = (T*) std::malloc(fileDescription.size * sizeof(T));
+      std::fread(ptr, sizeof(T), fileDescription.size, file);
+    } else {
+      ptr =
+          (T*)mmap64(nullptr, sizeof(T) * fileDescription.size, PROT_READ, MAP_SHARED, fileno(file), 0);
+      if (ptr == MAP_FAILED)
+        throw std::runtime_error("could not map file(" + std::string(path) + ") to memory");
+    }
+    return ptr;
   }
 
   template <typename T>
