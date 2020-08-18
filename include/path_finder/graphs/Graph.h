@@ -73,6 +73,9 @@ public:
   MyPointerType end() { return _end; };
   MyPointerType end() const { return _end; };
   size_t size() { return _end - _begin; }
+  auto operator[](size_t position) const {
+    return *(begin() + position);
+  }
 };
 class Graph {
 public:

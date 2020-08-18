@@ -20,10 +20,11 @@ class OscarIntegrator {
 public:
   template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
   static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
+    const auto edges = graph.getEdges();
     int progress = 0;
 #pragma omp parallel for default(shared)
-    for(int i = 0; i < graph.m_edges.size(); ++i) {
-      const auto& edge = graph.m_edges[i];
+    for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
+      const auto& edge = edges[i];
       if(edge.child1.has_value()){
         ++progress;
         continue;
@@ -48,7 +49,7 @@ public:
         diskWriter(i, cellIds);
         ++progress;
         if(progress % 1000 == 0)
-            std::cout << "progress: " << progress << "/" << graph.m_edges.size() << '\n';
+            std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
         //std::cout << "count: " << cellIds.size() << '\n';
       }
     }

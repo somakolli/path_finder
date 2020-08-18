@@ -11,8 +11,8 @@ public:
   static void writeGraph(const CHGraph & graph, const std::string& graphName, const std::string& folder);
   static void writeHubLabels(const RamHubLabelStore & hubLabelStore, const std::string& graphName, const std::string& folder);
   static void writeCells(const RamCellIdStore& cellIdStore, const std::string& graphName, const std::string& folder);
-  static void writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
-                       RamCellIdStore* cellIdStore, const std::string &folder);
+  static void writeAll(std::shared_ptr<RamGraph> graph, std::shared_ptr<RamHubLabelStore> hubLabelStore,
+                       std::shared_ptr<RamCellIdStore> cellIdStore, const std::string &folder);
 };
 
 }

@@ -74,8 +74,8 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   out << j.dump();
   out.close();
 }
-void FileWriter::writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
-                          RamCellIdStore* cellIdStore, const std::string &folder) {
+void FileWriter::writeAll(std::shared_ptr<RamGraph> graph, std::shared_ptr<RamHubLabelStore> hubLabelStore,
+                          std::shared_ptr<RamCellIdStore> cellIdStore, const std::string &folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::HybridPfDataInfo dataInfo;
@@ -105,4 +105,3 @@ void FileWriter::writeAll(RamGraph* graph, RamHubLabelStore* hubLabelStore,
   out.close();
 }
 }
-
