@@ -28,6 +28,8 @@ struct LatLng {
   Lat lat;
   Lng lng;
 
+  LatLng() = default;
+  LatLng(const double lat, const double lng): lat(lat), lng(lng) {}
   bool operator==(LatLng other) const {
     return other.lat == lat && other.lng == lng;
   }
