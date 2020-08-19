@@ -2,7 +2,6 @@
 #define ALG_ENG_PROJECT_CHGRAPH_H
 
 #include "Graph.h"
-#include <gtest/gtest.h>
 #include <algorithm>
 #include <cmath>
 #include <map>
