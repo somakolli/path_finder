@@ -2,7 +2,6 @@
 #define ALG_ENG_PROJECT_CHGRAPH_H
 
 #include "Graph.h"
-#include <gtest/gtest.h>
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -47,9 +46,6 @@ friend class FileReader;
 friend class GraphReader;
 friend class FileWriter;
 friend class Grid;
-FRIEND_TEST(Graph, ReadWorks);
-FRIEND_TEST(Graph, GridReorderWorks);
-FRIEND_TEST(Graph, ReadFromDiskWorks);
 public:
   CHGraph();
 
