@@ -46,9 +46,6 @@ friend class FileReader;
 friend class GraphReader;
 friend class FileWriter;
 friend class Grid;
-FRIEND_TEST(Graph, ReadWorks);
-FRIEND_TEST(Graph, GridReorderWorks);
-FRIEND_TEST(Graph, ReadFromDiskWorks);
 public:
   CHGraph();
 
