@@ -136,11 +136,11 @@ void HubLabelCreator::selfPrune(costNodeVec_t &label,
           MyIterator(forwardLabels, forwardLabels + forwardSize),
           MyIterator(label.begin().base(), label.end().base()),
           topNode);
-      free(forwardLabels);
       if (d.has_value() && d.value() < cost) {
         label[i] = label[label.size() - 1];
         label.pop_back();
       }
+      free(forwardLabels);
     }
   }
 }
