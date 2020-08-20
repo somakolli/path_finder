@@ -1,28 +1,28 @@
 #include <fstream>
 #include <path_finder/helper/Timer.h>
+#include <path_finder/routing/CHDijkstra.h>
 #include <path_finder/storage/FileLoader.h>
+namespace pathFinder {
 std::shared_ptr<pathFinder::HybridPathFinder>
 pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder, bool mmap) {
   std::ifstream t(configFolder + "/config.json");
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HybridPfDataInfo>(str);
   auto chGraph = loadGraph(configFolder + "/graph/");
   std::shared_ptr<MMapHubLabelStore> hubLabelStore;
   std::shared_ptr<MMapCellIdStore> cellIdStore;
-  if(config.cellIdsCalculated){
+  if (config.cellIdsCalculated) {
     cellIdStore = loadCellIds(configFolder + "/cellIds/");
   }
-  if(config.hubLabelsCalculated)
+  if (config.hubLabelsCalculated)
     hubLabelStore = loadHubLabels(configFolder + "/hubLabels/");
 
   return std::make_shared<HybridPathFinder>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
-                                             config.hubLabelsCalculated, config.cellIdsCalculated);
+                                            config.hubLabelsCalculated, config.cellIdsCalculated);
 }
 std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder, bool mmap) {
   std::ifstream t(graphFolder + "/config.json");
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<GraphDataInfo>(str);
   auto nodes = Static::getFromFile<CHNode>(config.nodes, graphFolder, mmap);
   auto forwardEdges = Static::getFromFile<CHEdge>(config.forwardEdges, graphFolder, mmap);
@@ -43,15 +43,15 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
 
   auto chGraph = std::make_shared<CHGraph>(chGraphCreateInfo);
   // set up grid
-  for(auto gridEntry : config.gridMapEntries) {
+  for (auto gridEntry : config.gridMapEntries) {
     chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
   }
   return chGraph;
 }
-std::shared_ptr<pathFinder::MMapCellIdStore> pathFinder::FileLoader::loadCellIds(const std::string &cellIdFolder, bool mmap) {
+std::shared_ptr<pathFinder::MMapCellIdStore> pathFinder::FileLoader::loadCellIds(const std::string &cellIdFolder,
+                                                                                 bool mmap) {
   std::ifstream t(cellIdFolder + "/config.json");
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<CellDataInfo>(str);
   auto cellIds = Static::getFromFile<CellId_t>(config.cellIds, cellIdFolder, mmap);
   auto cellIdsOffset = Static::getFromFile<OffsetElement>(config.cellIdsOffset, cellIdFolder, mmap);
@@ -67,16 +67,16 @@ std::shared_ptr<pathFinder::MMapCellIdStore> pathFinder::FileLoader::loadCellIds
   auto cellIdStore = std::make_shared<CellIdStore>(cellIdStoreCreateInfo);
   return cellIdStore;
 }
-std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLabels(const std::string &hubLabelFolder, bool mmap) {
+std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLabels(const std::string &hubLabelFolder,
+                                                                                     bool mmap) {
 
   std::ifstream t(hubLabelFolder + "/config.json");
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HubLabelDataInfo>(str);
-  auto forwardHublabels = Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder,mmap);
-  auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder,mmap);
-  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder,mmap);
-  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder,mmap);
+  auto forwardHublabels = Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder, mmap);
+  auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder, mmap);
+  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder, mmap);
+  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder, mmap);
 
   HubLabelStoreInfo hubLabelStoreInfo{};
   hubLabelStoreInfo.numberOfLabels = config.forwardHublabelOffset.size;
@@ -98,20 +98,19 @@ std::shared_ptr<pathFinder::MMapHubLabelStore> pathFinder::FileLoader::loadHubLa
 std::shared_ptr<pathFinder::HybridPathFinder>
 pathFinder::FileLoader::loadHubLabelsSharedRam(const std::string &configFolder) {
   std::ifstream t(configFolder + "/config.json");
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HybridPfDataInfo>(str);
   auto chGraph = loadGraphRam(configFolder + "/graph/");
   std::shared_ptr<RamHubLabelStore> hubLabelStore;
   std::shared_ptr<RamCellIdStore> cellIdStore;
-  if(config.cellIdsCalculated){
+  if (config.cellIdsCalculated) {
     cellIdStore = loadCellIdsRam(configFolder + "/cellIds/");
   }
-  if(config.hubLabelsCalculated)
+  if (config.hubLabelsCalculated)
     hubLabelStore = loadHubLabelsRam(configFolder + "/hubLabels/");
 
   return std::make_shared<HybridPathFinder>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
-                                             config.hubLabelsCalculated, config.cellIdsCalculated);
+                                            config.hubLabelsCalculated, config.cellIdsCalculated);
 }
 std::shared_ptr<pathFinder::RamGraph> pathFinder::FileLoader::loadGraphRam(const std::string &graphFolder) {
   return loadGraph(graphFolder, false);
@@ -119,6 +118,16 @@ std::shared_ptr<pathFinder::RamGraph> pathFinder::FileLoader::loadGraphRam(const
 std::shared_ptr<pathFinder::RamCellIdStore> pathFinder::FileLoader::loadCellIdsRam(const std::string &cellIdFolder) {
   return loadCellIds(cellIdFolder, false);
 }
-std::shared_ptr<pathFinder::RamHubLabelStore> pathFinder::FileLoader::loadHubLabelsRam(const std::string &hubLabelFolder) {
+std::shared_ptr<pathFinder::RamHubLabelStore>
+pathFinder::FileLoader::loadHubLabelsRam(const std::string &hubLabelFolder) {
   return loadHubLabels(hubLabelFolder, false);
+}
+std::shared_ptr<CHDijkstra> pathFinder::FileLoader::loadCHDijkstraShared(const std::string &configFolder, bool mmap) {
+  auto chGraph = loadGraph(configFolder + "/graph/");
+  return std::make_shared<CHDijkstra>(chGraph);
+}
+std::shared_ptr<CHDijkstra> pathFinder::FileLoader::loadCHDijkstraRam(const std::string &configFolder) {
+  auto chGraph = loadGraphRam(configFolder + "/graph/");
+  return std::make_shared<CHDijkstra>(chGraph);
+}
 }

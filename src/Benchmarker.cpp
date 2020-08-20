@@ -14,13 +14,20 @@ namespace pathFinder{
 {
   m_pathFinderRam = FileLoader::loadHubLabelsSharedRam(dataPath);
   m_pathFinderMMap = FileLoader::loadHubLabelsShared(dataPath);
+  m_chDijkstraRam = FileLoader::loadCHDijkstraRam(dataPath);
+  m_chDijkstraMMap = FileLoader::loadCHDijkstraShared(dataPath);
 }
-[[maybe_unused]] Benchmarker::Benchmarker(std::shared_ptr<HybridPathFinder>& pathFinderRam, std::shared_ptr<HybridPathFinder>& pathFinderMMap,
-                         std::string  outPutPath)
-                        : m_pathFinderMMap(pathFinderMMap), m_pathFinderRam(pathFinderRam), m_outputPath(std::move(outPutPath))
+[[maybe_unused]] Benchmarker::Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam,
+                                          std::shared_ptr<HybridPathFinder> pathFinderMMap,
+                                          std::shared_ptr<CHDijkstra> chDijkstraRam,
+                                          std::shared_ptr<CHDijkstra> chDijkstraMMap,
+                                          std::string  outPutPath)
+                        : m_pathFinderMMap(pathFinderMMap),
+                          m_pathFinderRam(pathFinderRam),
+                          m_outputPath(std::move(outPutPath))
 {}
 void Benchmarker::benchmarkAllLevel(uint32_t numberOfQueries,
-            std::vector<BenchResult>& ramResult,std::vector<BenchResult>& mmapResult) {
+            std::vector<BenchResult>& ramResult, std::vector<BenchResult>& mmapResult){
   uint32_t numberOfNodes = m_pathFinderRam->graphNodeSize();
   std::uniform_int_distribution<> distr(0, numberOfNodes-1);
   auto maxLevel = m_pathFinderRam->getMaxLevel();
@@ -86,12 +93,56 @@ void Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries,
   std::cout << totalCalCLabelMMapTimingInfo << '\n';
   std::cout << "totalTime: " << averageMMapTime << '\n';
   std::cout << line << '\n';
-
 }
 void Benchmarker::dropCaches() {
   sync();
 
   std::ofstream ofs("/proc/sys/vm/drop_caches");
   ofs << "3" << std::endl;
+}
+void Benchmarker::benchmarkCHDijkstra(uint32_t numberOfLevels,
+                                      RoutingResult &chMMapResult,
+                                      RoutingResult &chRamResult) {
+
+  std::random_device rd; // obtain a random number from hardware
+  std::mt19937 gen(rd()); // seed the generator
+  uint32_t numberOfNodes = m_pathFinderRam->graphNodeSize();
+  std::uniform_int_distribution<> distr(0, numberOfNodes-1);
+
+  double totalRamTime = 0;
+  double totalMMapTime = 0;
+  for(int i = 0; i < numberOfLevels; ++i) {
+    uint32_t sourceId = distr(gen);
+    uint32_t targetId = distr(gen);
+    Stopwatch ramWatch;
+    auto chRamResult = m_chDijkstraRam->getShortestDistance(sourceId, targetId);
+    auto ramTime = ramWatch.elapsedMicro();
+    dropCaches();
+    totalRamTime += ramTime;
+    Stopwatch mmapWatch;
+    auto chMMapResult = m_chDijkstraMMap->getShortestDistance(sourceId, targetId);
+    auto mmapTime = mmapWatch.elapsedMicro();
+    totalMMapTime += mmapTime;
+    dropCaches();
+  }
+  double averageRamTime = totalRamTime / numberOfLevels;
+  double averageMMapTime = totalMMapTime / numberOfLevels;
+
+  RoutingResult ramRoutingResult{};
+  ramRoutingResult.distanceTime = averageRamTime;
+
+  RoutingResult mmapRoutingResult{};
+  mmapRoutingResult.distanceTime = averageMMapTime;
+
+  chRamResult = ramRoutingResult;
+  chMMapResult = mmapRoutingResult;
+
+  std::string line = "------------------------------\n";
+
+  std::cout << line;
+  std::cout << "Normal CH" << '\n';
+  std::cout << "mmap: " << chMMapResult.distanceTime << '\n';
+  std::cout << "ram: " << chRamResult.distanceTime << '\n';
+  std::cout << line;
 }
 }
