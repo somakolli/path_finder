@@ -12,9 +12,9 @@
 #include <set>
 
 namespace pathFinder {
-template <typename Graph> class CHDijkstra : public PathFinderBase {
+class CHDijkstra : public PathFinderBase {
 public:
-  explicit CHDijkstra(Graph &graph);
+  explicit CHDijkstra(CHGraph &graph);
   std::optional<Distance> getShortestDistance(NodeId source,
                                               NodeId target);
   std::vector<CostNode> shortestDistance(NodeId source,
@@ -23,11 +23,11 @@ public:
 private:
   std::vector<Distance> cost;
   std::vector<NodeId> visited;
-  Graph &graph;
+  CHGraph &graph;
 };
-template <typename Graph>
+
 std::vector<pathFinder::CostNode>
-pathFinder::CHDijkstra<Graph>::shortestDistance(
+pathFinder::CHDijkstra::shortestDistance(
     pathFinder::NodeId source, pathFinder::EdgeDirection direction) {
   std::vector<CostNode> settledNodes;
   for (auto nodeId : visited)
@@ -57,17 +57,17 @@ pathFinder::CHDijkstra<Graph>::shortestDistance(
   }
   return settledNodes;
 }
-template <typename Graph>
-pathFinder::CHDijkstra<Graph>::CHDijkstra(Graph &graph) : graph(graph) {
-  cost.reserve(graph.numberOfNodes);
-  while (cost.size() <= graph.numberOfNodes)
+
+pathFinder::CHDijkstra::CHDijkstra(CHGraph &graph) : graph(graph) {
+  cost.reserve(graph.getNumberOfNodes());
+  while (cost.size() <= graph.getNumberOfNodes())
     cost.emplace_back(MAX_DISTANCE);
 }
-template <typename Graph>
+
 std::optional<pathFinder::Distance>
-pathFinder::CHDijkstra<Graph>::getShortestDistance(pathFinder::NodeId source,
+pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
                                                    pathFinder::NodeId target) {
-  if (source >= graph.getNodes().size() || target >= graph.getNodes().size())
+  if (source >= graph.getNumberOfNodes() || target >= graph.getNumberOfNodes())
     return std::nullopt;
   auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
   auto backwardLabel = shortestDistance(target, EdgeDirection::BACKWARD);
