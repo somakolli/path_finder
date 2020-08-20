@@ -83,7 +83,7 @@ HubLabelCreator::calcLabel(NodeId nodeId,
   Level level = m_graph->getLevel(nodeId);
   costNodeVec_t label;
   costNodeVec_t newLabel;
-  label.reserve(100);
+  label.reserve(1000);
   for (const auto &edge : m_graph->edgesFor(nodeId, direction)) {
     if (level < m_graph->getLevel(edge.target)) {
       CostNode* targetLabel;
@@ -102,6 +102,7 @@ HubLabelCreator::calcLabel(NodeId nodeId,
   int sizeBeforePrune = label.size();
   selfPrune(label, nodeId, direction);
   label.shrink_to_fit();
+  //std::cout << "pruning saved: " << sizeBeforePrune - label.size() << '\n';
   Static::sortLabel(label);
   return label;
 }
@@ -112,11 +113,34 @@ void HubLabelCreator::selfPrune(costNodeVec_t &label,
   bool forward = (direction == EdgeDirection::FORWARD);
   for (int i = (int)label.size() - 1; i >= 0; --i) {
     auto &[id, cost, previousNode] = label[i];
-    std::optional<Distance> d = forward ? getShortestDistance(nodeId, id)
-                                        : getShortestDistance(id, nodeId);
-    if (d.has_value() && d.value() < cost) {
-      label[i] = label[label.size() - 1];
-      label.pop_back();
+    if(forward) {
+     CostNode* backwardLabels;
+     size_t backwardSize;
+     m_hubLabelStore->retrieve(id, EdgeDirection::BACKWARD, backwardLabels, backwardSize);
+     NodeId topNode;
+      auto d = Static::getShortestDistance(
+         MyIterator(label.begin().base(), label.end().base()),
+         MyIterator(backwardLabels, backwardLabels + backwardSize),
+         topNode);
+      if (d.has_value() && d.value() < cost) {
+        label[i] = label[label.size() - 1];
+        label.pop_back();
+      }
+      free(backwardLabels);
+    } else {
+      CostNode* forwardLabels;
+      size_t forwardSize;
+      m_hubLabelStore->retrieve(nodeId, EdgeDirection::FORWARD, forwardLabels, forwardSize);
+      NodeId topNode;
+      auto d = Static::getShortestDistance(
+          MyIterator(forwardLabels, forwardLabels + forwardSize),
+          MyIterator(label.begin().base(), label.end().base()),
+          topNode);
+      free(forwardLabels);
+      if (d.has_value() && d.value() < cost) {
+        label[i] = label[label.size() - 1];
+        label.pop_back();
+      }
     }
   }
 }
