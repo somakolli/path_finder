@@ -125,7 +125,7 @@ pathFinder::MyIterator<const pathFinder::CHEdge *> pathFinder::CHGraph::getEdges
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
 pathFinder::MyIterator<const pathFinder::CHEdge *> pathFinder::CHGraph::edgesFor(pathFinder::NodeId node,
-                                                                                 pathFinder::EdgeDirection direction) {
+                                                                                 pathFinder::EdgeDirection direction) const {
   switch (direction) {
   case FORWARD:
     return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};

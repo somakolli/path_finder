@@ -52,9 +52,9 @@ pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
   Static::sortLabel(forwardLabel);
   Static::sortLabel(backwardLabel);
   NodeId topNode;
-  return Static::getShortestDistance(MyIterator<CostNode *>(forwardLabel.begin().base(),
+  return Static::getShortestDistance(MyIterator<volatile const CostNode *>(forwardLabel.begin().base(),
                                                             forwardLabel.end().base()),
-                                     MyIterator<CostNode *>(backwardLabel.begin().base(),
+                                     MyIterator<volatile const CostNode *>(backwardLabel.begin().base(),
                                                             backwardLabel.end().base()),
                                      topNode);
 }

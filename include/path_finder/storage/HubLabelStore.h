@@ -2,17 +2,13 @@
 // Created by sokol on 23.01.20.
 //
 
-#ifndef MASTER_ARBEIT_HUBLABELSTORE_H
-#define MASTER_ARBEIT_HUBLABELSTORE_H
+#pragma once
 
-#include "path_finder/graphs/Graph.h"
-#include <vector>
+#include <path_finder/graphs/Graph.h>
+
 #include <memory>
+#include <vector>
 namespace pathFinder {
-struct OffsetElement {
-  size_t position = 0;
-  size_t size = 0;
-};
 struct HubLabelStoreInfo {
   CostNode* forwardLabels;
   CostNode* backwardLabels;
@@ -58,16 +54,17 @@ public:
   void store(const std::vector<CostNode> &label, NodeId id,
              EdgeDirection direction);
 
-  void retrieve(NodeId id, EdgeDirection direction, std::vector<CostNode>& storeVec);
-  void retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size);
+  MyIterator<const CostNode*> retrieveIt(NodeId id, EdgeDirection direction) const;
+
+  std::vector<CostNode> retrieve(NodeId id, EdgeDirection direction) const;
+  void retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size) const;
   [[nodiscard]] size_t getNumberOfLabels() const;
   [[nodiscard]] size_t getForwardLabelsSize() const;
   [[nodiscard]] size_t getBackwardLabelsSize() const;
   [[nodiscard]] size_t getForwardOffsetSize() const;
   [[nodiscard]] size_t getBackwardOffsetSize() const;
   static size_t getSpaceConsumption();
-  std::string printStore();
+  std::string printStore() const;
 };
 } // namespace pathFinder
 
-#endif // MASTER_ARBEIT_HUBLABELSTORE_H

@@ -4,13 +4,14 @@
 
 #ifndef MASTER_ARBEIT_CELLIDSTORE_H
 #define MASTER_ARBEIT_CELLIDSTORE_H
-#include <path_finder/storage/HubLabelStore.h>
+#include <path_finder/helper/Types.h>
+
 #include <vector>
 
 namespace pathFinder {
-using CellId_t = uint32_t;
+
 struct CellIdStoreCreateInfo {
-  CellId_t* cellIds = nullptr;
+  CellId_t * cellIds = nullptr;
   OffsetElement* offsetVector = nullptr;
   size_t cellIdSize = 0;
   size_t offsetSize = 0;

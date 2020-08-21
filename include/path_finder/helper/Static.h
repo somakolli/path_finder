@@ -40,12 +40,13 @@ public:
    * @param result
    * @param replacePrevious
    */
-  template <typename ItA, typename ItB, typename Container, typename Distance, typename ReplacePrevious>
-  static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd,
-                           Distance distanceToLabel, Container &result,
+  template <typename ItA, typename ItB, typename Distance, typename ReplacePrevious>
+  static inline std::vector<CostNode> merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd,
+                           Distance distanceToLabel,
                            ReplacePrevious replacePrevious) {
     auto i = aBegin;
     auto j = bBegin;
+    std::vector<CostNode> result;
     while (i < aEnd && j < bEnd) {
       if (i->id < j->id) {
         result.push_back(replacePrevious(*i));
@@ -73,6 +74,7 @@ public:
       result.emplace_back(replacePrevious(j->id, j->cost + distanceToLabel, j->previousNode));
       ++j;
     }
+    return result;
   }
 
   template <typename T>
@@ -161,9 +163,9 @@ public:
    * @param topNode store for node id of the topNode (see details)
    * @return
    */
-   template <typename pointerType>
+   template <typename IteratorType, typename OtherIteratorType>
   static inline std::optional<pathFinder::Distance> getShortestDistance(
-      MyIterator<pointerType> forwardLabels, MyIterator<pointerType> backwardLabels,
+      IteratorType forwardLabels, OtherIteratorType backwardLabels,
       NodeId &topNode) {
     Distance shortestDistance = MAX_DISTANCE;
     topNode = 0;

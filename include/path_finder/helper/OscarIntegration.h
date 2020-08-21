@@ -5,7 +5,9 @@
 #ifndef MASTER_ARBEIT_OSCARINTEGRATION_H
 #define MASTER_ARBEIT_OSCARINTEGRATION_H
 #include "path_finder/storage/CellIdStore.h"
+
 #include <algorithm>
+#include <iostream>
 namespace pathFinder{
 class CellIdDiskWriter {
 private:

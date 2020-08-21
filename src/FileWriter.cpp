@@ -25,7 +25,7 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
   out << j.dump();
   out.close();
 }
-void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, const std::string& graphName, const std::string& folder) {
+void FileWriter::writeHubLabels(const HubLabelStore &hubLabelStore, const std::string& graphName, const std::string& folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::HubLabelDataInfo dataConfig;
@@ -55,7 +55,7 @@ void FileWriter::writeHubLabels(const RamHubLabelStore &hubLabelStore, const std
   out << j.dump();
   out.close();
 }
-void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string &graphName,
+void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &graphName,
                             const std::string &folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
@@ -74,8 +74,8 @@ void FileWriter::writeCells(const RamCellIdStore &cellIdStore, const std::string
   out << j.dump();
   out.close();
 }
-void FileWriter::writeAll(std::shared_ptr<RamGraph> graph, std::shared_ptr<RamHubLabelStore> hubLabelStore,
-                          std::shared_ptr<RamCellIdStore> cellIdStore, const std::string &folder) {
+void FileWriter::writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore,
+                          std::shared_ptr<CellIdStore> cellIdStore, const std::string &folder) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::HybridPfDataInfo dataInfo;

@@ -53,10 +53,12 @@ set(INCLUDES
         include/path_finder/graphs/Grid.h
         include/path_finder/storage/FileLoader.h
         include/path_finder/storage/FileWriter.h
-        include/path_finder/helper/ThreadPool.h)
+        include/path_finder/helper/ThreadPool.h
+        include/path_finder/helper/Types.h)
 
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(OpenMP)
+find_package(tbb)
 
 include_directories(${Boost_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
@@ -78,7 +80,7 @@ endif()
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json::nlohmann_json tbb)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")

@@ -10,13 +10,6 @@
 #include <sys/mman.h>
 
 namespace pathFinder {
-struct CHNode : Node {
-  Level level;
-};
-struct CHEdge : Edge {
-  std::optional<NodeId> child1 = std::nullopt;
-  std::optional<NodeId> child2 = std::nullopt;
-};
 struct CHGraphCreateInfo {
   CHNode* nodes = nullptr;
   CHEdge* edges = nullptr;
@@ -57,7 +50,7 @@ public:
 
   std::map<std::pair<Lat, Lng>, std::pair<NodeId, NodeId>> gridMap;
 
-  [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction);
+  [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   Level getLevel(NodeId nodeId);
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();

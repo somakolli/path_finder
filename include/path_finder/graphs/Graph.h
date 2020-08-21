@@ -2,14 +2,16 @@
 // Created by sokol on 02.10.19.
 //
 
-#ifndef ALG_ENG_PROJECT_GRAPH_H
-#define ALG_ENG_PROJECT_GRAPH_H
+#pragma once
+
+#include <path_finder/helper/Types.h>
 
 #include "ostream"
 #include "vector"
 #include <cstdint>
 #include <iostream>
 #include <limits>
+
 
 #ifndef NDEBUG
 #define Debug(x) ;
@@ -18,67 +20,6 @@
 #endif
 
 namespace pathFinder {
-using NodeId = uint32_t ;
-using Lat = float;
-using Lng = float;
-using Distance = uint32_t ;
-using Level = uint16_t;
-
-struct LatLng {
-  Lat lat;
-  Lng lng;
-
-  LatLng() = default;
-  LatLng(const double lat, const double lng): lat(lat), lng(lng) {}
-  bool operator==(LatLng other) const {
-    return other.lat == lat && other.lng == lng;
-  }
-};
-
-constexpr Distance MAX_DISTANCE = std::numeric_limits<Distance>::max();
-enum EdgeDirection { FORWARD = true, BACKWARD = false };
-class Edge {
-public:
-  NodeId source;
-  NodeId target;
-  NodeId distance;
-  Edge(NodeId source, NodeId target, Distance distance)
-      : source(source), target(target), distance(distance) {}
-  Edge() = default;
-  friend std::ostream &operator<<(std::ostream &Str, const Edge &edge) {
-    Str << "source: " << edge.source << ' ' << "target: " << edge.target
-        << " distance: " << edge.distance;
-    return Str;
-  }
-};
-class Node {
-public:
-  NodeId id;
-  LatLng latLng;
-  double quickBeeLine(const LatLng &other) const;
-  double quickBeeLine(const Node &other) const;
-  double euclid(const Node &other) const;
-
-};
-template <typename MyPointerType> class MyIterator {
-private:
-  MyPointerType _begin;
-  MyPointerType _end;
-
-public:
-
-  MyIterator(MyPointerType begin, MyPointerType end)
-      : _begin(begin), _end(end) {}
-  bool empty() const { return _begin == _end; };
-  MyPointerType begin() { return _begin; };
-  MyPointerType begin() const { return _begin; };
-  MyPointerType end() { return _end; };
-  MyPointerType end() const { return _end; };
-  size_t size() { return _end - _begin; }
-  auto operator[](size_t position) const {
-    return *(begin() + position);
-  }
-};
 class Graph {
 public:
   typedef std::vector<Node> nodeVector;
@@ -86,8 +27,6 @@ public:
 
 private:
 public:
-  // typedef stxxl::VECTOR_GENERATOR<Node>::result nodeVector;
-  // typedef stxxl::VECTOR_GENERATOR<Edge>::result edgeVector;
   NodeId numberOfNodes{};
   std::vector<NodeId> offset;
   edgeVector edges;
@@ -114,21 +53,6 @@ public:
   NodeId getNodeId(LatLng latLng) const;
   LatLng getLatLng(NodeId nodeId) const;
 };
-// used for dijkstra PQ
-struct CostNode {
-  NodeId id;
-  Distance cost;
-  NodeId previousNode;
-  CostNode() = default;
-
-  bool operator<(const CostNode &rhs) const { return cost > rhs.cost; }
-  CostNode(NodeId id, size_t cost, NodeId previousNode)
-      : id(id), cost(cost), previousNode(previousNode) {}
-
-  bool operator==(const CostNode &rhs) const {
-    return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
-  }
-};
 class PreviousReplacer {
 private:
   NodeId currentNode;
@@ -150,4 +74,3 @@ public:
   }
 };
 } // namespace pathFinder
-#endif // ALG_END_PROJECT_GRAPH_H

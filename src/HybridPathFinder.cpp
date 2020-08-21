@@ -149,11 +149,9 @@ HybridPathFinder::calcLabelHybrid(
       m_hubLabelStore->retrieve(id, direction, label, labelSize);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
       stopwatch1.reset();
-      costNodeVec_t resultVec;
-      resultVec.reserve(settledNodes.size() + labelSize);
-      Static::merge(settledNodes.begin(), settledNodes.end(),
-                    label, label + labelSize, m_cost[id],
-                    resultVec, PreviousReplacer(previousNodeId));
+      costNodeVec_t resultVec = Static::merge(settledNodes.begin(), settledNodes.end(),
+                                      label, label + labelSize, m_cost[id],
+                                      PreviousReplacer(previousNodeId));
       free(label);
       settledNodes = std::move(resultVec);
       calcLabelTimingInfo.mergeTime += stopwatch1.elapsedMicro();
