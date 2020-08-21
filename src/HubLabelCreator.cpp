@@ -7,6 +7,7 @@
 #include <mutex>
 #include <execution>
 #include <utility>
+#include <algorithm>
 namespace pathFinder {
 HubLabelCreator::HubLabelCreator(
     std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore)
@@ -58,15 +59,16 @@ void HubLabelCreator::processRangeParallel(
   auto begin = &m_sortedNodes[range.first];
   auto end = &m_sortedNodes[range.second];
   std::mutex m;
-
-  std::for_each(std::execution::par
-                ,begin, end,
-                [&](auto&& item){
-                  auto id = item.id;
-                  auto label = calcLabel(id, edgeDirection);
-                  std::lock_guard<std::mutex> guard(m);
-                  m_hubLabelStore->store(label, id, edgeDirection);
-                });
+  std::vector<std::pair<NodeId, costNodeVec_t>> labels;
+  std::transform(begin, end, std::back_inserter(labels),
+                 [&](auto&& item){
+    auto id = item.id;
+    auto label = calcLabel(id, edgeDirection);
+    return std::make_pair(id, label);
+  });
+  for(const auto& [id,label] : labels) {
+    m_hubLabelStore->store(label, id, edgeDirection);
+  }
 }
 
 std::vector<CostNode>
