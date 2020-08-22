@@ -43,6 +43,7 @@ void HubLabelCreator::constructAllLabels(
     Level maxLevel, Level labelsUntilLevel) {
   int currentLevel = maxLevel;
   for (const auto &sameLevelRange : sameLevelRanges) {
+    std::cout << "---------------------------------\n";
     std::cout << "constructing level: " << currentLevel << std::endl;
     processRangeParallel(sameLevelRange, EdgeDirection::FORWARD);
     processRangeParallel(sameLevelRange, EdgeDirection::BACKWARD);
@@ -60,18 +61,25 @@ void HubLabelCreator::processRangeParallel(
   auto end = &m_sortedNodes[range.second];
   std::mutex m;
   std::vector<std::pair<NodeId, costNodeVec_t>> labels;
-  labels.resize(range.second - range.first);
-  std::transform(std::execution::par, begin, end, labels.begin(),
+  size_t rangeSize = range.second - range.first;
+  labels.resize(rangeSize);
+  std::cout << "calculating " << rangeSize << " labels in parallel...\n";
+  std::transform(std::execution::par_unseq, begin, end, labels.begin(),
                  [&](auto&& item){
     auto id = item.id;
     auto label = calcLabel(id, edgeDirection);
     return std::make_pair(id, label);
   });
+  std::cout << "writing labels: 0/" << labels.size() << '\r';
+  auto i = 0;
   for(auto& [id,label] : labels) {
     m_hubLabelStore->store(label, id, edgeDirection);
     label.clear();
     label.shrink_to_fit();
+    char newLineChar = (i == labels.size() - 1) ? '\n' : '\r';
+    std::cout << "writing labels: " << ++i << '/' << labels.size() << newLineChar;
   }
+  std::cout << std::flush;
 }
 
 std::vector<CostNode>
