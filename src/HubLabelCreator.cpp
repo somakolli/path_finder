@@ -60,14 +60,17 @@ void HubLabelCreator::processRangeParallel(
   auto end = &m_sortedNodes[range.second];
   std::mutex m;
   std::vector<std::pair<NodeId, costNodeVec_t>> labels;
-  std::transform(begin, end, std::back_inserter(labels),
+  labels.resize(range.second - range.first);
+  std::transform(std::execution::par, begin, end, labels.begin(),
                  [&](auto&& item){
     auto id = item.id;
     auto label = calcLabel(id, edgeDirection);
     return std::make_pair(id, label);
   });
-  for(const auto& [id,label] : labels) {
+  for(auto& [id,label] : labels) {
     m_hubLabelStore->store(label, id, edgeDirection);
+    label.clear();
+    label.shrink_to_fit();
   }
 }
 
@@ -90,7 +93,6 @@ HubLabelCreator::calcLabel(NodeId nodeId,
   int sizeBeforePrune = label.size();
   selfPrune(label, nodeId, direction);
   label.shrink_to_fit();
-  std::cout << "pruning saved: " << sizeBeforePrune - label.size() << '\n';
   Static::sortLabel(label);
   return label;
 }

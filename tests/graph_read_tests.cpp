@@ -11,7 +11,7 @@ namespace GraphTest {
 const std::string PATH = "/home/sokol/Uni/path_finder/test-data/";
 
 template <typename Edges>
-bool edgeExists(const pathFinder::RamGraph & graph, Edges edges, LatLng source, LatLng target) {
+bool edgeExists(const pathFinder::CHGraph & graph, Edges edges, LatLng source, LatLng target) {
   for(const auto& edge : edges) {
     const auto& source1 = graph.getNode(edge.source);
     const auto& target1 = graph.getNode(edge.target);
@@ -21,8 +21,8 @@ bool edgeExists(const pathFinder::RamGraph & graph, Edges edges, LatLng source, 
   return false;
 }
 
-bool haveSameEdges(pathFinder::RamGraph & graph, CHNode node,
-                   pathFinder::RamGraph & reorderedGraph, CHNode reorderedNode) {
+bool haveSameEdges(pathFinder::CHGraph & graph, CHNode node,
+                   pathFinder::CHGraph & reorderedGraph, CHNode reorderedNode) {
   const auto& edges = graph.edgesFor(node.id, EdgeDirection::FORWARD);
   const auto& reorderEdges = reorderedGraph.edgesFor(reorderedNode.id, EdgeDirection::FORWARD);
   for(const auto& edge : edges) {
