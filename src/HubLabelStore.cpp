@@ -30,6 +30,29 @@ void HubLabelStore::store(
   size += label.size();
 }
 
+void HubLabelStore::store( std::vector<HubLabelStore::IdLabelPair>& idLabels, EdgeDirection direction) {
+  size_t allocationSize = std::accumulate(idLabels.begin(), idLabels.end(), (size_t)0,
+                                          [](size_t init, const HubLabelStore::IdLabelPair& idLabelPair) {
+                                            return init + idLabelPair.second.size();
+                                          });
+
+  auto& storePointer = direction ? m_forwardLabels : m_backwardLabels;
+  auto& offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
+  auto& size = direction ? m_forwardLabelSize : m_backwardLabelSize;
+
+  storePointer = (CostNode*) std::realloc(storePointer, sizeof(CostNode) * (size + allocationSize));
+  std::cout << "writing labels: 0/" << idLabels.size() <<  '\r';
+  int i = 0;
+  for(auto&& [id, label] : idLabels) {
+    offsetPointer[id] = OffsetElement{size, (uint32_t)label.size()};
+    std::memcpy(storePointer + size, label.data(), sizeof(CostNode) * label.size());
+    size += label.size();
+    label.clear();
+    char newLineChar = (i == idLabels.size()-1) ? '\n' : '\r';
+    std::cout << "writing labels: " << ++i << '/' << idLabels.size() << newLineChar;
+  }
+}
+
 MyIterator<const CostNode *> HubLabelStore::retrieveIt(NodeId id, EdgeDirection direction) const{
   if(id > m_numberOfLabels - 1)
     throw std::runtime_error("[HublabelStore] node id does not exist.");
@@ -136,4 +159,5 @@ std::shared_ptr<HubLabelStore> HubLabelStore::makeShared(size_t numberOfLabels) 
 size_t HubLabelStore::getSpaceConsumption() {
     return 0;
 };
+
 }

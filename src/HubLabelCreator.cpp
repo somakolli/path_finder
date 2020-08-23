@@ -70,16 +70,7 @@ void HubLabelCreator::processRangeParallel(
     auto label = calcLabel(id, edgeDirection);
     return std::make_pair(id, label);
   });
-  std::cout << "writing labels: 0/" << labels.size() << '\r';
-  auto i = 0;
-  for(auto& [id,label] : labels) {
-    m_hubLabelStore->store(label, id, edgeDirection);
-    label.clear();
-    label.shrink_to_fit();
-    char newLineChar = (i == labels.size() - 1) ? '\n' : '\r';
-    std::cout << "writing labels: " << ++i << '/' << labels.size() << newLineChar;
-  }
-  std::cout << std::flush;
+  m_hubLabelStore->store(labels, edgeDirection);
 }
 
 std::vector<CostNode>
@@ -108,7 +99,7 @@ HubLabelCreator::calcLabel(NodeId nodeId,
 void HubLabelCreator::selfPrune(costNodeVec_t &label,
                                 NodeId nodeId,
                                 EdgeDirection direction) const{
-  EdgeDirection other = (pathFinder::EdgeDirection)!direction;
+  auto other = (pathFinder::EdgeDirection)!direction;
   for (int i = (int)label.size() - 1; i >= 0; --i) {
     auto &[id, cost, previousNode] = label[i];
    auto otherLabels = m_hubLabelStore->retrieveIt(id, other);

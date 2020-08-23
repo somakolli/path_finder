@@ -53,10 +53,14 @@ public:
 
   void store(const std::vector<CostNode> &label, NodeId id,
              EdgeDirection direction);
+  using IdLabelPair = std::pair<NodeId , costNodeVec_t>;
 
-  MyIterator<const CostNode*> retrieveIt(NodeId id, EdgeDirection direction) const;
+  // idLabels vec will be deleted after store
+  void store(std::vector<IdLabelPair>& idLabels, EdgeDirection direction);
 
-  std::vector<CostNode> retrieve(NodeId id, EdgeDirection direction) const;
+  [[nodiscard]] MyIterator<const CostNode*> retrieveIt(NodeId id, EdgeDirection direction) const;
+
+  [[nodiscard]] std::vector<CostNode> retrieve(NodeId id, EdgeDirection direction) const;
   void retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size) const;
   [[nodiscard]] size_t getNumberOfLabels() const;
   [[nodiscard]] size_t getForwardLabelsSize() const;
