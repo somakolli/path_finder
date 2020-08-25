@@ -21,6 +21,9 @@ struct GridMapEntry {
   std::pair<int, int> latLng;
   std::pair<NodeId, NodeId> pointerPair;
 };
+struct GridMapEntries {
+  std::vector<GridMapEntry> gridMapEntries;
+};
 
 void from_json(const nlohmann::json &j, BinaryFileDescription &d);
 void to_json(nlohmann::json &j, const BinaryFileDescription &d);
@@ -37,7 +40,7 @@ struct GraphDataInfo  : DataInfo{
   BinaryFileDescription forwardOffset;
   BinaryFileDescription backwardEdges;
   BinaryFileDescription backwardOffset;
-  std::vector<GridMapEntry> gridMapEntries;
+  std::string gridMapFile;
 };
 
 struct HubLabelDataInfo : DataInfo {
@@ -103,6 +106,10 @@ void from_json(const nlohmann::json &j, pathFinder::DataConfig &d);
 void to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d);
 
 void from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d);
+
+void to_json(nlohmann::json &j,const pathFinder::GridMapEntries &d);
+
+void from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d);
 
 void to_json(nlohmann::json &j, const pathFinder::DataInfo &d);
 

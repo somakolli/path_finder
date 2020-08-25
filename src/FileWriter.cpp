@@ -17,17 +17,24 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
   Static::writeVectorToFile(graph.m_offset, graph.m_numberOfNodes + 1, (folder + dataConfig.forwardOffset.path).c_str());
   Static::writeVectorToFile(graph.m_backEdges, graph.m_numberOfEdges, (folder + dataConfig.backwardEdges.path).c_str());
   Static::writeVectorToFile(graph.m_backOffset, graph.m_numberOfNodes + 1, (folder + dataConfig.backwardOffset.path).c_str());
+  GridMapEntries gridMapEntries;
   for(auto& entry : graph.gridMap) {
     GridMapEntry ge;
     ge.latLng = entry.first;
     ge.pointerPair = entry.second;
-    dataConfig.gridMapEntries.push_back(ge);
+    gridMapEntries.gridMapEntries.push_back(ge);
   }
+  dataConfig.gridCalculated = true;
+  dataConfig.gridMapFile = "gridMap.json";
+  std::ofstream gridOut(folder + '/' + dataConfig.gridMapFile);
+  nlohmann::json gridJson;
+  to_json(gridJson, gridMapEntries);
+  gridOut << gridJson.dump(1, '\t', true);
+  gridOut.close();
   //write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;
   to_json(j, dataConfig);
-  std::string jsonString = j.dump();
   out << j.dump(1, '\t', true);
   out.close();
 }

@@ -81,6 +81,18 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d)
   j.at("begin").get_to(d.pointerPair.first);
   j.at("end").get_to(d.pointerPair.second);
 }
+
+
+void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntries &d){
+    j = {
+        {"gridMapEntries", d.gridMapEntries}
+  };
+};
+
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d){
+    j.at("gridMapEntries").get_to(d.gridMapEntries);
+};
+
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataInfo &d) {
   j = {
       {"graphName", d.graphName},
@@ -98,7 +110,7 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::GraphDataInfo &d) 
   j.push_back({"forwardOffset", d.forwardOffset});
   j.push_back({"backwardEdges", d.backwardEdges});
   j.push_back({"backwardOffset", d.backwardOffset});
-  j.push_back({"gridMapEntries", d.gridMapEntries});
+  j.push_back({"gridMapFile", d.gridMapFile});
   j.push_back({"gridCalculated", d.gridCalculated});
 
 }
@@ -109,7 +121,7 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d
   j.at("forwardOffset").get_to(d.forwardOffset);
   j.at("backwardEdges").get_to(d.backwardEdges);
   j.at("backwardOffset").get_to(d.backwardOffset);
-  j.at("gridMapEntries").get_to(d.gridMapEntries);
+  j.at("gridMapFile").get_to(d.gridMapFile);
   j.at("gridCalculated").get_to(d.gridCalculated);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::HubLabelDataInfo &d) {
