@@ -45,16 +45,17 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
   chGraphCreateInfo.offsetMMap = config.forwardOffset.mmap;
   chGraphCreateInfo.backOffsetMMap = config.backwardOffset.mmap;
 
-  auto chGraph = std::make_shared<CHGraph>(chGraphCreateInfo);
   // set up grid
   if(config.gridCalculated) {
     std::ifstream gridStream(graphFolder + config.gridMapFile);
     std::string gridStr((std::istreambuf_iterator<char>(gridStream)), std::istreambuf_iterator<char>());
     auto gridConfig = pathFinder::DataConfig::getFromFile<GridMapEntries>(gridStr);
+    chGraphCreateInfo.grid = std::make_shared<Grid>(gridConfig.latStretchFactor, gridConfig.lngStretchFactor);
     for (auto gridEntry : gridConfig.gridMapEntries) {
-      chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
+      chGraphCreateInfo.grid->operator[](gridEntry.latLng) = gridEntry.pointerPair;
     }
   }
+  auto chGraph = std::make_shared<CHGraph>(chGraphCreateInfo);
   return chGraph;
 }
 std::shared_ptr<pathFinder::CellIdStore> pathFinder::FileLoader::loadCellIds(const std::string &cellIdFolder) {

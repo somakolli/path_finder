@@ -85,12 +85,16 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d)
 
 void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntries &d){
     j = {
-        {"gridMapEntries", d.gridMapEntries}
+        {"gridMapEntries", d.gridMapEntries},
+        {"latStretchFactor", d.latStretchFactor},
+        {"lngStretchFactor", d.lngStretchFactor}
   };
 };
 
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d){
     j.at("gridMapEntries").get_to(d.gridMapEntries);
+    j.at("latStretchFactor").get_to(d.latStretchFactor);
+    j.at("lngStretchFactor").get_to(d.lngStretchFactor);
 };
 
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataInfo &d) {

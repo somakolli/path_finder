@@ -22,6 +22,8 @@ struct GridMapEntry {
   std::pair<NodeId, NodeId> pointerPair;
 };
 struct GridMapEntries {
+  int latStretchFactor;
+  int lngStretchFactor;
   std::vector<GridMapEntry> gridMapEntries;
 };
 

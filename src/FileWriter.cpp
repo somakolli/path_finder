@@ -18,7 +18,7 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
   Static::writeVectorToFile(graph.m_backEdges, graph.m_numberOfEdges, (folder + dataConfig.backwardEdges.path).c_str());
   Static::writeVectorToFile(graph.m_backOffset, graph.m_numberOfNodes + 1, (folder + dataConfig.backwardOffset.path).c_str());
   GridMapEntries gridMapEntries;
-  for(auto& entry : graph.gridMap) {
+  for(auto& entry : *(graph.grid)) {
     GridMapEntry ge;
     ge.latLng = entry.first;
     ge.pointerPair = entry.second;

@@ -19,6 +19,7 @@ pathFinder::CHGraph::CHGraph(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
   m_backEdgesMMap = chGraphCreateInfo.backEdgesMMap;
   m_offsetMMap = chGraphCreateInfo.offsetMMap;
   m_backOffsetMMap = chGraphCreateInfo.backOffsetMMap;
+  grid = chGraphCreateInfo.grid;
 }
 std::shared_ptr<pathFinder::CHGraph> pathFinder::CHGraph::makeShared(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
   return std::make_shared<CHGraph>(chGraphCreateInfo);

@@ -2,6 +2,7 @@
 #define ALG_ENG_PROJECT_CHGRAPH_H
 
 #include "Graph.h"
+#include "Grid.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,6 +25,8 @@ struct CHGraphCreateInfo {
   bool backEdgesMMap = false;
   bool offsetMMap = false;
   bool backOffsetMMap = false;
+  bool gridCalculated = false;
+  std::shared_ptr<Grid> grid;
 
   void setAllMMap(bool condition) {
     nodesMMap = condition;
@@ -39,7 +42,6 @@ friend class FileReader;
 */
 friend class GraphReader;
 friend class FileWriter;
-friend class Grid;
 public:
   CHGraph();
 
@@ -49,7 +51,7 @@ public:
 
   static std::shared_ptr<CHGraph> makeShared(CHGraphCreateInfo chGraphCreateInfo);
 
-  std::map<std::pair<int, int>, std::pair<NodeId, NodeId>> gridMap;
+  std::shared_ptr<Grid> grid;
 
   [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   Level getLevel(NodeId nodeId);
