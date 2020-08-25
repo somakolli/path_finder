@@ -48,9 +48,28 @@ void pathFinder::CHGraph::randomizeLatLngs() {
   }
 }
 void pathFinder::CHGraph::sortEdges() {
-  std::sort(m_edges, m_edges + m_numberOfEdges, [](auto edge1, auto edge2) -> bool{
-    return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
+  std::vector<std::pair<CHEdge, size_t >> indexEdges{};
+  indexEdges.resize(m_numberOfEdges);
+  int i = 0;
+  std::transform(m_edges, m_edges + m_numberOfEdges, indexEdges.begin(), [&i](auto&& edge) {
+    return std::make_pair(edge, i++);
   });
+  std::sort(indexEdges.begin(), indexEdges.end(), [](auto edge1, auto edge2) -> bool{
+    return (edge1.first.source == edge2.first.source) ? edge1.first.target <= edge2.first.target : edge1.first.source < edge2.first.source;
+  });
+  std::map<NodeId, NodeId> previousIdToId;
+  for(int j = 0; j < indexEdges.size(); ++j) {
+    previousIdToId[indexEdges[j].second] = j;
+  }
+  int j = 0;
+  for(auto& indexEdge : indexEdges) {
+    auto& edge = indexEdge.first;
+    if(edge.child2.has_value())
+      edge.child2 = std::optional(previousIdToId[edge.child2.value()]);
+    if(edge.child1.has_value())
+      edge.child1 = std::optional(previousIdToId[edge.child1.value()]);
+    m_edges[j++] = edge;
+  }
 }
 pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) { double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
