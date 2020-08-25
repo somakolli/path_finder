@@ -57,14 +57,14 @@ void pathFinder::to_json(nlohmann::json &j, const BinaryFileDescription &d) {
 std::string pathFinder::DataConfig::toJson() {
   nlohmann::json j;
   to_json(j, *this);
-  return j.dump();
+  return j.dump(1, '\t', true);
 }
 
 
 nlohmann::json pathFinder::BinaryFileDescription::toJson() const {
   nlohmann::json j;
   to_json(j, *this);
-  return j.dump();
+  return j.dump(1, '\t', true);
 }
 
 void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d){

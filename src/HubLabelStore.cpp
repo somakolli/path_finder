@@ -8,6 +8,7 @@
 #include <path_finder/helper/Static.h>
 #include <sstream>
 #include <utility>
+#include <execution>
 
 namespace pathFinder {
 HubLabelStore::HubLabelStore(size_t numberOfLabels) {

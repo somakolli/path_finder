@@ -6,6 +6,7 @@
 
 #include <boost/optional.hpp>
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <vector>
 
 namespace pathFinder {
@@ -96,24 +97,53 @@ struct CalcLabelTimingInfo{
     lookUpTime /= other;
     graphSearchTime /= other;
   }
+  CalcLabelTimingInfo operator/(double other) const{
+    CalcLabelTimingInfo c{};
+    c.mergeTime = this->mergeTime / other;
+    c.lookUpTime = this->lookUpTime / other;
+    c.graphSearchTime = this->graphSearchTime / other;
+    return c;
+  }
   friend std::ostream& operator<<(std::ostream& os, const CalcLabelTimingInfo& calcLabelTimingInfo) {
     os << "mergeTime: " << calcLabelTimingInfo.mergeTime << '\n';
     os << "lookUpTime: " << calcLabelTimingInfo.lookUpTime << '\n';
     os << "graphSearchTime: " << calcLabelTimingInfo.graphSearchTime << '\n';
     return os;
   }
+  [[nodiscard]] std::string toJson() const;
 };
 
-struct RoutingResult {
-  std::vector<uint32_t> edgeIds;
-  std::vector<LatLng> path;
-  std::vector<CellId_t> cellIds;
-  Distance distance;
+struct RoutingResultTimingInfo {
   double distanceTime;
   double pathTime = 0;
   double cellTime = 0;
   double nodeSearchTime = 0;
   CalcLabelTimingInfo calcLabelTimingInfo{};
+  // operator to calculate averages
+  RoutingResultTimingInfo operator/(uint32_t numberOfQueries) const {
+    RoutingResultTimingInfo r{};
+    r.distanceTime = this->distanceTime / numberOfQueries;
+    r.nodeSearchTime = this->nodeSearchTime / numberOfQueries;
+    r.cellTime = this->cellTime / numberOfQueries;
+    r.pathTime = this->pathTime / numberOfQueries;
+    r.calcLabelTimingInfo = this->calcLabelTimingInfo / numberOfQueries;
+    return r;
+  }
+  void operator+=(RoutingResultTimingInfo other) {
+    distanceTime += other.distanceTime;
+    pathTime += other.pathTime;
+    cellTime += other.cellTime;
+    nodeSearchTime += other.nodeSearchTime;
+    calcLabelTimingInfo += other.calcLabelTimingInfo;
+  }
+  [[nodiscard]] std::string toJson() const;
+};
+struct RoutingResult {
+  std::vector<uint32_t> edgeIds;
+  std::vector<LatLng> path;
+  std::vector<CellId_t> cellIds;
+  Distance distance;
+  RoutingResultTimingInfo routingResultTimingInfo;
 };
 // used for dijkstra PQ
 struct CostNode {
@@ -132,4 +162,6 @@ struct CostNode {
 };
 using costNodeVec_t = std::vector<CostNode>;
 
+void to_json(nlohmann::json& j, CalcLabelTimingInfo calcLabelTimingInfo);
+void to_json(nlohmann::json& j, RoutingResultTimingInfo calcLabelTimingInfo);
 }

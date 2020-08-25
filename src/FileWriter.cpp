@@ -22,7 +22,7 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
   nlohmann::json j;
   to_json(j, dataConfig);
   std::string jsonString = j.dump();
-  out << j.dump();
+  out << j.dump(1, '\t', true);
   out.close();
 }
 void FileWriter::writeHubLabels(const HubLabelStore &hubLabelStore, const std::string& graphName, const std::string& folder) {
@@ -52,7 +52,7 @@ void FileWriter::writeHubLabels(const HubLabelStore &hubLabelStore, const std::s
   nlohmann::json j;
   to_json(j, dataConfig);
   std::string jsonString = j.dump();
-  out << j.dump();
+  out << j.dump(1, '\t', true);
   out.close();
 }
 void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &graphName,
@@ -71,7 +71,7 @@ void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &g
   nlohmann::json j;
   to_json(j, dataConfig);
   std::string jsonString = j.dump();
-  out << j.dump();
+  out << j.dump(1, '\t', true);
   out.close();
 }
 void FileWriter::writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore,
@@ -100,8 +100,7 @@ void FileWriter::writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLab
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;
   to_json(j, dataInfo);
-  std::string jsonString = j.dump();
-  out << j.dump();
+  out << j.dump(1, '\t', true);
   out.close();
 }
 }

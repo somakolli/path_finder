@@ -8,24 +8,21 @@ HybridPathFinder::getShortestPath(
     NodeId source, NodeId target) {
   RoutingResult routingResult;
   Stopwatch stopwatch;
-  auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD, routingResult.calcLabelTimingInfo);
-  auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD, routingResult.calcLabelTimingInfo);
+  auto forwardLabel = calcLabelHybrid(source, EdgeDirection::FORWARD, routingResult.routingResultTimingInfo.calcLabelTimingInfo);
+  auto backwardLabel = calcLabelHybrid(target, EdgeDirection::BACKWARD, routingResult.routingResultTimingInfo.calcLabelTimingInfo);
   NodeId topNode;
   routingResult.distance = Static::getShortestDistance(
       MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
       MyIterator(backwardLabel.begin().base(), backwardLabel.end().base()),
       topNode).value();
-  routingResult.distanceTime = stopwatch.elapsedMicro();
-
+  routingResult.routingResultTimingInfo.distanceTime = stopwatch.elapsedMicro();
   stopwatch.reset();
-  // the forward path is in reverse the backward path is correct
   auto reverseForwardPath =
       getShortestPathFromLabel(forwardLabel, topNode, source);
   auto backwardPath = getShortestPathFromLabel(backwardLabel, topNode, target);
 
-  // reverse the forward path
   std::vector<NodeId> forwardPath;
-  for (int i = reverseForwardPath.size() - 1; i >= 0; --i) {
+  for (int i = (int)reverseForwardPath.size() - 1; i >= 0; --i) {
     forwardPath.push_back(reverseForwardPath[i]);
   }
   for(int i = 1; i < backwardPath.size(); ++i)
@@ -53,7 +50,7 @@ HybridPathFinder::getShortestPath(
     newLatLngVector.push_back(m_graph->getNode(edge.target).latLng);
   }
   routingResult.path = newLatLngVector;
-  routingResult.pathTime = stopwatch.elapsedMicro();
+  routingResult.routingResultTimingInfo.pathTime = stopwatch.elapsedMicro();
 
   stopwatch.reset();
   // find cell ids
@@ -66,7 +63,7 @@ HybridPathFinder::getShortestPath(
   (routingResult.cellIds)
       .erase(unique(routingResult.cellIds.begin(), routingResult.cellIds.end()),
              routingResult.cellIds.end());
-  routingResult.cellTime = stopwatch.elapsedMicro();
+  routingResult.routingResultTimingInfo.cellTime = stopwatch.elapsedMicro();
   return routingResult;
 }
 
@@ -79,7 +76,7 @@ HybridPathFinder::getShortestPath(
   NodeId targetId = m_graph->getNodeIdFor(target);
   auto nodeSearchTime = stopwatch.elapsedMicro();
   RoutingResult routingResult = getShortestPath(sourceId, targetId);
-  routingResult.nodeSearchTime = nodeSearchTime;
+  routingResult.routingResultTimingInfo.nodeSearchTime = nodeSearchTime;
   return routingResult;
 }
 
@@ -143,7 +140,7 @@ HybridPathFinder::calcLabelHybrid(
   Stopwatch stopwatch1;
   for (auto [previousNodeId, labelsToCollect] : labelsToCollectMap) {
     for (auto id : labelsToCollect) {
-      stopwatch1.reset();
+      // stopwatch1.reset();
       CostNode* label;
       size_t labelSize;
       m_hubLabelStore->retrieve(id, direction, label, labelSize);

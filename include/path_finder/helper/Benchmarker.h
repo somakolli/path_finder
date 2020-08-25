@@ -11,70 +11,55 @@
 namespace pathFinder {
 class Benchmarker {
 public:
-  using BenchResult = std::pair<Level, RoutingResult>;
+  using BenchResult = std::pair<Level, RoutingResultTimingInfo>;
   Benchmarker(const std::string& dataPath, std::string  outPutPath);
   Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam,
               std::shared_ptr<HybridPathFinder> pathFinderMMap,
               std::shared_ptr<CHDijkstra> chDijkstraRam,
               std::shared_ptr<CHDijkstra> chDijkstraMMap,
               std::string  outPutPath);
-  void benchmarkAllLevel(uint32_t numberOfQueries, std::vector<BenchResult>& ramResult,std::vector<BenchResult>& mmapResult);
-  void benchmarkLevel(uint32_t level, uint32_t numberOfQueries, BenchResult& ramResult, BenchResult& mmapResult);
-  void benchmarkCHDijkstra(uint32_t numberOfLevels, RoutingResult& chMMapResult, RoutingResult& chRamResult);
-  static void printRoutingResultForOktave(std::ostream& os,const std::vector<BenchResult>& ramResult,
-                                          const std::vector<BenchResult>& mmapResult, double chRamResult, double chMMapResult) {
+  std::vector<BenchResult> benchmarkAllLevel(uint32_t numberOfQueries);
+  BenchResult benchmarkLevel(uint32_t level, uint32_t numberOfQueries);
+  RoutingResultTimingInfo benchmarkCHDijkstra(uint32_t numberOfQueries);
+  static void printRoutingResultForOctave(std::ostream& distanceStream, const std::vector<BenchResult>& ramResult, double chResult) {
     std::stringstream plotLevel;
     plotLevel << "level = [";
     std::stringstream hybridRam;
     std::stringstream chRam;
+    std::stringstream pathUnpackRam;
     hybridRam << "hybridRam = [";
-    hybridRam << "chRam = [";
+    chRam << "chRam = [";
+    pathUnpackRam << "pathUnpackRam = [";
     bool first = true;
     for(auto [level, result]:ramResult) {
       if(!first){
         plotLevel << ',';
         hybridRam << ',';
         chRam << ',';
+        pathUnpackRam << ',';
       }
       first = false;
       plotLevel << level;
       hybridRam << result.distanceTime;
-      chRam << chRamResult;
-    }
-    std::stringstream hybridMmap;
-    std::stringstream chMMap;
-    hybridMmap << "hybridMMap = [";
-    chMMap << "chMMap = [";
-    first = true;
-    for(auto [level, result]: mmapResult) {
-      if(!first){
-        hybridMmap << ',';
-        chMMap << ',';
-      }
-      first = false;
-      hybridMmap << result.distanceTime;
-      chMMap << chMMapResult;
+      pathUnpackRam << result.pathTime;
     }
     plotLevel << "]\n";
     hybridRam << "]\n";
-    hybridMmap << "]\n";
     chRam << "]\n";
-    chMMap << "]\n";
-    os << plotLevel.str();
-    os << hybridRam.str();
-    os << hybridMmap.str();
-    os << chRam.str();
-    os << chMMap.str();
-    os << "plot(level, hybridRam, \"g\",level, hybridMMap, \"r\", level, chRam, \"g\", level, chMMap, \"r\")\n";
-    os << "print -djpg image.jpg\n";
+    pathUnpackRam << "]\n";
+    distanceStream << plotLevel.str();
+    distanceStream << hybridRam.str();
+    distanceStream << chRam.str();
+    distanceStream
+        << "plot(level, hybridRam, \"g\", level, chRam, \"g\")\n";
+    distanceStream << "print -djpg image.jpg\n";
+    distanceStream << pathUnpackRam.str();
   }
 private:
   std::string m_dataPath;
   std::string m_outputPath;
-  std::shared_ptr<HybridPathFinder> m_pathFinderMMap;
-  std::shared_ptr<HybridPathFinder> m_pathFinderRam;
-  std::shared_ptr<CHDijkstra> m_chDijkstraMMap;
-  std::shared_ptr<CHDijkstra> m_chDijkstraRam;
+  std::shared_ptr<HybridPathFinder> m_pathFinder;
+  std::shared_ptr<CHDijkstra> m_chDijkstra;
   static void dropCaches();
 };
 }

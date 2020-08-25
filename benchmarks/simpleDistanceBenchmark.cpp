@@ -26,28 +26,16 @@ int main(int argc, char* argv[]) {
   }
   pathFinder::Benchmarker benchmarker(dataPath, dataPath);
   if(level >= 0) {
-    pathFinder::Benchmarker::BenchResult ramResult;
-    pathFinder::Benchmarker::BenchResult mmapResult;
-    benchmarker.benchmarkLevel(level, numberOfQueries, ramResult, mmapResult);
-    pathFinder::RoutingResult chRamRoutingResult;
-    pathFinder::RoutingResult chMMapRoutingResult;
-    benchmarker.benchmarkCHDijkstra(numberOfQueries, chRamRoutingResult, chMMapRoutingResult);
-
+    benchmarker.benchmarkLevel(level, numberOfQueries);
+    benchmarker.benchmarkCHDijkstra(numberOfQueries);
   }
   else {
-    std::vector<pathFinder::Benchmarker::BenchResult> ramResult;
-    std::vector<pathFinder::Benchmarker::BenchResult> mmapResult;
-    benchmarker.benchmarkAllLevel(numberOfQueries, ramResult, mmapResult);
-
-    pathFinder::RoutingResult chRamResult;
-    pathFinder::RoutingResult chMMApResult;
-    benchmarker.benchmarkCHDijkstra(numberOfQueries * 10, chMMApResult, chRamResult);
+    std::vector<pathFinder::Benchmarker::BenchResult> hybResult = benchmarker.benchmarkAllLevel(numberOfQueries);
+    pathFinder::RoutingResultTimingInfo chResult = benchmarker.benchmarkCHDijkstra(numberOfQueries * 10);
     std::ofstream plotOutputFile;
     plotOutputFile.open ("plot.txt");
-    pathFinder::Benchmarker::printRoutingResultForOktave(plotOutputFile, ramResult, mmapResult,
-                                                         chRamResult.distanceTime, chMMApResult.distanceTime);
+    pathFinder::Benchmarker::printRoutingResultForOctave(plotOutputFile, hybResult, chResult.distanceTime);
     plotOutputFile.close();
   }
-
   return 0;
 }
