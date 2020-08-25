@@ -49,7 +49,7 @@ public:
 
   static std::shared_ptr<CHGraph> makeShared(CHGraphCreateInfo chGraphCreateInfo);
 
-  std::map<std::pair<Lat, Lng>, std::pair<NodeId, NodeId>> gridMap;
+  std::map<std::pair<int, int>, std::pair<NodeId, NodeId>> gridMap;
 
   [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   Level getLevel(NodeId nodeId);

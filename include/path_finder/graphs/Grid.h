@@ -11,9 +11,10 @@ namespace pathFinder {
 class Grid {
 public:
   void createForGraph(CHGraph& graph, double latStretchFactor, double lngStretchFactor);
+  auto begin();
+  auto end();
 private:
-  std::map<LatLng, std::pair<NodeId, NodeId>> m_grid;
-
+  std::map<std::pair<int, int>, std::pair<NodeId, NodeId>> m_grid;
 };
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_GRID_H

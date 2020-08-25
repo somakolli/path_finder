@@ -18,7 +18,7 @@ struct BinaryFileDescription {
   nlohmann::json toJson() const;
 };
 struct GridMapEntry {
-  std::pair<Lat, Lng> latLng;
+  std::pair<int, int> latLng;
   std::pair<NodeId, NodeId> pointerPair;
 };
 
