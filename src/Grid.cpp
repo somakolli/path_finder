@@ -1,39 +1,39 @@
 //
 // Created by sokol on 20.04.20.
 //
+#include <path_finder/graphs/CHGraph.h>
+#include <path_finder/graphs/Grid.h>
 
-#include "path_finder/graphs/Grid.h"
-namespace pathFinder {
-void pathFinder::Grid::buildGrid() {
-  double divLat = 180.0f / static_cast<float>(gridSizeX);
-  double divLng = 360.0f / static_cast<float>(gridSizeY);
-  for (const auto& node: graph.getNodes()){
-    auto latPositionInGrid = floor(node.latLng.lat / divLat);
-    auto lngPositionInGrid = floor(node.latLng.lng / divLng);
-    auto latLng = std::make_pair(latPositionInGrid, lngPositionInGrid);
-    mapGrid[latLng].emplace_back(std::move(node));
+void pathFinder::Grid::createForGraph(pathFinder::CHGraph &graph, double latStretchFactor, double lngStretchFactor) {
+  std::map<std::pair<int, int>, std::vector<CHNode>> map;
+
+  for(const auto& node : graph.getNodes()) {
+    int latPositionInGrid = std::floor(node.latLng.lat * latStretchFactor);
+    int lngPositionInGrid = std::floor(node.latLng.lng * lngStretchFactor);
+
+    map[std::make_pair(latPositionInGrid, lngPositionInGrid)].emplace_back(node);
   }
-}
-void Grid::reorderNodes() {
   std::map<NodeId, NodeId> oldIdToNewId;
-  graph.getNodes();
-  NodeId i = 0;
-  for(auto& [latLng, nodeVector] : mapGrid) {
-    auto pointerPair = std::make_pair(i, i);
-    for(auto node = graph.m_nodes; node < graph.m_nodes + graph.m_numberOfNodes; ++node) {
-      oldIdToNewId[node->id] = i;
-      node->id = i;
-      graph.m_nodes[i] = *node;
+  int i = 0;
+  free(graph.m_nodes);
+  graph.m_nodes = (CHNode*) std::calloc(graph.m_numberOfNodes, sizeof(CHNode));
+  for(auto& [positionPair, nodeVec] : map) {
+    for(const auto& node : nodeVec) {
+      oldIdToNewId[node.id] = i;
+      CHNode newNode = node;
+      newNode.id = i;
+      graph.m_nodes[i] = newNode;
       ++i;
-      pointerPair.second++;
+      if(i > graph.m_numberOfNodes)
+        throw std::out_of_range("grid has more nodes that graph");
     }
-    pointerGrid[latLng] = pointerPair;
   }
-  for(auto edge = graph.m_edges; edge < graph.m_edges + graph.m_numberOfEdges; ++edge) {
-    edge->source = oldIdToNewId[edge->source];
-    edge->target = oldIdToNewId[edge->target];
+  int j = 0;
+  for(auto& edge : graph.getEdgesMutable()) {
+    edge.source = oldIdToNewId[edge.source];
+    edge.target = oldIdToNewId[edge.target];
+    ++j;
+    if(j > graph.m_numberOfEdges)
+      throw std::out_of_range("");
   }
-  graph.sortEdges();
-  free(graph.m_offset);
-}
 }

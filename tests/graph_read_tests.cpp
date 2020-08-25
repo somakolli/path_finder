@@ -104,7 +104,6 @@ TEST(CHGraph, ReadFromDiskWorks) {
 TEST(CHGraph, GridReorderWorks) {
   auto graph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(graph, PATH + "test.chfmi", false);
-  graph->randomizeLatLngs();
 
   std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
   std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;

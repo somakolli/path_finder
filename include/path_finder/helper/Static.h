@@ -203,6 +203,18 @@ public:
     oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
     return oss.str();
   }
+  static std::string humanReadable(size_t bytes)
+  {
+    std::stringstream ss;
+    std::string suffix[] =  { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB" }; //Longs run out around EB
+    if (bytes == 0)
+        return "0" + suffix[0];
+    int place = std::floor(std::log(bytes) / std::log(1024));
+    double num = bytes / std::pow(1024, place);
+    ss.precision(4);
+    ss << num << suffix[place];
+    return ss.str();
+  }
 
   static void conditionalFree(void* pointer, bool isMMaped, size_t size);
 };

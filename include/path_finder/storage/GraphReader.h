@@ -19,7 +19,6 @@ public:
 private:
   static void buildBackEdges(const CHEdge* forwardEdges, CHEdge* &backEdges, size_t numberOfEdges);
   static void sortEdges(MyIterator<CHEdge*> edges);
-  static void gridReorder(CHGraph& graph);
 };
 } // namespace pathFinder
 

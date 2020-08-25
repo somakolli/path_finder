@@ -154,8 +154,17 @@ pathFinder::CHGraph::CHGraph() {}
 bool pathFinder::CHGraph::isValidNodeId(pathFinder::NodeId id) const {
   return id < m_numberOfNodes;
 }
-size_t pathFinder::CHGraph::getNumberOfNodes() { return m_numberOfNodes;}
+size_t pathFinder::CHGraph::getNumberOfNodes() const { return m_numberOfNodes;}
 pathFinder::MyIterator<const pathFinder::CHEdge *> pathFinder::CHGraph::getBackEdges() {
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
-size_t pathFinder::CHGraph::getNumberOfEdges() { return m_numberOfEdges; }
+size_t pathFinder::CHGraph::getNumberOfEdges() const { return m_numberOfEdges; }
+pathFinder::MyIterator<pathFinder::CHNode*> pathFinder::CHGraph::getNodesMutable() {
+  return MyIterator<pathFinder::CHNode*>(m_nodes, m_nodes + m_numberOfNodes);
+}
+pathFinder::MyIterator<pathFinder::CHEdge *> pathFinder::CHGraph::getEdgesMutable() {
+  return pathFinder::MyIterator<pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
+}
+pathFinder::MyIterator<pathFinder::CHEdge *> pathFinder::CHGraph::getBackEdgesMutable() {
+  return pathFinder::MyIterator<pathFinder::CHEdge *>(m_backEdges, m_backEdges + m_numberOfEdges);
+}

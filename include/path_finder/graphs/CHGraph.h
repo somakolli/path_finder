@@ -2,6 +2,7 @@
 #define ALG_ENG_PROJECT_CHGRAPH_H
 
 #include "Graph.h"
+
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -62,8 +63,8 @@ public:
   double getDistance(NodeId node1, NodeId node2);
   static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
   [[nodiscard]] bool isValidNodeId(NodeId id) const;
-  size_t getNumberOfNodes();
-  size_t getNumberOfEdges();
+  size_t getNumberOfNodes() const;
+  size_t getNumberOfEdges() const;
   MyIterator<const CHNode*> getNodes();
   MyIterator<const CHEdge*> getEdges();
   MyIterator<const CHEdge*> getBackEdges();
@@ -83,6 +84,10 @@ private:
   bool m_backEdgesMMap = false;
   bool m_offsetMMap = false;
   bool m_backOffsetMMap = false;
+
+  MyIterator<CHNode* > getNodesMutable();
+  MyIterator<CHEdge* > getEdgesMutable();
+  MyIterator<CHEdge*> getBackEdgesMutable();
 
 };
 } // namespace pathFinder

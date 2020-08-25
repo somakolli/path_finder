@@ -76,12 +76,14 @@ void pathFinder::GraphReader::readCHFmiFile(
     child2 == -1 ? edge.child2 = std::nullopt : edge.child2 = child2;
     graph->m_edges[j++] = edge;
   }
-
+  if(reorderWithGrid){
+    Grid grid;
+    grid.createForGraph(*graph, 10, 10);
+  }
 #if TEST
   graph->randomizeLatLngs();
 #endif
-  if(reorderWithGrid)
-    gridReorder(*graph);
+  graph->sortEdges();
   buildOffset(graph->m_edges, graph->m_numberOfEdges, graph->m_offset);
   buildBackEdges(graph->m_edges, graph->m_backEdges, graph->m_numberOfEdges);
   buildOffset(graph->m_backEdges, graph->m_numberOfEdges, graph->m_backOffset);
@@ -95,13 +97,6 @@ void pathFinder::GraphReader::sortEdges(MyIterator<CHEdge*> edges) {
                          ? edge1.target <= edge2.target
                          : edge1.source < edge2.source;
             });
-}
-void pathFinder::GraphReader::gridReorder(pathFinder::CHGraph& graph) {
-  Grid grid(graph, 3600, 1800);
-  grid.buildGrid();
-  grid.reorderNodes();
-  std::cout << "pointer grid length " << grid.pointerGrid.size() << std::endl;
-  graph.gridMap = grid.pointerGrid;
 }
 void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge* edges, size_t edgeSize, NodeId *&offset) {
   if (edgeSize == 0)

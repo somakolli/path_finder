@@ -2,6 +2,7 @@
 // Created by sokol on 31.03.20.
 //
 #include <nlohmann/json.hpp>
+#include <path_finder/helper/Static.h>
 #include <path_finder/storage/DataConfig.h>
 #include <sstream>
 
@@ -51,7 +52,10 @@ void pathFinder::from_json(const nlohmann::json &j, BinaryFileDescription &d) {
   j.at("mmap").get_to(d.mmap);
 }
 void pathFinder::to_json(nlohmann::json &j, const BinaryFileDescription &d) {
-  j = {{"path", d.path}, {"size", d.size}, {"mmap", d.mmap}};
+  j = {{"path", d.path},
+       {"size", d.size},
+       {"humanReadableSize", pathFinder::Static::humanReadable(d.size)},
+       {"mmap", d.mmap}};
 }
 
 std::string pathFinder::DataConfig::toJson() {
