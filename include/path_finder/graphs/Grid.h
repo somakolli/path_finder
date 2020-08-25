@@ -25,8 +25,8 @@ public:
   };
   Grid(uint16_t latStretchFactor, uint16_t lngStretchFactor);
 
-
-
+  uint16_t getLatStretchFactor() const;
+  uint16_t getLngStretchFactor() const;
 };
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_GRID_H

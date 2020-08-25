@@ -24,6 +24,8 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
     ge.pointerPair = entry.second;
     gridMapEntries.gridMapEntries.push_back(ge);
   }
+  gridMapEntries.latStretchFactor = graph.grid->getLatStretchFactor();
+  gridMapEntries.lngStretchFactor = graph.grid->getLngStretchFactor();
   dataConfig.gridCalculated = true;
   dataConfig.gridMapFile = "gridMap.json";
   std::ofstream gridOut(folder + '/' + dataConfig.gridMapFile);
