@@ -84,9 +84,9 @@ void pathFinder::GraphReader::readCHFmiFile(
   graph->randomizeLatLngs();
 #endif
   graph->sortEdges();
-  graph->m_offset = buildOffset(graph->m_edges, graph->m_numberOfEdges);
+  buildOffset(graph->m_edges, graph->m_numberOfEdges, graph->m_offset);
   buildBackEdges(graph->m_edges, graph->m_backEdges, graph->m_numberOfEdges);
-  graph->m_backOffset = buildOffset(graph->m_backEdges, graph->m_numberOfEdges);
+  buildOffset(graph->m_backEdges, graph->m_numberOfEdges, graph->m_backOffset);
 }
 
 
@@ -128,7 +128,6 @@ void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge* edges, size_
   }
   offset[0] = 0;
   offset[offsetSize-1] = edgeSize;
-  return offset;
 }
 void pathFinder::GraphReader::buildBackEdges(const pathFinder::CHEdge *forwardEdges, pathFinder::CHEdge *&backEdges,
                                              size_t numberOfEdges) {
