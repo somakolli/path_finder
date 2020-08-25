@@ -48,9 +48,9 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
   auto chGraph = std::make_shared<CHGraph>(chGraphCreateInfo);
   // set up grid
   if(config.gridCalculated) {
-    std::ifstream gridStream(graphFolder + "/" + config.gridMapFile);
-    std::string gridStr((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-    auto gridConfig = pathFinder::DataConfig::getFromFile<GridMapEntries>(str);
+    std::ifstream gridStream(graphFolder + config.gridMapFile);
+    std::string gridStr((std::istreambuf_iterator<char>(gridStream)), std::istreambuf_iterator<char>());
+    auto gridConfig = pathFinder::DataConfig::getFromFile<GridMapEntries>(gridStr);
     for (auto gridEntry : gridConfig.gridMapEntries) {
       chGraph->gridMap[gridEntry.latLng] = gridEntry.pointerPair;
     }
