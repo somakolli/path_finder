@@ -72,7 +72,8 @@ void pathFinder::CHGraph::sortEdges() {
     m_edges[j++] = edge;
   }
 }
-pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) { double distance = std::numeric_limits<double>::max();
+pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) {
+  double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
   for(int i = 0; i < m_numberOfNodes; ++i) {
     auto& node = m_nodes[i];
