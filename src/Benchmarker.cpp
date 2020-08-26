@@ -44,9 +44,11 @@ Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t nu
   for(uint32_t i = 0 ; i < numberOfQueries; ++i) {
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
+    LatLng sourceLatLng(48.797818160096874,9.214439392089846);
+    LatLng targetLatLng(48.75890477584505, 9.149551391601564);
     try {
       m_pathFinder->setLabelsUntilLevel((Level)level);
-      auto resultReturn = m_pathFinder->getShortestPath(sourceId, targetId).routingResultTimingInfo;
+      auto resultReturn = m_pathFinder->getShortestPath(sourceLatLng, targetLatLng).routingResultTimingInfo;
       totalRoutingResult += resultReturn;
       dropCaches();
     } catch (const std::runtime_error& e) {}
