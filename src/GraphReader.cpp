@@ -77,7 +77,7 @@ void pathFinder::GraphReader::readCHFmiFile(
     graph->m_edges[j++] = edge;
   }
   if(reorderWithGrid){
-    createGridForGraph(*graph, 10, 10);
+    createGridForGraph(*graph, 0.1, 0.1);
   }
 #if TEST
   graph->randomizeLatLngs();

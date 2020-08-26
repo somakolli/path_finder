@@ -14,8 +14,8 @@ public:
   using GridKey = std::pair<int, int>;
 private:
   std::map<GridKey, PositionPair> m_grid;
-  uint16_t m_latStretchFactor;
-  uint16_t m_lngStretchFactor;
+  double m_latStretchFactor;
+  double m_lngStretchFactor;
 public:
   auto begin() {
       return m_grid.cbegin();
@@ -28,10 +28,10 @@ public:
   };
   [[nodiscard]] GridKey getKeyFor(LatLng latLng) const;
   PositionPair operator[](LatLng latLng) const;
-  Grid(uint16_t latStretchFactor, uint16_t lngStretchFactor);
+  Grid(double latStretchFactor, double lngStretchFactor);
 
-  [[nodiscard]] uint16_t getLatStretchFactor() const;
-  [[nodiscard]] uint16_t getLngStretchFactor() const;
+  [[nodiscard]] double getLatStretchFactor() const;
+  [[nodiscard]] double getLngStretchFactor() const;
 
 };
 } // namespace pathFinder
