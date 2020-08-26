@@ -229,7 +229,7 @@ Level HybridPathFinder::labelsUntilLevel() {
   return m_labelsUntilLevel;
 }
 
-auto HybridPathFinder::getGraph() {
+std::shared_ptr<CHGraph> HybridPathFinder::getGraph() {
   return m_graph;
 }
 

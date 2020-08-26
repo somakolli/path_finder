@@ -79,7 +79,7 @@ public:
   RoutingResult getShortestPath(LatLng source, LatLng target) override;
   size_t graphNodeSize();
   Level labelsUntilLevel();
-  auto getGraph();
+  std::shared_ptr<CHGraph> getGraph();
   Level getMaxLevel();
   void setLabelsUntilLevel(Level level);
 private:
