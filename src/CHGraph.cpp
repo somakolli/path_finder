@@ -78,6 +78,7 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) 
   auto gridPositions = (*grid)[latLng];
   for(int i = gridPositions.first; i < gridPositions.second; ++i) {
     auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, m_nodes[position].latLng);
+    auto node = m_nodes[i];
     if(newDistance < distance) {
       distance = newDistance;
       position = i;

@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
   if(level >= 0) {
     benchmarker.benchmarkLevel(level, numberOfQueries);
     benchmarker.benchmarkCHDijkstra(numberOfQueries);
+    benchmarker.benchMarkNearestNeighbour(numberOfQueries);
   }
   else {
     std::vector<pathFinder::Benchmarker::BenchResult> hybResult = benchmarker.benchmarkAllLevel(numberOfQueries);

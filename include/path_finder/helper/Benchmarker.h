@@ -20,6 +20,7 @@ public:
               std::string  outPutPath);
   std::vector<BenchResult> benchmarkAllLevel(uint32_t numberOfQueries);
   BenchResult benchmarkLevel(uint32_t level, uint32_t numberOfQueries);
+  double benchMarkNearestNeighbour(uint32_t numberOfQueries);
   RoutingResultTimingInfo benchmarkCHDijkstra(uint32_t numberOfQueries);
   static void printRoutingResultForOctave(std::ostream& distanceStream, const std::vector<BenchResult>& ramResult, double chResult) {
     std::stringstream plotLevel;

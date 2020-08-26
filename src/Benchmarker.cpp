@@ -93,4 +93,15 @@ RoutingResultTimingInfo Benchmarker::benchmarkCHDijkstra(uint32_t numberOfQuerie
   std::cout << line;
   return routingResult;
 }
+double Benchmarker::benchMarkNearestNeighbour(uint32_t numberOfQueries) {
+  double totalTime = 0;
+  for(int i = 0; i < numberOfQueries; ++i) {
+    Stopwatch stopwatch;
+    LatLng latLng(48.811385499847546, 9.243965148925783);
+    auto nodeId = m_pathFinder->getGraph()->getNodeIdFor(latLng);
+    totalTime += stopwatch.elapsedMicro();
+    CHNode node = m_pathFinder->getGraph()->getNode(nodeId);
+  }
+  return totalTime / numberOfQueries;
+}
 }
