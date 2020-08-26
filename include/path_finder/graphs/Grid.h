@@ -32,6 +32,7 @@ public:
 
   [[nodiscard]] double getLatStretchFactor() const;
   [[nodiscard]] double getLngStretchFactor() const;
+  [[nodiscard]] std::vector<PositionPair> getSurroundingNodes(uint32_t range, GridKey middlePosition) const;
 
 };
 } // namespace pathFinder
