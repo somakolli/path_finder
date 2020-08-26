@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "google-default-arguments"
 //
 // Created by sokol on 17.06.20.
 //
@@ -85,6 +83,8 @@ public:
   Level getMaxLevel();
   void setLabelsUntilLevel(Level level);
 private:
+  bool m_cellIdsCalculated;
+  bool m_hubLabelsCalculated;
   typedef std::vector<CostNode> costNodeVec_t;
 
   std::shared_ptr<HubLabelStore> m_hubLabelStore;
@@ -148,10 +148,7 @@ private:
   std::optional<CostNode> findElementInLabel(NodeId nodeId,
                                              const costNodeVec_t &label);
 
-  bool m_cellIdsCalculated = false;
-  bool m_hubLabelsCalculated = false;
 };
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_HYBRIDPATHFINDER_H
 
-#pragma clang diagnostic pop

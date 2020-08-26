@@ -9,10 +9,13 @@
 #include <utility>
 namespace pathFinder {
 class Grid {
+public:
+  using PositionPair = std::pair<NodeId, NodeId>;
+  using GridKey = std::pair<int, int>;
 private:
-  std::map<std::pair<int, int>, std::pair<NodeId, NodeId>> m_grid;
-  uint16_t m_latStretchFactor = 1;
-  uint16_t m_lngStretchFactor = 1;
+  std::map<GridKey, PositionPair> m_grid;
+  uint16_t m_latStretchFactor;
+  uint16_t m_lngStretchFactor;
 public:
   auto begin() {
       return m_grid.cbegin();
@@ -20,13 +23,16 @@ public:
   auto end() {
       return m_grid.cend();
   };
-  auto &operator[](std::pair<int, int> index){
+  auto &operator[](GridKey index){
      return m_grid[index];
   };
+  [[nodiscard]] GridKey getKeyFor(LatLng latLng) const;
+  PositionPair operator[](LatLng latLng) const;
   Grid(uint16_t latStretchFactor, uint16_t lngStretchFactor);
 
-  uint16_t getLatStretchFactor() const;
-  uint16_t getLngStretchFactor() const;
+  [[nodiscard]] uint16_t getLatStretchFactor() const;
+  [[nodiscard]] uint16_t getLngStretchFactor() const;
+
 };
 } // namespace pathFinder
 #endif // MASTER_ARBEIT_GRID_H

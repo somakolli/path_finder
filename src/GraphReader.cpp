@@ -183,10 +183,7 @@ void pathFinder::GraphReader::createGridForGraph(pathFinder::CHGraph &graph, dou
   std::map<std::pair<int, int>, std::vector<CHNode>> map;
 
   for(const auto& node : graph.getNodes()) {
-    int latPositionInGrid = std::floor(node.latLng.lat * latStretchFactor);
-    int lngPositionInGrid = std::floor(node.latLng.lng * lngStretchFactor);
-
-    map[std::make_pair(latPositionInGrid, lngPositionInGrid)].emplace_back(node);
+    map[grid->getKeyFor(node.latLng)].emplace_back(node);
   }
   std::map<NodeId, NodeId> oldIdToNewId;
   size_t i = 0;

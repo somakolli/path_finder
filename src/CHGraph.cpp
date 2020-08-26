@@ -75,16 +75,14 @@ void pathFinder::CHGraph::sortEdges() {
 pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) {
   double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
-  for(int i = 0; i < m_numberOfNodes; ++i) {
-    auto& node = m_nodes[i];
-    double currentDistance = beeLineWithoutSquareRoot(node.latLng, latLng);
-    if(currentDistance < distance){
-      distance = currentDistance;
+  auto gridPositions = (*grid)[latLng];
+  for(int i = gridPositions.first; i < gridPositions.second; ++i) {
+    auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, m_nodes[position].latLng);
+    if(newDistance < distance) {
+      distance = newDistance;
       position = i;
     }
   }
-  std::cout << latLng.lat << latLng.lng << std::endl;
-  std::cout << position << std::endl;
   return position;
 }
 pathFinder::CHNode pathFinder::CHGraph::getNode(pathFinder::NodeId id) const {
@@ -122,9 +120,7 @@ std::vector<pathFinder::CHEdge> pathFinder::CHGraph::getPathFromShortcut(pathFin
     edgesStack.pop();
     __glibcxx_assert(edgeIdx < m_numberOfEdges);
     const auto& edge = m_edges[edgeIdx];
-    double length = m_nodes[edge.source].euclid(m_nodes[edge.target]);
-    if(edge.child1.has_value() && length > minLength) {
-
+    if(edge.child1.has_value() && m_nodes[edge.source].euclid(m_nodes[edge.target]) > minLength) {
       edgesStack.push(edge.child2.value());
       edgesStack.push(edge.child1.value());
     } else {
