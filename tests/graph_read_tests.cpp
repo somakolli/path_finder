@@ -4,6 +4,7 @@
 #include <path_finder/storage/FileLoader.h>
 #include <path_finder/storage/FileWriter.h>
 #include <path_finder/storage/GraphReader.h>
+#include <path_finder/graphs/GeometricType.h>
 #include <ctime>
 
 namespace pathFinder {
@@ -129,6 +130,48 @@ TEST(CHGraph, GridReorderWorks) {
   }
   for(const auto& [source, target]: backwardEdgesBeforeReorder) {
       ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getBackEdges(), source, target));
+  }
+}
+TEST(CHGraph, calcMidPointWorks) {
+  {
+    LatLng a(0, 0);
+    LatLng b(1, 1);
+    auto calcPoint = BoundingBox::calcMidPoint(a, b);
+    ASSERT_EQ(LatLng(0.5f, 0.5f), calcPoint);
+  }
+  {
+    LatLng a(1, 1);
+    LatLng b(2, 2);
+    auto calcPoint = BoundingBox::calcMidPoint(a, b);
+    ASSERT_EQ(LatLng(1.5f, 1.5f), calcPoint);
+  }
+}
+TEST(Static, IntersectionWorks) {
+  {
+    LatLng a(0, 0);
+    LatLng b(1, 1);
+    LatLng c(1, 0);
+    LatLng d(0, 1);
+    auto intPoint = BoundingBox::intersectionPoint(a, b, c, d).value();
+    ASSERT_EQ(intPoint, LatLng(0.5f, 0.5f));
+  }{
+    LatLng a(0, 0);
+    LatLng b(1, 1);
+    LatLng c(5, 4);
+    LatLng d(4, 5);
+    auto intPoint = BoundingBox::intersectionPoint(a, b, c, d);
+    ASSERT_EQ(std::nullopt, intPoint);
+  }
+}
+TEST(BoundingBox, ContainsWorks) {
+  BoundingBox boundingBox {1,1,0,0};
+  {
+    LatLng point(0.5,0.5);
+    ASSERT_TRUE(boundingBox.contains(point));
+  }
+  {
+    LatLng point(2, 2);
+    ASSERT_FALSE(boundingBox.contains(point));
   }
 }
 }

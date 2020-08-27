@@ -34,7 +34,7 @@ set(SOURCES
         src/base64.cpp
         src/FileWriter.cpp
         src/Benchmarker.cpp
-        src/ThreadPool.cpp)
+        src/ThreadPool.cpp include/path_finder/helper/Math.h include/path_finder/graphs/GeometricType.h src/GeometricTypes.cpp)
 
 set(INCLUDES
         include/path_finder/routing/CHDijkstra.h

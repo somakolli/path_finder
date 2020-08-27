@@ -7,12 +7,12 @@
 #include <boost/optional.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <path_finder/graphs/GeometricType.h>
 #include <vector>
 
 namespace pathFinder {
 using NodeId = uint32_t ;
-using Lat = float;
-using Lng = float;
+
 using Distance = uint32_t ;
 using Level = uint16_t;
 using CellId_t = uint32_t;
@@ -42,43 +42,7 @@ struct OffsetElement {
   size_t position = 0;
   size_t size = 0;
 };
-struct LatLng {
-  Lat lat;
-  Lng lng;
 
-  LatLng() = default;
-  LatLng(const double lat, const double lng): lat(lat), lng(lng) {}
-  bool operator==(LatLng other) const {
-    return other.lat == lat && other.lng == lng;
-  }
-  LatLng operator-(LatLng other) const{
-    LatLng newLatLng;
-    newLatLng.lat = lat - other.lat;
-    newLatLng.lng = lng - other.lng;
-    return newLatLng;
-  }
-  LatLng operator+(LatLng other) {
-    LatLng newLatLng;
-    newLatLng.lat = lat + other.lat;
-    newLatLng.lng = lng + other.lng;
-    return newLatLng;
-  }
-  LatLng operator*(double other) {
-    LatLng newLatLng;
-    newLatLng.lat = other * lat;
-    newLatLng.lng = other * lng;
-    return newLatLng;
-  }
-  LatLng operator/(double other) {
-    LatLng newLatLng;
-    newLatLng.lat = other / lat;
-    newLatLng.lng = other / lng;
-    return newLatLng;
-  }
-  double length() {
-    return std::sqrt(std::pow(lat, 2) + std::pow(lng, 2));
-  }
-};
 void to_json(nlohmann::json& j, LatLng latLng);
 void from_json(const nlohmann::json& j, LatLng& latLng);
 class Node {
@@ -193,19 +157,5 @@ using costNodeVec_t = std::vector<CostNode>;
 
 void to_json(nlohmann::json& j, CalcLabelTimingInfo calcLabelTimingInfo);
 void to_json(nlohmann::json& j, RoutingResultTimingInfo calcLabelTimingInfo);
-struct BoundingBox {
-  double north = 0;
-  double east = 0;
-  double south = 0;
-  double west = 0;
 
-  LatLng southEast(){
-      return LatLng(south, east);
-  };
-  LatLng northWest(){
-    return LatLng(north, west);
-  }
-};
-void to_json(nlohmann::json& j, BoundingBox boundingBox);
-void from_json(const nlohmann::json& j, BoundingBox& boundingBox);
 }

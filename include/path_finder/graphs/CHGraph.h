@@ -51,7 +51,7 @@ public:
 
   explicit CHGraph(CHGraphCreateInfo chGraphCreateInfo);
 
-  static std::shared_ptr<CHGraph> makeShared(CHGraphCreateInfo chGraphCreateInfo);
+  static std::shared_ptr<CHGraph> makeShared(const CHGraphCreateInfo& chGraphCreateInfo);
 
   std::shared_ptr<Grid> grid;
   BoundingBox boundingBox;

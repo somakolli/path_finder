@@ -23,7 +23,7 @@ pathFinder::CHGraph::CHGraph(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
   boundingBox = chGraphCreateInfo.boundingBox;
   grid = chGraphCreateInfo.grid;
 }
-std::shared_ptr<pathFinder::CHGraph> pathFinder::CHGraph::makeShared(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
+std::shared_ptr<pathFinder::CHGraph> pathFinder::CHGraph::makeShared(const pathFinder::CHGraphCreateInfo& chGraphCreateInfo) {
   return std::make_shared<CHGraph>(chGraphCreateInfo);
 }
 void pathFinder::CHGraph::sortByLevel(std::vector<CHNode> &sortedNodes) {
@@ -77,6 +77,10 @@ void pathFinder::CHGraph::sortEdges() {
 pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) {
   double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
+  if(!boundingBox.contains(latLng)) {
+    // get point at correct edge of bounding box
+    latLng = boundingBox.getIntersectionPoint(midPoint, latLng);
+  }
   auto gridPositions = (*grid)[latLng];
   uint32_t maxSearchRadius = 10000000;
   for(int i = gridPositions.first; i < gridPositions.second; ++i) {

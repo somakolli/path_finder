@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
+#include <path_finder/helper/Static.h>
 
 void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph,
                                           const std::string &filepath) {
@@ -56,8 +57,8 @@ void pathFinder::GraphReader::readCHFmiFile(
   uint32_t child1;
   uint32_t child2;
   uint64_t osmId;
-  Lat lat;
-  Lng lng;
+  LatLng::Lat lat;
+  LatLng::Lng lng;
   uint32_t el;
   int i = graph->m_numberOfNodes + 1;
   int j = 0;
@@ -235,8 +236,5 @@ void pathFinder::GraphReader::calcBoundingBox(pathFinder::CHGraph &graph) {
   }
   graph.boundingBox = boundingBox;
 
-  // midpoint
-  LatLng diagVec = (boundingBox.northWest() - boundingBox.southEast());
-  double diagLength = diagVec.length();
-  graph.midPoint = boundingBox.southEast() + (diagVec / 2);
+  graph.midPoint = boundingBox.calcMidPoint(boundingBox.southWest(), boundingBox.northEast());
 }
