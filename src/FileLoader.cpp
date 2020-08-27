@@ -44,6 +44,8 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
   chGraphCreateInfo.backEdgesMMap = config.backwardEdges.mmap;
   chGraphCreateInfo.offsetMMap = config.forwardOffset.mmap;
   chGraphCreateInfo.backOffsetMMap = config.backwardOffset.mmap;
+  chGraphCreateInfo.boundingBox = config.boundingBox;
+  chGraphCreateInfo.midPoint = config.midPoint;
 
   // set up grid
   if(config.gridCalculated) {

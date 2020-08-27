@@ -21,6 +21,7 @@ private:
   static void buildBackEdges(const CHEdge* forwardEdges, CHEdge* &backEdges, size_t numberOfEdges);
   static void sortEdges(MyIterator<CHEdge*> edges);
   static void createGridForGraph(CHGraph& graph, double latStretchFactor, double lngStretchFactor);
+  static void calcBoundingBox(CHGraph& graph);
 };
 } // namespace pathFinder
 

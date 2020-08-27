@@ -44,11 +44,11 @@ Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t nu
   for(uint32_t i = 0 ; i < numberOfQueries; ++i) {
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
-    LatLng sourceLatLng(48.797818160096874,9.214439392089846);
-    LatLng targetLatLng(48.75890477584505, 9.149551391601564);
+    //LatLng sourceLatLng(48.797818160096874,9.214439392089846);
+    //LatLng targetLatLng(48.75890477584505, 9.149551391601564);
     try {
       m_pathFinder->setLabelsUntilLevel((Level)level);
-      auto resultReturn = m_pathFinder->getShortestPath(sourceLatLng, targetLatLng).routingResultTimingInfo;
+      auto resultReturn = m_pathFinder->getShortestPath(sourceId, targetId).routingResultTimingInfo;
       totalRoutingResult += resultReturn;
       dropCaches();
     } catch (const std::runtime_error& e) {}
@@ -99,7 +99,7 @@ double Benchmarker::benchMarkNearestNeighbour(uint32_t numberOfQueries) {
   double totalTime = 0;
   for(int i = 0; i < numberOfQueries; ++i) {
     Stopwatch stopwatch;
-    LatLng latLng(48.811385499847546, 9.243965148925783);
+    LatLng latLng(49.52520834197442,10.744628906250002);
     auto nodeId = m_pathFinder->getGraph()->getNodeIdFor(latLng);
     totalTime += stopwatch.elapsedMicro();
     CHNode node = m_pathFinder->getGraph()->getNode(nodeId);

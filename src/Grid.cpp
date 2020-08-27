@@ -17,7 +17,10 @@ Grid::GridKey Grid::getKeyFor(LatLng latLng) const{
   return std::make_pair(latPositionInGrid, lngPositionInGrid);
 }
 Grid::PositionPair Grid::operator[](LatLng latLng) const {
-  return m_grid.at(getKeyFor(latLng));
+  if(m_grid.contains(getKeyFor(latLng))) {
+    return m_grid.at(getKeyFor(latLng));
+  }
+  return PositionPair {0,0};
 }
 
 /*
@@ -39,9 +42,10 @@ std::vector<Grid::PositionPair> Grid::getSurroundingNodes(uint32_t range, Grid::
    *
    *  y-position = negativeRange and x-position changes through the loop
   */
-  for(int i = negativeRange; i < range; ++i) {
+  for(int i = negativeRange; i < (int)range; ++i) {
     auto newGridCoords = std::make_pair(middlePosition.first + i, middlePosition.second + negativeRange);
-    returnVec.emplace_back(m_grid.at(newGridCoords));
+    if(m_grid.contains(newGridCoords))
+      returnVec.emplace_back(m_grid.at(newGridCoords));
   }
   /* bottom
    *  x x x
@@ -51,9 +55,10 @@ std::vector<Grid::PositionPair> Grid::getSurroundingNodes(uint32_t range, Grid::
    *
    *  y-position = range and x-position changes through the loop
   */
-  for(int i = negativeRange + 1; i <= range; ++i) {
+  for(int i = negativeRange + 1; i <= (int)range; ++i) {
     auto newGridCoords = std::make_pair(middlePosition.first + i, middlePosition.second + range);
-    returnVec.emplace_back(m_grid.at(newGridCoords));
+    if(m_grid.contains(newGridCoords))
+      returnVec.emplace_back(m_grid.at(newGridCoords));
   }
   /* left
    *  x x x
@@ -63,9 +68,10 @@ std::vector<Grid::PositionPair> Grid::getSurroundingNodes(uint32_t range, Grid::
    *
    *  y-position = changes through the loop and x-position = negative range
   */
-  for(int i = negativeRange + 1; i <= range; ++i) {
+  for(int i = negativeRange + 1; i <= (int)range; ++i) {
     auto newGridCoords = std::make_pair(middlePosition.first + negativeRange, middlePosition.second + i);
-    returnVec.emplace_back(m_grid.at(newGridCoords));
+    if(m_grid.contains(newGridCoords))
+      returnVec.emplace_back(m_grid.at(newGridCoords));
   }
   /* right
    *  x x o
@@ -75,11 +81,15 @@ std::vector<Grid::PositionPair> Grid::getSurroundingNodes(uint32_t range, Grid::
    *
    *  y-position = changes through the loop and x-position = range
   */
-  for(int i = negativeRange; i < range; ++i) {
+  for(int i = negativeRange; i < (int)range; ++i) {
     auto newGridCoords = std::make_pair(middlePosition.first + range, middlePosition.second + i);
-    returnVec.emplace_back(m_grid.at(newGridCoords));
+    if(m_grid.contains(newGridCoords))
+      returnVec.emplace_back(m_grid.at(newGridCoords));
   }
   return returnVec;
+}
+double Grid::getRadiusWithoutSqrt(uint32_t range, LatLng latLng) {
+  return CHGraph::beeLineWithoutSquareRoot(latLng, LatLng(latLng.lat + (range * m_latStretchFactor), latLng.lng));
 }
 
 }

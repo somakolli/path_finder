@@ -43,6 +43,8 @@ struct GraphDataInfo  : DataInfo{
   BinaryFileDescription backwardEdges;
   BinaryFileDescription backwardOffset;
   std::string gridMapFile;
+  BoundingBox boundingBox;
+  LatLng midPoint;
 };
 
 struct HubLabelDataInfo : DataInfo {

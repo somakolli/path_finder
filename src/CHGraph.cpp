@@ -19,6 +19,8 @@ pathFinder::CHGraph::CHGraph(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
   m_backEdgesMMap = chGraphCreateInfo.backEdgesMMap;
   m_offsetMMap = chGraphCreateInfo.offsetMMap;
   m_backOffsetMMap = chGraphCreateInfo.backOffsetMMap;
+  midPoint = chGraphCreateInfo.midPoint;
+  boundingBox = chGraphCreateInfo.boundingBox;
   grid = chGraphCreateInfo.grid;
 }
 std::shared_ptr<pathFinder::CHGraph> pathFinder::CHGraph::makeShared(pathFinder::CHGraphCreateInfo chGraphCreateInfo) {
@@ -76,6 +78,7 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) 
   double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
   auto gridPositions = (*grid)[latLng];
+  uint32_t maxSearchRadius = 10000000;
   for(int i = gridPositions.first; i < gridPositions.second; ++i) {
     auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, latLng);
     auto node = m_nodes[i];
@@ -84,13 +87,17 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) 
       position = i;
     }
   }
-  auto firstSurround = grid->getSurroundingNodes(1, grid->getKeyFor(latLng));
-  for(auto [begin, end] : firstSurround) {
-    for(int i = begin; i < end; ++i) {
-      auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, latLng);
-      if(newDistance < distance) {
-        distance = newDistance;
-        position = i;
+  for(int i = 1; position == m_numberOfNodes &&
+                  i < maxSearchRadius &&
+                  distance > grid->getRadiusWithoutSqrt(i - 1, latLng); ++i){
+    auto firstSurround = grid->getSurroundingNodes(i, grid->getKeyFor(latLng));
+    for(auto [begin, end] : firstSurround) {
+      for(int j = begin; j < end; ++j) {
+        auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, latLng);
+        if(newDistance < distance) {
+          distance = newDistance;
+          position = j;
+        }
       }
     }
   }

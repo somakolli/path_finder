@@ -116,7 +116,8 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::GraphDataInfo &d) 
   j.push_back({"backwardOffset", d.backwardOffset});
   j.push_back({"gridMapFile", d.gridMapFile});
   j.push_back({"gridCalculated", d.gridCalculated});
-
+  j.push_back({{"boundingBox"}, d.boundingBox});
+  j.push_back({{"midPoint"}, d.midPoint});
 }
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d) {
   from_json(j, static_cast<DataInfo&>(d));
@@ -127,6 +128,8 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d
   j.at("backwardOffset").get_to(d.backwardOffset);
   j.at("gridMapFile").get_to(d.gridMapFile);
   j.at("gridCalculated").get_to(d.gridCalculated);
+  j.at("boundingBox").get_to(d.boundingBox);
+  j.at("midPoint").get_to(d.midPoint);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::HubLabelDataInfo &d) {
   to_json(j, static_cast<const DataInfo&>(d));

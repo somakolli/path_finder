@@ -27,6 +27,8 @@ struct CHGraphCreateInfo {
   bool backOffsetMMap = false;
   bool gridCalculated = false;
   std::shared_ptr<Grid> grid;
+  BoundingBox boundingBox;
+  LatLng midPoint;
 
   void setAllMMap(bool condition) {
     nodesMMap = condition;
@@ -52,6 +54,8 @@ public:
   static std::shared_ptr<CHGraph> makeShared(CHGraphCreateInfo chGraphCreateInfo);
 
   std::shared_ptr<Grid> grid;
+  BoundingBox boundingBox;
+  LatLng midPoint;
 
   [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   Level getLevel(NodeId nodeId);
@@ -65,8 +69,8 @@ public:
   double getDistance(NodeId node1, NodeId node2);
   static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
   [[nodiscard]] bool isValidNodeId(NodeId id) const;
-  size_t getNumberOfNodes() const;
-  size_t getNumberOfEdges() const;
+  [[nodiscard]] size_t getNumberOfNodes() const;
+  [[nodiscard]] size_t getNumberOfEdges() const;
   MyIterator<const CHNode*> getNodes();
   MyIterator<const CHEdge*> getEdges();
   MyIterator<const CHEdge*> getBackEdges();

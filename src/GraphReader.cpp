@@ -79,6 +79,7 @@ void pathFinder::GraphReader::readCHFmiFile(
   if(reorderWithGrid){
     createGridForGraph(*graph, 10, 10);
   }
+  calcBoundingBox(*graph);
 #if TEST
   graph->randomizeLatLngs();
 #endif
@@ -212,4 +213,30 @@ void pathFinder::GraphReader::createGridForGraph(pathFinder::CHGraph &graph, dou
       throw std::out_of_range("");
   }
   graph.grid = grid;
+}
+void pathFinder::GraphReader::calcBoundingBox(pathFinder::CHGraph &graph) {
+  BoundingBox boundingBox {
+      graph.getNode(0).latLng.lat, // north
+      graph.getNode(0).latLng.lng, // east
+      graph.getNode(0).latLng.lat, // south
+      graph.getNode(0).latLng.lng, // west
+  };
+  for(const auto& node : graph.getNodes()){
+    auto lat = node.latLng.lat;
+    auto lng = node.latLng.lng;
+    if(lat > boundingBox.north)
+      boundingBox.north = lat;
+    if(lat < boundingBox.south)
+      boundingBox.south = lat;
+    if(lng > boundingBox.east)
+      boundingBox.east = lng;
+    if(lng < boundingBox.west)
+      boundingBox.west = lng;
+  }
+  graph.boundingBox = boundingBox;
+
+  // midpoint
+  LatLng diagVec = (boundingBox.northWest() - boundingBox.southEast());
+  double diagLength = diagVec.length();
+  graph.midPoint = boundingBox.southEast() + (diagVec / 2);
 }

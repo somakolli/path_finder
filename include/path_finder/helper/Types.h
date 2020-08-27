@@ -51,7 +51,44 @@ struct LatLng {
   bool operator==(LatLng other) const {
     return other.lat == lat && other.lng == lng;
   }
+  LatLng operator-(LatLng other) const{
+    LatLng newLatLng;
+    newLatLng.lat = lat - other.lat;
+    newLatLng.lng = lng - other.lng;
+    return newLatLng;
+  }
+  LatLng operator+(LatLng other) {
+    LatLng newLatLng;
+    newLatLng.lat = lat + other.lat;
+    newLatLng.lng = lng + other.lng;
+    return newLatLng;
+  }
+  LatLng operator*(double other) {
+    LatLng newLatLng;
+    newLatLng.lat = other * lat;
+    newLatLng.lng = other * lng;
+    return newLatLng;
+  }
+  LatLng operator/(double other) {
+    LatLng newLatLng;
+    newLatLng.lat = other / lat;
+    newLatLng.lng = other / lng;
+    return newLatLng;
+  }
+  double length() {
+    return std::sqrt(std::pow(lat, 2) + std::pow(lng, 2));
+  }
 };
+void to_json(nlohmann::json& j, LatLng latLng) {
+  j = nlohmann::json {
+      {"lat", latLng.lat},
+      {"lng", latLng.lng}
+  };
+}
+void from_json(const nlohmann::json& j, LatLng& latLng) {
+  j.at("lat").get_to(latLng.lat);
+  j.at("lng").get_to(latLng.lng);
+}
 class Node {
 public:
   NodeId id;
@@ -164,4 +201,31 @@ using costNodeVec_t = std::vector<CostNode>;
 
 void to_json(nlohmann::json& j, CalcLabelTimingInfo calcLabelTimingInfo);
 void to_json(nlohmann::json& j, RoutingResultTimingInfo calcLabelTimingInfo);
+struct BoundingBox {
+  double north = 0;
+  double east = 0;
+  double south = 0;
+  double west = 0;
+
+  LatLng southEast(){
+      return LatLng(south, east);
+  };
+  LatLng northWest(){
+    return LatLng(north, west);
+  }
+};
+void to_json(nlohmann::json& j, BoundingBox boundingBox){
+  j = nlohmann::json {
+      {"north", boundingBox.north},
+      {"east", boundingBox.east},
+      {"south", boundingBox.south},
+      {"west", boundingBox.west}
+  };
+}
+void from_json(const nlohmann::json& j, BoundingBox& boundingBox){
+  j.at("north").get_to(boundingBox.north);
+  j.at("east").get_to(boundingBox.east);
+  j.at("south").get_to(boundingBox.south);
+  j.at("west").get_to(boundingBox.west);
+}
 }

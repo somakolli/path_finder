@@ -28,6 +28,8 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string& graphName, 
   gridMapEntries.lngStretchFactor = graph.grid->getLngStretchFactor();
   dataConfig.gridCalculated = true;
   dataConfig.gridMapFile = "gridMap.json";
+  dataConfig.midPoint = graph.midPoint;
+  dataConfig.boundingBox = graph.boundingBox;
   std::ofstream gridOut(folder + '/' + dataConfig.gridMapFile);
   nlohmann::json gridJson;
   to_json(gridJson, gridMapEntries);
