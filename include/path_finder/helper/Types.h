@@ -79,16 +79,8 @@ struct LatLng {
     return std::sqrt(std::pow(lat, 2) + std::pow(lng, 2));
   }
 };
-void to_json(nlohmann::json& j, LatLng latLng) {
-  j = nlohmann::json {
-      {"lat", latLng.lat},
-      {"lng", latLng.lng}
-  };
-}
-void from_json(const nlohmann::json& j, LatLng& latLng) {
-  j.at("lat").get_to(latLng.lat);
-  j.at("lng").get_to(latLng.lng);
-}
+void to_json(nlohmann::json& j, LatLng latLng);
+void from_json(const nlohmann::json& j, LatLng& latLng);
 class Node {
 public:
   NodeId id;
@@ -214,18 +206,6 @@ struct BoundingBox {
     return LatLng(north, west);
   }
 };
-void to_json(nlohmann::json& j, BoundingBox boundingBox){
-  j = nlohmann::json {
-      {"north", boundingBox.north},
-      {"east", boundingBox.east},
-      {"south", boundingBox.south},
-      {"west", boundingBox.west}
-  };
-}
-void from_json(const nlohmann::json& j, BoundingBox& boundingBox){
-  j.at("north").get_to(boundingBox.north);
-  j.at("east").get_to(boundingBox.east);
-  j.at("south").get_to(boundingBox.south);
-  j.at("west").get_to(boundingBox.west);
-}
+void to_json(nlohmann::json& j, BoundingBox boundingBox);
+void from_json(const nlohmann::json& j, BoundingBox& boundingBox);
 }
