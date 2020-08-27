@@ -84,6 +84,16 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) 
       position = i;
     }
   }
+  auto firstSurround = grid->getSurroundingNodes(1, grid->getKeyFor(latLng));
+  for(auto [begin, end] : firstSurround) {
+    for(int i = begin; i < end; ++i) {
+      auto newDistance = beeLineWithoutSquareRoot(m_nodes[i].latLng, latLng);
+      if(newDistance < distance) {
+        distance = newDistance;
+        position = i;
+      }
+    }
+  }
   return position;
 }
 pathFinder::CHNode pathFinder::CHGraph::getNode(pathFinder::NodeId id) const {
