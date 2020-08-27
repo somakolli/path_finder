@@ -86,7 +86,7 @@ struct BoundingBox {
                point2.has_value()) {
       return point2.value();
     } else {
-      return intersectionPoint(midPoint, outSidePoint, southWest(), northEast()).value();
+      return intersectionPoint(midPoint, outSidePoint, southWest(), northWest()).value();
     }
   }
   static std::optional<LatLng> intersectionPoint(LatLng A, LatLng B, LatLng C, LatLng D);;
