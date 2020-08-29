@@ -28,34 +28,35 @@ HybridPathFinder::getShortestPath(
   for(int i = 1; i < backwardPath.size(); ++i)
     forwardPath.push_back(backwardPath[i]);
 
-  std::vector<CHEdge> newForwardEdges =
+  std::vector<CHEdge> edgePathWithShortcuts =
       getEdgeVectorFromNodeIdPath(forwardPath, EdgeDirection::FORWARD);
+
   // unpack edges
-  std::vector<CHEdge> newFinalForwardEdgePath;
-  for (auto edge : newForwardEdges) {
+  std::vector<CHEdge> edgePathWithoutShortcuts;
+  for (auto edge : edgePathWithShortcuts) {
     for (auto e : m_graph->getPathFromShortcut(edge, 0))
-      newFinalForwardEdgePath.emplace_back(e);
+      edgePathWithoutShortcuts.emplace_back(e);
   }
 
-  for(auto e : newFinalForwardEdgePath) {
+  for(auto e : edgePathWithoutShortcuts) {
     routingResult.edgeIds.emplace_back(m_graph->getEdgePosition(e, EdgeDirection::FORWARD).value());
   }
 
   // get lat longs
-  std::vector<LatLng> newLatLngVector;
-  if (!newFinalForwardEdgePath.empty())
-    newLatLngVector.push_back(
-        m_graph->getNode(newFinalForwardEdgePath[0].source).latLng);
-  for (auto edge : newFinalForwardEdgePath) {
-    newLatLngVector.push_back(m_graph->getNode(edge.target).latLng);
+  std::vector<LatLng> latLngPath;
+  if (!edgePathWithoutShortcuts.empty())
+    latLngPath.push_back(
+        m_graph->getNode(edgePathWithoutShortcuts[0].source).latLng);
+  for (auto edge : edgePathWithoutShortcuts) {
+    latLngPath.push_back(m_graph->getNode(edge.target).latLng);
   }
-  routingResult.path = newLatLngVector;
+  routingResult.path = latLngPath;
   routingResult.routingResultTimingInfo.pathTime = stopwatch.elapsedMicro();
 
   stopwatch.reset();
   // find cell ids
   if(m_cellIdsCalculated)
-    for (auto edge : newFinalForwardEdgePath) {
+    for (auto edge : edgePathWithShortcuts) {
       addCellIds(edge, routingResult.cellIds);
     }
   // remove duplicates from cellIds
