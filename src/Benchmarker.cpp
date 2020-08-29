@@ -50,12 +50,12 @@ Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t nu
       m_pathFinder->setLabelsUntilLevel((Level)level);
       auto resultReturn = m_pathFinder->getShortestPath(sourceId, targetId).routingResultTimingInfo;
       totalRoutingResult += resultReturn;
-      dropCaches();
     } catch (const std::runtime_error& e) {}
+    dropCaches();
   }
 
   RoutingResultTimingInfo averageRoutingResult = totalRoutingResult / numberOfQueries;
-  std::cout << "mmap: " << '\n';
+  std::cout << "level: " << level << '\n';
   std::cout << averageRoutingResult.toJson() << '\n';
   return std::make_pair(level , averageRoutingResult);
 }

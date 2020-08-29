@@ -69,6 +69,9 @@ public:
 };
 struct CHNode : Node {
   Level level;
+  Node toNode() {
+    return Node{id, latLng};
+  }
 };
 struct CHEdge : Edge {
   std::optional<NodeId> child1 = std::nullopt;

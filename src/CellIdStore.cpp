@@ -7,7 +7,7 @@
 namespace pathFinder {
 
 CellIdStore::CellIdStore(size_t numberOfEdges) {
-  _cellIds = nullptr;
+  _cellIds = (CellId_t*) calloc(_reservedSize, sizeof(CellId_t));
   _cellIdSize = 0;
   _offsetVector = (OffsetElement*)calloc(numberOfEdges, sizeof(OffsetElement));
   _offsetVectorSize = numberOfEdges;
@@ -17,7 +17,11 @@ void CellIdStore::storeCellIds(
     size_t edgeId, const std::vector<CellId_t>&cellToAdd) {
   _offsetVector[edgeId].position = _cellIdSize;
   _offsetVector[edgeId].size = cellToAdd.size();
-  _cellIds = (CellId_t*)realloc(_cellIds, sizeof(CellId_t) * (_cellIdSize + cellToAdd.size()));
+  if(_reservedSize < _cellIdSize + cellToAdd.size()) {
+    _reservedSize += cellToAdd.size();
+    _reservedSize = _reservedSize * 2;
+    _cellIds = (CellId_t*)realloc(_cellIds, sizeof(CellId_t) * (_reservedSize));
+  }
   for(auto cell : cellToAdd) {
     _cellIds[_cellIdSize++] = cell;
   }
@@ -54,5 +58,8 @@ CellIdStore::~CellIdStore() {
   Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
   Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
   Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
+}
+void CellIdStore::shrink_to_fit() {
+  _cellIds = (CellId_t*)realloc(_cellIds, sizeof(CellId_t) * (_cellIdSize));
 }
 }

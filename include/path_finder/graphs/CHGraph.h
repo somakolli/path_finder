@@ -57,25 +57,27 @@ public:
   BoundingBox boundingBox;
   LatLng midPoint;
 
-  [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   Level getLevel(NodeId nodeId);
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   void randomizeLatLngs();
   NodeId getNodeIdFor(LatLng latLng);
+
+  [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
   [[nodiscard]] CHNode getNode(NodeId id) const;
-  std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction);
-  std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength);
-  double getDistance(NodeId node1, NodeId node2);
-  static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
+  [[nodiscard]] std::optional<size_t> getEdgePosition(const CHEdge& edge, EdgeDirection direction) const;
+  [[nodiscard]] std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength) const;
+  [[nodiscard]] double getDistance(NodeId node1, NodeId node2) const;
   [[nodiscard]] bool isValidNodeId(NodeId id) const;
   [[nodiscard]] size_t getNumberOfNodes() const;
   [[nodiscard]] size_t getNumberOfEdges() const;
-  MyIterator<const CHNode*> getNodes();
-  MyIterator<const CHEdge*> getEdges();
-  MyIterator<const CHEdge*> getBackEdges();
-  MyIterator<const NodeId*> getForwardOffset();
-  MyIterator<const NodeId*> getBackwardOffset();
+  [[nodiscard]] MyIterator<const CHNode*> getNodes() const;
+  [[nodiscard]] MyIterator<const CHEdge*> getEdges() const;
+  [[nodiscard]] MyIterator<const CHEdge*> getBackEdges() const;
+  [[nodiscard]] MyIterator<const NodeId*> getForwardOffset() const;
+  [[nodiscard]] MyIterator<const NodeId*> getBackwardOffset() const;
+
+  static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
 private:
   CHNode* m_nodes = nullptr;
   CHEdge* m_edges = nullptr;

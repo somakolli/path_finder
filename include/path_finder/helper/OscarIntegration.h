@@ -5,9 +5,11 @@
 #ifndef MASTER_ARBEIT_OSCARINTEGRATION_H
 #define MASTER_ARBEIT_OSCARINTEGRATION_H
 #include "path_finder/storage/CellIdStore.h"
-
+#include <path_finder/graphs/CHGraph.h>
 #include <algorithm>
 #include <iostream>
+#include <mutex>
+#include <execution>
 namespace pathFinder{
 class CellIdDiskWriter {
 private:
@@ -20,31 +22,38 @@ public:
 };
 class OscarIntegrator {
 public:
-  template<typename GeoPoint, typename Graph, typename CellIdsForEdge, typename DiskWriter, typename Store>
-  static void writeCellIdsForEdges(Graph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, Store store) {
-    const auto edges = graph.getEdges();
+  template<typename GeoPoint, typename CellIdsForEdge, typename DiskWriter, typename KVStore>
+  static void writeCellIdsForEdges(const CHGraph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, KVStore& store) {
+     const auto edges = graph.getEdges();
     int progress = 0;
-#pragma omp parallel for default(shared)
+#pragma omp parallel for default(none) shared(edges, graph, cellIdsForEdge, diskWriter, store, progress, std::cout)
     for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
       const auto& edge = edges[i];
+      std::vector<uint32_t> cellIds;
+      std::vector<CHEdge> fullEdges;
       if(edge.child1.has_value()){
-        ++progress;
-        continue;
+        fullEdges = graph.getPathFromShortcut(edge, 0);
+      } else {
+        fullEdges.emplace_back(edge);
       }
-      const auto sourceNode = graph.getNode(edge.source);
-      const auto targetNode = graph.getNode(edge.target);
-      GeoPoint sourcePoint;
-      sourcePoint.lat() = sourceNode.latLng.lat;
-      sourcePoint.lon() = sourceNode.latLng.lng;
-      GeoPoint targetPoint;
-      targetPoint.lat() = targetNode.latLng.lat;
-      targetPoint.lon() = targetNode.latLng.lng;
-      std::vector<uint32_t > cellIds;
-      try {
-        cellIds = cellIdsForEdge(sourcePoint, targetPoint);
-      } catch (std::exception& e) {
+      for(const auto& edge: fullEdges) {
+        const auto sourceNode = graph.getNode(edge.source);
+        const auto targetNode = graph.getNode(edge.target);
+        GeoPoint sourcePoint;
+        sourcePoint.lat() = sourceNode.latLng.lat;
+        sourcePoint.lon() = sourceNode.latLng.lng;
+        GeoPoint targetPoint;
+        targetPoint.lat() = targetNode.latLng.lat;
+        targetPoint.lon() = targetNode.latLng.lng;
 
+        try {
+          auto cellIdsEdge = cellIdsForEdge(sourcePoint, targetPoint);
+          cellIds.insert(cellIds.end(), cellIdsEdge.begin(), cellIdsEdge.end());
+        } catch (std::exception& e) {
+
+        }
       }
+
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
  #pragma omp critical
       {

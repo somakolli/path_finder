@@ -28,6 +28,7 @@ friend class FileWriter;
 private:
   size_t _cellIdSize;
   size_t _offsetVectorSize;
+  size_t _reservedSize = 100;
 
   CellId_t *_cellIds;
   OffsetElement *_offsetVector;
@@ -42,7 +43,8 @@ public:
   ~CellIdStore();
   void storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd);
   [[nodiscard]] size_t offsetSize() const;
-  size_t cellIdSize() const;
+  [[nodiscard]] size_t cellIdSize() const;
+  void shrink_to_fit();
   std::vector<CellId_t> getCellIds(size_t edgeId);
 };
 }
