@@ -1,14 +1,9 @@
-//
-// Created by sokol on 24.11.19.
-//
-
-#ifndef ALG_ENG_PROJECT_GRAPHSTATS_H
-#define ALG_ENG_PROJECT_GRAPHSTATS_H
-
+#pragma once
 #include "path_finder/graphs/CHGraph.h"
 
 namespace pathFinder {
-template <typename Graph> class GraphStats {
+template <typename Graph>
+class GraphStats {
   Graph &graph;
 
 public:
@@ -23,8 +18,7 @@ template <typename Graph>
 pathFinder::GraphStats<Graph>::GraphStats(Graph &graph) : graph(graph) {}
 template <typename Graph>
 std::uint32_t pathFinder::GraphStats<Graph>::getDegree(pathFinder::NodeId id) {
-  return graph.edgesFor(id, EdgeDirection::BACKWARD).size() +
-         graph.edgesFor(id, EdgeDirection::FORWARD).size();
+  return graph.edgesFor(id, EdgeDirection::BACKWARD).size() + graph.edgesFor(id, EdgeDirection::FORWARD).size();
 }
 template <typename Graph>
 float pathFinder::GraphStats<Graph>::getAverageDegree() {
@@ -35,8 +29,7 @@ float pathFinder::GraphStats<Graph>::getAverageDegree() {
   return (float)accumulator / graph.numberOfNodes;
 }
 template <typename Graph>
-std::uint32_t pathFinder::GraphStats<Graph>::getNodeCountWithLevelSmallerThan(
-    pathFinder::Level level) {
+std::uint32_t pathFinder::GraphStats<Graph>::getNodeCountWithLevelSmallerThan(pathFinder::Level level) {
   size_t count = 0;
   for (auto node : graph.getNodes()) {
     if (node.level < level)
@@ -59,15 +52,12 @@ void pathFinder::GraphStats<Graph>::printStats(std::ostream &ss) {
   ss << "average degree: " << getAverageDegree() << "\n";
   Level highestLevel = getHighestLevel();
   ss << "highest level: " << highestLevel << "\n";
-  std::string seperator =
-      "------------------------------------------------------";
+  std::string seperator = "------------------------------------------------------";
   ss << seperator << "\n";
   ss << "number of nodes < level\n";
   for (Level level = 1; level < 50; ++level) {
     size_t nodeCount = getNodeCountWithLevelSmallerThan(level);
-    ss << nodeCount << ',' << level << ','
-       << (float)nodeCount / graph.numberOfNodes << '\n';
+    ss << nodeCount << ',' << level << ',' << (float)nodeCount / graph.numberOfNodes << '\n';
   }
 }
 } // namespace pathFinder
-#endif // ALG_ENG_PROJECT_GRAPHSTATS_H

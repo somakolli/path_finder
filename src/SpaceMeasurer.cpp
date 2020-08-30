@@ -4,11 +4,10 @@
 
 #include "path_finder/helper/SpaceMeasurer.h"
 
-void pathFinder::SpaceMeasurer::setSpaceConsumption(pathFinder::Level nodeId,
-                                                    size_t space) {
+void pathFinder::SpaceMeasurer::setSpaceConsumption(pathFinder::Level nodeId, size_t space) {
   spaceConsumption[nodeId] = space;
 }
 
-size_t pathFinder::SpaceMeasurer::getSpaceConsumption(pathFinder::Level level) {
+[[maybe_unused]] size_t pathFinder::SpaceMeasurer::getSpaceConsumption(pathFinder::Level level) {
   return spaceConsumption[level];
 }

@@ -64,4 +64,4 @@ void from_json(const nlohmann::json &j, LatLng &latLng) {
   j.at("lat").get_to(latLng.lat);
   j.at("lng").get_to(latLng.lng);
 }
-}
+} // namespace pathFinder

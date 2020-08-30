@@ -18,19 +18,19 @@ TEST(RoutingTest, DistanceWorks) {
   hlc.create(labelsUntilLevel);
 
   CellIdStore ramCellIdStore(chGraph->getNumberOfEdges());
-  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph,
-      std::make_shared<CellIdStore>(ramCellIdStore), labelsUntilLevel);
+  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph, std::make_shared<CellIdStore>(ramCellIdStore),
+                                    labelsUntilLevel);
 
   Dijkstra dijkstra(graph);
-  for(int i = 0; i < graph.numberOfNodes; ++i) {
-    for(int j = 0; j < graph.numberOfNodes; ++j) {
+  for (int i = 0; i < graph.numberOfNodes; ++i) {
+    for (int j = 0; j < graph.numberOfNodes; ++j) {
       auto normalDistance = dijkstra.getShortestDistance(i, j);
       auto routingResult = hybridPathFinder.getShortestPath(i, j);
       ASSERT_EQ(normalDistance, routingResult.distance);
     }
   }
 
-  //ASSERT_EQ(22, graph.nodes.size());
+  // ASSERT_EQ(22, graph.nodes.size());
 }
 TEST(RoutingTest, PathFindingWorks) {
   std::string path = "/home/sokol/Uni/path_finder/test-data/";
@@ -64,4 +64,4 @@ TEST(RoutingTest, PathFindingWorks) {
 
   ASSERT_EQ(22, graph.nodes.size());
 }
-}
+} // namespace pathFinder

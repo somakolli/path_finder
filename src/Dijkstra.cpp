@@ -13,9 +13,8 @@ pathFinder::Dijkstra::Dijkstra(const pathFinder::Graph &graph) : graph(graph) {
   }
 }
 
-std::optional<pathFinder::Distance>
-pathFinder::Dijkstra::getShortestDistance(pathFinder::NodeId source,
-                                          pathFinder::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::Dijkstra::getShortestDistance(pathFinder::NodeId source,
+                                                                              pathFinder::NodeId target) {
   if (source >= graph.numberOfNodes || target >= graph.numberOfNodes)
     return std::nullopt;
   // clean up distances

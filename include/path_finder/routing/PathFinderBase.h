@@ -1,10 +1,4 @@
-//
-// Created by sokol on 02.12.19.
-//
-
-#ifndef ALG_ENG_PROJECT_PATHFINDERBASE_H
-#define ALG_ENG_PROJECT_PATHFINDERBASE_H
-
+#pragma once
 #include "path_finder/graphs/Graph.h"
 #include "path_finder/helper/Types.h"
 #include <optional>
@@ -16,5 +10,3 @@ public:
   virtual RoutingResult getShortestPath(LatLng source, LatLng target);
 };
 } // namespace pathFinder
-
-#endif // ALG_ENG_PROJECT_PATHFINDERBASE_H

@@ -1,10 +1,4 @@
-//
-// Created by sokol on 31.03.20.
-//
-
-#ifndef MASTER_ARBEIT_DATACONFIG_H
-#define MASTER_ARBEIT_DATACONFIG_H
-
+#pragma once
 #include "path_finder/graphs/Graph.h"
 #include <nlohmann/json.hpp>
 #include <string>
@@ -15,7 +9,6 @@ struct BinaryFileDescription {
   std::string path;
   size_t size;
   bool mmap;
-  nlohmann::json toJson() const;
 };
 struct GridMapEntry {
   std::pair<int, int> latLng;
@@ -35,7 +28,7 @@ struct DataInfo {
   std::string timestamp;
 };
 
-struct GraphDataInfo  : DataInfo{
+struct GraphDataInfo : DataInfo {
   BinaryFileDescription nodes;
   bool gridCalculated;
   BinaryFileDescription forwardEdges;
@@ -70,7 +63,6 @@ struct HybridPfDataInfo {
   bool hubLabelsCalculated = false;
 };
 
-
 struct DataConfig {
   std::string graphName;
 
@@ -84,10 +76,10 @@ struct DataConfig {
   BinaryFileDescription forwardOffset;
   BinaryFileDescription backwardEdges;
   BinaryFileDescription backwardOffset;
-  BinaryFileDescription forwardHublabels;
-  BinaryFileDescription forwardHublabelOffset;
-  BinaryFileDescription backwardHublabels;
-  BinaryFileDescription backwardHublabelOffset;
+  BinaryFileDescription forwardHubLabels;
+  BinaryFileDescription forwardHubLabelOffset;
+  BinaryFileDescription backwardHubLabels;
+  BinaryFileDescription backwardHubLabelOffset;
   BinaryFileDescription cellIds;
   BinaryFileDescription cellIdsOffset;
   std::vector<GridMapEntry> gridMapEntries;
@@ -107,11 +99,11 @@ void to_json(nlohmann::json &j, const pathFinder::DataConfig &d);
 
 void from_json(const nlohmann::json &j, pathFinder::DataConfig &d);
 
-void to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d);
+void to_json(nlohmann::json &j, const pathFinder::GridMapEntry &d);
 
 void from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d);
 
-void to_json(nlohmann::json &j,const pathFinder::GridMapEntries &d);
+void to_json(nlohmann::json &j, const pathFinder::GridMapEntries &d);
 
 void from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d);
 
@@ -136,4 +128,3 @@ void to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &d);
 void from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo &d);
 
 } // namespace pathFinder
-#endif // MASTER_ARBEIT_DATACONFIG_H

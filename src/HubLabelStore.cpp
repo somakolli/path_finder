@@ -4,105 +4,99 @@
 
 #include "path_finder/storage/HubLabelStore.h"
 #include <cstring>
+#include <execution>
 #include <memory>
 #include <path_finder/helper/Static.h>
 #include <sstream>
 #include <utility>
-#include <execution>
 
 namespace pathFinder {
 HubLabelStore::HubLabelStore(size_t numberOfLabels) {
-  m_forwardOffset = (OffsetElement*) std::calloc( numberOfLabels , sizeof(OffsetElement));
-  m_backwardOffset = (OffsetElement*) std::calloc( numberOfLabels , sizeof(OffsetElement));
+  m_forwardOffset = (OffsetElement *)std::calloc(numberOfLabels, sizeof(OffsetElement));
+  m_backwardOffset = (OffsetElement *)std::calloc(numberOfLabels, sizeof(OffsetElement));
   m_backwardLabels = nullptr;
   m_forwardLabels = nullptr;
   this->m_numberOfLabels = numberOfLabels;
 }
 
-void HubLabelStore::store(
-    const std::vector<CostNode> &label, NodeId id, EdgeDirection direction) {
-  auto& storePointer = direction ? m_forwardLabels : m_backwardLabels;
-  auto& offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
-  auto& size = direction ? m_forwardLabelSize : m_backwardLabelSize;
-  offsetPointer[id] =
-      OffsetElement{size, (uint32_t)label.size()};
-  storePointer = (CostNode*) std::realloc(storePointer, sizeof(CostNode) * (size + label.size()));
+void HubLabelStore::store(const std::vector<CostNode> &label, NodeId id, EdgeDirection direction) {
+  auto &storePointer = direction ? m_forwardLabels : m_backwardLabels;
+  auto &offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
+  auto &size = direction ? m_forwardLabelSize : m_backwardLabelSize;
+  offsetPointer[id] = OffsetElement{size, (uint32_t)label.size()};
+  storePointer = (CostNode *)std::realloc(storePointer, sizeof(CostNode) * (size + label.size()));
   std::memcpy(storePointer + size, label.data(), sizeof(CostNode) * label.size());
   size += label.size();
 }
 
-void HubLabelStore::store( std::vector<HubLabelStore::IdLabelPair>& idLabels, EdgeDirection direction) {
-  size_t allocationSize = std::accumulate(idLabels.begin(), idLabels.end(), (size_t)0,
-                                          [](size_t init, const HubLabelStore::IdLabelPair& idLabelPair) {
-                                            return init + idLabelPair.second.size();
-                                          });
+void HubLabelStore::store(std::vector<HubLabelStore::IdLabelPair> &idLabels, EdgeDirection direction) {
+  size_t allocationSize = std::accumulate(
+      idLabels.begin(), idLabels.end(), (size_t)0,
+      [](size_t init, const HubLabelStore::IdLabelPair &idLabelPair) { return init + idLabelPair.second.size(); });
 
-  auto& storePointer = direction ? m_forwardLabels : m_backwardLabels;
-  auto& offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
-  auto& size = direction ? m_forwardLabelSize : m_backwardLabelSize;
+  auto &storePointer = direction ? m_forwardLabels : m_backwardLabels;
+  auto &offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
+  auto &size = direction ? m_forwardLabelSize : m_backwardLabelSize;
 
-  storePointer = (CostNode*) std::realloc(storePointer, sizeof(CostNode) * (size + allocationSize));
-  std::cout << "writing labels: 0/" << idLabels.size() <<  '\r';
+  storePointer = (CostNode *)std::realloc(storePointer, sizeof(CostNode) * (size + allocationSize));
+  std::cout << "writing labels: 0/" << idLabels.size() << '\r';
   int i = 0;
-  for(auto&& [id, label] : idLabels) {
+  for (auto &&[id, label] : idLabels) {
     offsetPointer[id] = OffsetElement{size, (uint32_t)label.size()};
     std::memcpy(storePointer + size, label.data(), sizeof(CostNode) * label.size());
     size += label.size();
     label.clear();
-    char newLineChar = (i == idLabels.size()-1) ? '\n' : '\r';
+    char newLineChar = (i == idLabels.size() - 1) ? '\n' : '\r';
     std::cout << "writing labels: " << ++i << '/' << idLabels.size() << newLineChar;
   }
 }
 
-MyIterator<const CostNode *> HubLabelStore::retrieveIt(NodeId id, EdgeDirection direction) const{
-  if(id > m_numberOfLabels - 1)
+MyIterator<const CostNode *> HubLabelStore::retrieveIt(NodeId id, EdgeDirection direction) const {
+  if (id > m_numberOfLabels - 1)
     throw std::runtime_error("[HublabelStore] node id does not exist.");
-  auto offsetElement = direction ?  m_forwardOffset[id] : m_backwardOffset[id];
+  auto offsetElement = direction ? m_forwardOffset[id] : m_backwardOffset[id];
   auto labelEnd = offsetElement.position + offsetElement.size;
-  const auto& storePointer = direction ? m_forwardLabels : m_backwardLabels;
+  const auto &storePointer = direction ? m_forwardLabels : m_backwardLabels;
   return MyIterator<const CostNode *>(storePointer + offsetElement.position, storePointer + labelEnd);
 }
 
-std::vector<CostNode> HubLabelStore::retrieve(NodeId id, EdgeDirection direction) const{
-  if(id > m_numberOfLabels - 1)
+std::vector<CostNode> HubLabelStore::retrieve(NodeId id, EdgeDirection direction) const {
+  if (id > m_numberOfLabels - 1)
     throw std::runtime_error("[HublabelStore] node id does not exist.");
   bool forward = (EdgeDirection::FORWARD == direction);
-  auto offsetElement = forward ?  m_forwardOffset[id] : m_backwardOffset[id];
-  if(offsetElement.size == 0) {
+  auto offsetElement = forward ? m_forwardOffset[id] : m_backwardOffset[id];
+  if (offsetElement.size == 0) {
     return std::vector<CostNode>();
   }
   std::vector<CostNode> storeVec;
   storeVec.reserve(offsetElement.size);
   auto labelEnd = offsetElement.position + offsetElement.size;
-  volatile const auto& storePointer = forward ? m_forwardLabels : m_backwardLabels;
-  for(auto i = offsetElement.position; i < labelEnd; ++i) {
+  volatile const auto &storePointer = forward ? m_forwardLabels : m_backwardLabels;
+  for (auto i = offsetElement.position; i < labelEnd; ++i) {
     storeVec.push_back(storePointer[i]);
   }
   return storeVec;
 }
-void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t& size) const{
-  if(id > m_numberOfLabels - 1)
+void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, CostNode *&storeVec, size_t &size) const {
+  if (id > m_numberOfLabels - 1)
     throw std::runtime_error("[HublabelStore] node id does not exist.");
   bool forward = (EdgeDirection::FORWARD == direction);
-  auto offsetElement = forward ?  m_forwardOffset[id] : m_backwardOffset[id];
-  if(offsetElement.size == 0) {
+  auto offsetElement = forward ? m_forwardOffset[id] : m_backwardOffset[id];
+  if (offsetElement.size == 0) {
     storeVec = nullptr;
     size = 0;
     return;
   }
   auto labelEnd = offsetElement.position + offsetElement.size;
-  storeVec = (CostNode*) calloc(offsetElement.size, sizeof(CostNode));
+  storeVec = (CostNode *)calloc(offsetElement.size, sizeof(CostNode));
   size = offsetElement.size;
   const auto storePointer = forward ? m_forwardLabels : m_backwardLabels;
-  for(auto i = offsetElement.position, j = (size_t)0; i < labelEnd; ++i, ++j) {
+  for (auto i = offsetElement.position, j = (size_t)0; i < labelEnd; ++i, ++j) {
     storeVec[j] = storePointer[i];
   }
 }
 
-size_t HubLabelStore::getNumberOfLabels() const  {
-  return m_numberOfLabels;
-}
-
+size_t HubLabelStore::getNumberOfLabels() const { return m_numberOfLabels; }
 
 HubLabelStore::HubLabelStore(HubLabelStoreInfo hubLabelStoreInfo) {
   this->m_forwardLabels = hubLabelStoreInfo.forwardLabels;
@@ -128,26 +122,24 @@ HubLabelStore::~HubLabelStore() {
   Static::conditionalFree(m_backwardLabels, m_backwardLabelsMMap, m_backwardLabelSize * sizeof(CostNode));
   Static::conditionalFree(m_forwardOffset, m_forwardOffsetMMap, m_numberOfLabels * sizeof(OffsetElement));
   Static::conditionalFree(m_backwardOffset, m_backwardOffsetMMap, m_numberOfLabels * sizeof(OffsetElement));
-
 }
 size_t HubLabelStore::getForwardLabelsSize() const { return m_forwardLabelSize; }
 size_t HubLabelStore::getBackwardLabelsSize() const { return m_backwardLabelSize; }
 size_t HubLabelStore::getForwardOffsetSize() const { return m_numberOfLabels; }
 size_t HubLabelStore::getBackwardOffsetSize() const { return m_numberOfLabels; }
-std::string HubLabelStore::printStore() const{
+[[maybe_unused]] std::string HubLabelStore::printStore() const {
   std::stringstream ss;
-  for(NodeId i = 0; i < m_numberOfLabels; ++i) {
+  for (NodeId i = 0; i < m_numberOfLabels; ++i) {
     std::vector<CostNode> forwardVec = retrieve(i, EdgeDirection::FORWARD);
     std::vector<CostNode> backwardVec = retrieve(i, EdgeDirection::BACKWARD);
 
-
     ss << "label for id: " << i << '\n';
     ss << "forward:" << '\n';
-    for(const auto& [id, cost , previousNode]: forwardVec) {
+    for (const auto &[id, cost, previousNode] : forwardVec) {
       ss << id << ' ' << cost << ' ' << previousNode << '\n';
     }
     ss << "backward:" << '\n';
-    for(const auto& [id, cost , previousNode]: backwardVec) {
+    for (const auto &[id, cost, previousNode] : backwardVec) {
       ss << id << ' ' << cost << ' ' << previousNode << '\n';
     }
   }
@@ -157,8 +149,6 @@ std::string HubLabelStore::printStore() const{
 std::shared_ptr<HubLabelStore> HubLabelStore::makeShared(size_t numberOfLabels) {
   return std::make_shared<HubLabelStore>(numberOfLabels);
 }
-size_t HubLabelStore::getSpaceConsumption() {
-    return 0;
-};
+size_t HubLabelStore::getSpaceConsumption() { return 0; };
 
-}
+} // namespace pathFinder

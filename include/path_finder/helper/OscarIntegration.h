@@ -1,36 +1,23 @@
-//
-// Created by sokol on 14.05.20.
-//
-
-#ifndef MASTER_ARBEIT_OSCARINTEGRATION_H
-#define MASTER_ARBEIT_OSCARINTEGRATION_H
+#pragma once
 #include "path_finder/storage/CellIdStore.h"
-#include <path_finder/graphs/CHGraph.h>
 #include <algorithm>
+#include <execution>
 #include <iostream>
 #include <mutex>
-#include <execution>
-namespace pathFinder{
-class CellIdDiskWriter {
-private:
-  CellIdStore& _cellIdStore;
-public:
-  explicit CellIdDiskWriter(CellIdStore& cellIdStore);
-  void operator()(const NodeId i, const std::vector<unsigned int>& cellIds) {
-    _cellIdStore.storeCellIds(i, cellIds);
-  }
-};
+#include <path_finder/graphs/CHGraph.h>
+namespace pathFinder {
 class OscarIntegrator {
 public:
-  template<typename GeoPoint, typename CellIdsForEdge, typename KVStore>
-  static void writeCellIdsForEdges(const CHGraph& graph, CellIdsForEdge cellIdsForEdge, CellIdStore& cellIdStore, KVStore& store) {
-     const auto edges = graph.getEdges();
+  template <typename GeoPoint, typename CellIdsForEdge, typename KVStore>
+  static void writeCellIdsForEdges(const CHGraph &graph, CellIdsForEdge cellIdsForEdge, CellIdStore &cellIdStore,
+                                   KVStore &store) {
+    const auto edges = graph.getEdges();
     int progress = 0;
 #pragma omp parallel for default(none) shared(edges, graph, cellIdsForEdge, cellIdStore, store, progress, std::cout)
-    for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
-      const auto& edge = edges[i];
+    for (int i = 0; i < graph.getNumberOfEdges(); ++i) {
+      const auto &edge = edges[i];
       std::vector<uint32_t> cellIds;
-      if(edge.child1.has_value()){
+      if (edge.child1.has_value()) {
         continue;
       }
       const auto sourceNode = graph.getNode(edge.source);
@@ -45,32 +32,31 @@ public:
       try {
         auto cellIdsEdge = cellIdsForEdge(sourcePoint, targetPoint);
         cellIds.insert(cellIds.end(), cellIdsEdge.begin(), cellIdsEdge.end());
-      } catch (std::exception& e) {}
+      } catch (std::exception &e) {
+      }
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
- #pragma omp critical
+#pragma omp critical
       {
         cellIdStore.storeCellIds(i, cellIds);
         ++progress;
-        if(progress % 1000 == 0)
-            std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
-        //std::cout << "count: " << cellIds.size() << '\n';
+        if (progress % 1000 == 0)
+          std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
+        // std::cout << "count: " << cellIds.size() << '\n';
       }
     }
 #pragma omp parallel for default(none) shared(graph, edges, cellIdStore)
-    for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
-      const auto& edge = edges[i];
-      if(edge.child1.has_value()) {
+    for (int i = 0; i < graph.getNumberOfEdges(); ++i) {
+      const auto &edge = edges[i];
+      if (edge.child1.has_value()) {
         const auto fullEdges = graph.getPathFromShortcut(edge, 0);
         std::vector<size_t> fullEdgeIds;
         fullEdgeIds.resize(fullEdges.size());
-        for(const auto fullEdge : fullEdges) {
+        for (const auto fullEdge : fullEdges) {
           fullEdgeIds.emplace_back(graph.getEdgePosition(fullEdge, EdgeDirection::FORWARD).value());
         }
         auto fullCellIds = cellIdStore.getCellIds(fullEdgeIds);
         sort(fullCellIds.begin(), fullCellIds.end());
-        (fullCellIds)
-            .erase(unique(fullCellIds.begin(), fullCellIds.end()),
-                   fullCellIds.end());
+        (fullCellIds).erase(unique(fullCellIds.begin(), fullCellIds.end()), fullCellIds.end());
 #pragma omp critical
         cellIdStore.storeCellIds(i, fullCellIds);
       }
@@ -79,5 +65,3 @@ public:
   }
 };
 } // namespace pathFinder
-
-#endif // MASTER_ARBEIT_OSCARINTEGRATION_H

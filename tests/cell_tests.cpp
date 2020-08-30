@@ -7,16 +7,12 @@
 #include <path_finder/storage/FileWriter.h>
 #include <stdio.h>
 
-namespace pathFinder{
+namespace pathFinder {
 TEST(CellIdStore, StoreAndRetrieveWorks) {
   CellIdStore store(10);
-  std::vector<uint32_t> cellIds0 = {
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-  };
+  std::vector<uint32_t> cellIds0 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   std::vector<uint32_t> cellIds1 = {};
-  std::vector<uint32_t> cellIds2 = {
-      1, 2, 3, 4, 5
-  };
+  std::vector<uint32_t> cellIds2 = {1, 2, 3, 4, 5};
   store.storeCellIds(0, cellIds0);
   store.storeCellIds(1, cellIds1);
   store.storeCellIds(2, cellIds2);
@@ -50,5 +46,4 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
     }
   }
 }
-}
-
+} // namespace pathFinder

@@ -1,43 +1,40 @@
+#include <ctime>
 #include <filesystem>
 #include <gtest/gtest.h>
+#include <path_finder/graphs/GeometricType.h>
 #include <path_finder/graphs/Graph.h>
 #include <path_finder/storage/FileLoader.h>
 #include <path_finder/storage/FileWriter.h>
 #include <path_finder/storage/GraphReader.h>
-#include <path_finder/graphs/GeometricType.h>
-#include <ctime>
 
 namespace pathFinder {
 namespace GraphTest {
 const std::string PATH = "/home/sokol/Uni/path_finder/test-data/";
 
 template <typename Edges>
-bool edgeExists(const pathFinder::CHGraph & graph, Edges edges, LatLng source, LatLng target) {
-  for(const auto& edge : edges) {
-    const auto& source1 = graph.getNode(edge.source);
-    const auto& target1 = graph.getNode(edge.target);
-    if(source == source1.latLng && target == target1.latLng)
+bool edgeExists(const pathFinder::CHGraph &graph, Edges edges, LatLng source, LatLng target) {
+  for (const auto &edge : edges) {
+    const auto &source1 = graph.getNode(edge.source);
+    const auto &target1 = graph.getNode(edge.target);
+    if (source == source1.latLng && target == target1.latLng)
       return true;
   }
   return false;
 }
 
-bool haveSameEdges(pathFinder::CHGraph & graph, CHNode node,
-                   pathFinder::CHGraph & reorderedGraph, CHNode reorderedNode) {
-  const auto& edges = graph.edgesFor(node.id, EdgeDirection::FORWARD);
-  const auto& reorderEdges = reorderedGraph.edgesFor(reorderedNode.id, EdgeDirection::FORWARD);
-  for(const auto& edge : edges) {
-    const auto& source = graph.getNode(edge.source);
-    const auto& target = graph.getNode(edge.target);
-    if(!edgeExists(reorderedGraph, reorderEdges, source.latLng, target.latLng))
+bool haveSameEdges(pathFinder::CHGraph &graph, CHNode node, pathFinder::CHGraph &reorderedGraph, CHNode reorderedNode) {
+  const auto &edges = graph.edgesFor(node.id, EdgeDirection::FORWARD);
+  const auto &reorderEdges = reorderedGraph.edgesFor(reorderedNode.id, EdgeDirection::FORWARD);
+  for (const auto &edge : edges) {
+    const auto &source = graph.getNode(edge.source);
+    const auto &target = graph.getNode(edge.target);
+    if (!edgeExists(reorderedGraph, reorderEdges, source.latLng, target.latLng))
       return false;
   }
   return true;
 }
 
-class GraphTests {
-
-};
+class GraphTests {};
 TEST(Graph, ReadWorks) {
   Graph graph;
   GraphReader::readFmiFile(graph, PATH + "test.fmi");
@@ -100,7 +97,6 @@ TEST(CHGraph, ReadFromDiskWorks) {
   ASSERT_EQ(edge4.target, 6);
   ASSERT_EQ(edge5.source, 1);
   ASSERT_EQ(edge5.target, 7);
-
 }
 TEST(CHGraph, GridReorderWorks) {
   auto graph = std::make_shared<CHGraph>();
@@ -109,27 +105,27 @@ TEST(CHGraph, GridReorderWorks) {
   std::vector<std::pair<LatLng, LatLng>> forwardEdgesBeforeReorder;
   std::vector<std::pair<LatLng, LatLng>> backwardEdgesBeforeReorder;
 
-  for(const auto& edge :graph->getEdges()) {
-    const auto& sourceNode = graph->getNode(edge.source);
-    const auto& targetNode = graph->getNode(edge.target);
+  for (const auto &edge : graph->getEdges()) {
+    const auto &sourceNode = graph->getNode(edge.source);
+    const auto &targetNode = graph->getNode(edge.target);
     forwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
-  for(const auto& edge :graph->getBackEdges()) {
-    const auto& sourceNode = graph->getNode(edge.source);
-    const auto& targetNode = graph->getNode(edge.target);
+  for (const auto &edge : graph->getBackEdges()) {
+    const auto &sourceNode = graph->getNode(edge.source);
+    const auto &targetNode = graph->getNode(edge.target);
     backwardEdgesBeforeReorder.emplace_back(sourceNode.latLng, targetNode.latLng);
   }
   auto reorderedGraph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(reorderedGraph, PATH + "test.chfmi", true);
-  for(const auto& node : graph->getNodes()) {
+  for (const auto &node : graph->getNodes()) {
     auto reorderedNode = reorderedGraph->getNode(reorderedGraph->getNodeIdFor(node.latLng));
     ASSERT_TRUE(haveSameEdges(*graph, node, *reorderedGraph, reorderedNode));
   }
-  for(const auto& [source, target]: forwardEdgesBeforeReorder) {
-      ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getEdges(), source, target));
+  for (const auto &[source, target] : forwardEdgesBeforeReorder) {
+    ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getEdges(), source, target));
   }
-  for(const auto& [source, target]: backwardEdgesBeforeReorder) {
-      ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getBackEdges(), source, target));
+  for (const auto &[source, target] : backwardEdgesBeforeReorder) {
+    ASSERT_TRUE(edgeExists(*graph, reorderedGraph->getBackEdges(), source, target));
   }
 }
 TEST(CHGraph, calcMidPointWorks) {
@@ -154,7 +150,8 @@ TEST(Static, IntersectionWorks) {
     LatLng d(0, 1);
     auto intPoint = BoundingBox::intersectionPoint(a, b, c, d).value();
     ASSERT_EQ(intPoint, LatLng(0.5f, 0.5f));
-  }{
+  }
+  {
     LatLng a(0, 0);
     LatLng b(1, 1);
     LatLng c(5, 4);
@@ -164,9 +161,9 @@ TEST(Static, IntersectionWorks) {
   }
 }
 TEST(BoundingBox, ContainsWorks) {
-  BoundingBox boundingBox {1,1,0,0};
+  BoundingBox boundingBox{1, 1, 0, 0};
   {
-    LatLng point(0.5,0.5);
+    LatLng point(0.5, 0.5);
     ASSERT_TRUE(boundingBox.contains(point));
   }
   {
@@ -174,5 +171,5 @@ TEST(BoundingBox, ContainsWorks) {
     ASSERT_FALSE(boundingBox.contains(point));
   }
 }
-}
-}
+} // namespace GraphTest
+} // namespace pathFinder

@@ -1,9 +1,4 @@
-//
-// Created by sokol on 16.06.20.
-//
-
-#ifndef MASTER_ARBEIT_HUBLABELCREATOR_H
-#define MASTER_ARBEIT_HUBLABELCREATOR_H
+#pragma once
 #include "path_finder/graphs/CHGraph.h"
 #include "path_finder/helper/SpaceMeasurer.h"
 #include "path_finder/helper/Types.h"
@@ -23,8 +18,6 @@ class HubLabelCreator {
 private:
   Level m_labelsUntilLevel = 0;
   std::vector<CHNode> m_sortedNodes;
-  std::mutex labelStoreMutex;
-
 
 public:
   std::shared_ptr<CHGraph> m_graph;
@@ -60,9 +53,8 @@ private:
    * @param labelsUntilLevel dictates until which level the labels should be
    *                         calculated
    */
-  void constructAllLabels(
-      const std::vector<std::pair<uint32_t, uint32_t>> &sameLevelRanges,
-      Level maxLevel, Level labelsUntilLevel);
+  void constructAllLabels(const std::vector<std::pair<uint32_t, uint32_t>> &sameLevelRanges, Level maxLevel,
+                          Level labelsUntilLevel);
   /**
    * @brief
    * starts hub label calculation for one range
@@ -77,8 +69,7 @@ private:
    * @param edgeDirection calculate labels in either the forward or backward
    *                      direction
    */
-  void processRangeParallel(const std::pair<uint32_t, uint32_t> &range,
-                            EdgeDirection edgeDirection);
+  void processRangeParallel(const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection);
   /**
    * @brief
    * calculates the hub label for one id
@@ -117,7 +108,5 @@ private:
    * @return shortest distance value and nullopt if shortest distance is not known
    */
   std::optional<pathFinder::Distance> getShortestDistance(NodeId source, NodeId target);
-
 };
 } // namespace pathFinder
-#endif // MASTER_ARBEIT_HUBLABELCREATOR_H

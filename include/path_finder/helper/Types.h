@@ -1,7 +1,3 @@
-//
-// Created by sokol on 07.07.20.
-//
-
 #pragma once
 
 #include <boost/optional.hpp>
@@ -11,31 +7,28 @@
 #include <vector>
 
 namespace pathFinder {
-using NodeId = uint32_t ;
+using NodeId = uint32_t;
 
-using Distance = uint32_t ;
+using Distance = uint32_t;
 using Level = uint16_t;
 using CellId_t = uint32_t;
 constexpr Distance MAX_DISTANCE = std::numeric_limits<Distance>::max();
 enum EdgeDirection { FORWARD = true, BACKWARD = false };
-template <typename MyPointerType> class MyIterator {
+template <typename MyPointerType>
+class MyIterator {
 private:
   MyPointerType _begin;
   MyPointerType _end;
 
 public:
-
-  MyIterator(MyPointerType begin, MyPointerType end)
-      : _begin(begin), _end(end) {}
-  bool empty() const { return _begin == _end; };
+  MyIterator(MyPointerType begin, MyPointerType end) : _begin(begin), _end(end) {}
+  [[nodiscard]] bool empty() const { return _begin == _end; };
   MyPointerType begin() { return _begin; };
   MyPointerType begin() const { return _begin; };
   MyPointerType end() { return _end; };
   MyPointerType end() const { return _end; };
   size_t size() { return _end - _begin; }
-  auto operator[](size_t position) const {
-    return *(begin() + position);
-  }
+  auto operator[](size_t position) const { return *(begin() + position); }
 };
 
 struct OffsetElement {
@@ -43,47 +36,43 @@ struct OffsetElement {
   size_t size = 0;
 };
 
-void to_json(nlohmann::json& j, LatLng latLng);
-void from_json(const nlohmann::json& j, LatLng& latLng);
+void to_json(nlohmann::json &j, LatLng latLng);
+void from_json(const nlohmann::json &j, LatLng &latLng);
 class Node {
 public:
   NodeId id;
   LatLng latLng;
-  double quickBeeLine(const LatLng &other) const;
-  double quickBeeLine(const Node &other) const;
-  double euclid(const Node &other) const;
+  [[nodiscard]] double quickBeeLine(const LatLng &other) const;
+  [[nodiscard]] double quickBeeLine(const Node &other) const;
+  [[nodiscard]] double euclid(const Node &other) const;
 };
 class Edge {
 public:
   NodeId source;
   NodeId target;
   NodeId distance;
-  Edge(NodeId source, NodeId target, Distance distance)
-      : source(source), target(target), distance(distance) {}
+  Edge(NodeId source, NodeId target, Distance distance) : source(source), target(target), distance(distance) {}
   Edge() = default;
   friend std::ostream &operator<<(std::ostream &Str, const Edge &edge) {
-    Str << "source: " << edge.source << ' ' << "target: " << edge.target
-        << " distance: " << edge.distance;
+    Str << "source: " << edge.source << ' ' << "target: " << edge.target << " distance: " << edge.distance;
     return Str;
   }
 };
 struct CHNode : Node {
   Level level;
-  Node toNode() {
-    return Node{id, latLng};
-  }
+  Node toNode() { return Node{id, latLng}; }
 };
 struct CHEdge : Edge {
   std::optional<NodeId> child1 = std::nullopt;
   std::optional<NodeId> child2 = std::nullopt;
 };
 
-struct CalcLabelTimingInfo{
+struct CalcLabelTimingInfo {
   double mergeTime = 0;
   double graphSearchTime = 0;
   double lookUpTime = 0;
 
-  void operator+=(const CalcLabelTimingInfo& other) {
+  void operator+=(const CalcLabelTimingInfo &other) {
     mergeTime += other.mergeTime;
     graphSearchTime += other.graphSearchTime;
     lookUpTime += other.lookUpTime;
@@ -93,20 +82,19 @@ struct CalcLabelTimingInfo{
     lookUpTime /= other;
     graphSearchTime /= other;
   }
-  CalcLabelTimingInfo operator/(double other) const{
+  CalcLabelTimingInfo operator/(double other) const {
     CalcLabelTimingInfo c{};
     c.mergeTime = this->mergeTime / other;
     c.lookUpTime = this->lookUpTime / other;
     c.graphSearchTime = this->graphSearchTime / other;
     return c;
   }
-  friend std::ostream& operator<<(std::ostream& os, const CalcLabelTimingInfo& calcLabelTimingInfo) {
+  friend std::ostream &operator<<(std::ostream &os, const CalcLabelTimingInfo &calcLabelTimingInfo) {
     os << "mergeTime: " << calcLabelTimingInfo.mergeTime << '\n';
     os << "lookUpTime: " << calcLabelTimingInfo.lookUpTime << '\n';
     os << "graphSearchTime: " << calcLabelTimingInfo.graphSearchTime << '\n';
     return os;
   }
-  [[nodiscard]] std::string toJson() const;
 };
 
 struct RoutingResultTimingInfo {
@@ -149,8 +137,7 @@ struct CostNode {
   CostNode() = default;
 
   bool operator<(const CostNode &rhs) const { return cost > rhs.cost; }
-  CostNode(NodeId id, size_t cost, NodeId previousNode)
-      : id(id), cost(cost), previousNode(previousNode) {}
+  CostNode(NodeId id, size_t cost, NodeId previousNode) : id(id), cost(cost), previousNode(previousNode) {}
 
   bool operator==(const CostNode &rhs) const {
     return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
@@ -158,7 +145,7 @@ struct CostNode {
 };
 using costNodeVec_t = std::vector<CostNode>;
 
-void to_json(nlohmann::json& j, CalcLabelTimingInfo calcLabelTimingInfo);
-void to_json(nlohmann::json& j, RoutingResultTimingInfo calcLabelTimingInfo);
+void to_json(nlohmann::json &j, CalcLabelTimingInfo calcLabelTimingInfo);
+void to_json(nlohmann::json &j, RoutingResultTimingInfo calcLabelTimingInfo);
 
-}
+} // namespace pathFinder

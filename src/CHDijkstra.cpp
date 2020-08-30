@@ -9,10 +9,8 @@ pathFinder::CHDijkstra::CHDijkstra(std::shared_ptr<CHGraph> graph) : graph(graph
     cost.emplace_back(MAX_DISTANCE);
 }
 
-
-std::vector<pathFinder::CostNode>
-pathFinder::CHDijkstra::shortestDistance(
-    pathFinder::NodeId source, pathFinder::EdgeDirection direction) {
+std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathFinder::NodeId source,
+                                                                           pathFinder::EdgeDirection direction) {
   std::vector<CostNode> settledNodes;
   for (auto nodeId : visited)
     cost[nodeId] = MAX_DISTANCE;
@@ -41,9 +39,8 @@ pathFinder::CHDijkstra::shortestDistance(
   }
   return settledNodes;
 }
-std::optional<pathFinder::Distance>
-pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
-                                            pathFinder::NodeId target) {
+std::optional<pathFinder::Distance> pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
+                                                                                pathFinder::NodeId target) {
   if (source >= graph->getNumberOfNodes() || target >= graph->getNumberOfNodes())
     return std::nullopt;
   auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);
@@ -52,10 +49,8 @@ pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
   Static::sortLabel(forwardLabel);
   Static::sortLabel(backwardLabel);
   NodeId topNode;
-  return Static::getShortestDistance(MyIterator<volatile const CostNode *>(forwardLabel.begin().base(),
-                                                            forwardLabel.end().base()),
-                                     MyIterator<volatile const CostNode *>(backwardLabel.begin().base(),
-                                                            backwardLabel.end().base()),
-                                     topNode);
+  return Static::getShortestDistance(
+      MyIterator<volatile const CostNode *>(forwardLabel.begin().base(), forwardLabel.end().base()),
+      MyIterator<volatile const CostNode *>(backwardLabel.begin().base(), backwardLabel.end().base()), topNode);
 }
-}
+} // namespace pathFinder

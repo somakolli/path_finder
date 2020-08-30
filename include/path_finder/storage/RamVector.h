@@ -1,10 +1,4 @@
-//
-// Created by sokol on 01.04.20.
-//
-
-#ifndef MASTER_ARBEIT_RAMVECTOR_H
-#define MASTER_ARBEIT_RAMVECTOR_H
-
+#pragma once
 #include "VectorBase.h"
 #include <vector>
 namespace pathFinder {
@@ -40,11 +34,13 @@ T &RamVector<T, Allocator>::operator[](size_t index) {
   return vec[index];
 }
 
-template <typename T, typename Allocator> T *RamVector<T, Allocator>::begin() {
+template <typename T, typename Allocator>
+T *RamVector<T, Allocator>::begin() {
   return vec.begin();
 }
 
-template <typename T, typename Allocator> T *RamVector<T, Allocator>::end() {
+template <typename T, typename Allocator>
+T *RamVector<T, Allocator>::end() {
   return vec.end();
 }
 
@@ -63,7 +59,8 @@ RamVector<T, Allocator>::RamVector(size_t size) {
   vec(size);
 }
 
-template <typename T, typename Allocator> T *RamVector<T, Allocator>::data() {
+template <typename T, typename Allocator>
+T *RamVector<T, Allocator>::data() {
   return vec.data();
 }
 
@@ -82,4 +79,3 @@ bool RamVector<T, Allocator>::empty() {
   return vec.empty();
 }
 } // namespace pathFinder
-#endif // MASTER_ARBEIT_RAMVECTOR_H

@@ -1,9 +1,4 @@
-//
-// Created by sokol on 19.03.20.
-//
-
-#ifndef MASTER_ARBEIT_SPACEMEASURER_H
-#define MASTER_ARBEIT_SPACEMEASURER_H
+#pragma once
 #include "path_finder/graphs/Graph.h"
 #include <map>
 
@@ -14,8 +9,6 @@ private:
 
 public:
   void setSpaceConsumption(Level level, size_t space);
-  size_t getSpaceConsumption(Level level);
+  [[maybe_unused]] size_t getSpaceConsumption(Level level);
 };
 } // namespace pathFinder
-
-#endif // MASTER_ARBEIT_SPACEMEASURER_H

@@ -7,24 +7,22 @@
 #include <sstream>
 
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataConfig &d) {
-  j = nlohmann::json{
-      {"graphName", d.graphName},
-      {"numberOfNodes", d.numberOfNodes},
-      {"numberOfEdges", d.numberOfEdges},
-      {"nodes", d.nodes},
-      {"calculatedUntilLevel", d.calculatedUntilLevel},
-      {"forwardEdges", d.forwardEdges},
-      {"forwardOffset", d.forwardOffset},
-      {"backwardEdges", d.backwardEdges},
-      {"backwardOffset", d.backwardOffset},
-      {"forwardHublabels", d.forwardHublabels},
-      {"backwardHublabels", d.backwardHublabels},
-      {"forwardHublabelOffset", d.forwardHublabelOffset},
-      {"backwardHublabelOffset", d.backwardHublabelOffset},
-      {"gridMapEntries", d.gridMapEntries},
-      {"cellIds", d.cellIds},
-      {"cellIdsOffset", d.cellIdsOffset}
-  };
+  j = nlohmann::json{{"graphName", d.graphName},
+                     {"numberOfNodes", d.numberOfNodes},
+                     {"numberOfEdges", d.numberOfEdges},
+                     {"nodes", d.nodes},
+                     {"calculatedUntilLevel", d.calculatedUntilLevel},
+                     {"forwardEdges", d.forwardEdges},
+                     {"forwardOffset", d.forwardOffset},
+                     {"backwardEdges", d.backwardEdges},
+                     {"backwardOffset", d.backwardOffset},
+                     {"forwardHubLabels", d.forwardHubLabels},
+                     {"backwardHublabels", d.backwardHubLabels},
+                     {"forwardHublabelOffset", d.forwardHubLabelOffset},
+                     {"backwardHubLabelOffset", d.backwardHubLabelOffset},
+                     {"gridMapEntries", d.gridMapEntries},
+                     {"cellIds", d.cellIds},
+                     {"cellIdsOffset", d.cellIdsOffset}};
 }
 
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::DataConfig &d) {
@@ -37,10 +35,10 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::DataConfig &d) {
   j.at("forwardOffset").get_to(d.forwardOffset);
   j.at("backwardEdges").get_to(d.backwardEdges);
   j.at("backwardOffset").get_to(d.backwardOffset);
-  j.at("forwardHublabels").get_to(d.forwardHublabels);
-  j.at("backwardHublabels").get_to(d.backwardHublabels);
-  j.at("forwardHublabelOffset").get_to(d.forwardHublabelOffset);
-  j.at("backwardHublabelOffset").get_to(d.backwardHublabelOffset);
+  j.at("forwardHubLabels").get_to(d.forwardHubLabels);
+  j.at("backwardHublabels").get_to(d.backwardHubLabels);
+  j.at("forwardHublabelOffset").get_to(d.forwardHubLabelOffset);
+  j.at("backwardHubLabelOffset").get_to(d.backwardHubLabelOffset);
   j.at("gridMapEntries").get_to(d.gridMapEntries);
   j.at("cellIds").get_to(d.cellIds);
   j.at("cellIdsOffset").get_to(d.cellIdsOffset);
@@ -64,51 +62,39 @@ std::string pathFinder::DataConfig::toJson() {
   return j.dump(1, '\t', true);
 }
 
-
-nlohmann::json pathFinder::BinaryFileDescription::toJson() const {
-  nlohmann::json j;
-  to_json(j, *this);
-  return j.dump(1, '\t', true);
+void pathFinder::to_json(nlohmann::json &j, const pathFinder::GridMapEntry &d) {
+  j = {
+      {"lat", d.latLng.first}, {"lng", d.latLng.second}, {"begin", d.pointerPair.first}, {"end", d.pointerPair.second}};
 }
 
-void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntry &d){
-  j = {{"lat", d.latLng.first}, {"lng", d.latLng.second}, {"begin", d.pointerPair.first}, {"end", d.pointerPair.second}};
-}
-
-void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d){
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntry &d) {
   j.at("lat").get_to(d.latLng.first);
   j.at("lng").get_to(d.latLng.second);
   j.at("begin").get_to(d.pointerPair.first);
   j.at("end").get_to(d.pointerPair.second);
 }
 
-
-void pathFinder::to_json(nlohmann::json &j,const pathFinder::GridMapEntries &d){
-    j = {
-        {"gridMapEntries", d.gridMapEntries},
-        {"latStretchFactor", d.latStretchFactor},
-        {"lngStretchFactor", d.lngStretchFactor}
-  };
+void pathFinder::to_json(nlohmann::json &j, const pathFinder::GridMapEntries &d) {
+  j = {{"gridMapEntries", d.gridMapEntries},
+       {"latStretchFactor", d.latStretchFactor},
+       {"lngStretchFactor", d.lngStretchFactor}};
 };
 
-void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d){
-    j.at("gridMapEntries").get_to(d.gridMapEntries);
-    j.at("latStretchFactor").get_to(d.latStretchFactor);
-    j.at("lngStretchFactor").get_to(d.lngStretchFactor);
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::GridMapEntries &d) {
+  j.at("gridMapEntries").get_to(d.gridMapEntries);
+  j.at("latStretchFactor").get_to(d.latStretchFactor);
+  j.at("lngStretchFactor").get_to(d.lngStretchFactor);
 };
 
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::DataInfo &d) {
-  j = {
-      {"graphName", d.graphName},
-      {"timeStamp", d.timestamp}
-  };
+  j = {{"graphName", d.graphName}, {"timeStamp", d.timestamp}};
 }
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::DataInfo &d) {
   j.at("graphName").get_to(d.graphName);
   j.at("timeStamp").get_to(d.timestamp);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::GraphDataInfo &d) {
-  to_json(j, static_cast<const DataInfo&>(d));
+  to_json(j, static_cast<const DataInfo &>(d));
   j.push_back({"nodes", d.nodes});
   j.push_back({"forwardEdges", d.forwardEdges});
   j.push_back({"forwardOffset", d.forwardOffset});
@@ -120,7 +106,7 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::GraphDataInfo &d) 
   j.push_back({"midPoint", d.midPoint});
 }
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d) {
-  from_json(j, static_cast<DataInfo&>(d));
+  from_json(j, static_cast<DataInfo &>(d));
   j.at("nodes").get_to(d.nodes);
   j.at("forwardEdges").get_to(d.forwardEdges);
   j.at("forwardOffset").get_to(d.forwardOffset);
@@ -132,36 +118,36 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::GraphDataInfo &d
   j.at("midPoint").get_to(d.midPoint);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::HubLabelDataInfo &d) {
-  to_json(j, static_cast<const DataInfo&>(d));
-  j.push_back({"forwardHublabels", d.forwardHublabels});
+  to_json(j, static_cast<const DataInfo &>(d));
+  j.push_back({"forwardHubLabels", d.forwardHublabels});
   j.push_back({"backwardHublabels", d.backwardHublabels});
   j.push_back({"forwardHublabelOffset", d.forwardHublabelOffset});
-  j.push_back({"backwardHublabelOffset", d.backwardHublabelOffset});
+  j.push_back({"backwardHubLabelOffset", d.backwardHublabelOffset});
   j.push_back({"calculatedUntilLevel", d.calculatedUntilLevel});
   j.push_back({"maxLevel", d.maxLevel});
 }
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::HubLabelDataInfo &d) {
-  from_json(j, static_cast<DataInfo&>(d));
-  j.at("forwardHublabels").get_to(d.forwardHublabels);
+  from_json(j, static_cast<DataInfo &>(d));
+  j.at("forwardHubLabels").get_to(d.forwardHublabels);
   j.at("backwardHublabels").get_to(d.backwardHublabels);
   j.at("forwardHublabelOffset").get_to(d.forwardHublabelOffset);
-  j.at("backwardHublabelOffset").get_to(d.backwardHublabelOffset);
+  j.at("backwardHubLabelOffset").get_to(d.backwardHublabelOffset);
   j.at("calculatedUntilLevel").get_to(d.calculatedUntilLevel);
   j.at("maxLevel").get_to(d.maxLevel);
 }
 void pathFinder::to_json(nlohmann::json &j, const pathFinder::CellDataInfo &d) {
-  to_json(j, static_cast<const DataInfo&>(d));
+  to_json(j, static_cast<const DataInfo &>(d));
   j.push_back({"cellIds", d.cellIds});
   j.push_back({"cellIdsOffset", d.cellIdsOffset});
 }
 
 void pathFinder::from_json(const nlohmann::json &j, pathFinder::CellDataInfo &d) {
-  from_json(j, static_cast<DataInfo&>(d));
+  from_json(j, static_cast<DataInfo &>(d));
   j.at("cellIds").get_to(d.cellIds);
   j.at("cellIdsOffset").get_to(d.cellIdsOffset);
 }
 
-void pathFinder::to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &d){
+void pathFinder::to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &d) {
   j = nlohmann::json{
       {"hubLabelFolder", d.hubLabelFolder},
       {"cellIdFolder", d.cellIdFolder},
@@ -172,11 +158,11 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &
   };
 }
 
-void pathFinder::from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo &d){
-    j.at("hubLabelFolder").get_to(d.hubLabelFolder);
-    j.at("cellIdFolder").get_to(d.cellIdFolder);
-    j.at("graphFolder").get_to(d.graphFolder);
-    j.at("labelsUntilLevel").get_to(d.labelsUntilLevel);
-    j.at("cellIdsCalculated").get_to(d.cellIdsCalculated);
-    j.at("hubLabelsCalculated").get_to(d.hubLabelsCalculated);
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo &d) {
+  j.at("hubLabelFolder").get_to(d.hubLabelFolder);
+  j.at("cellIdFolder").get_to(d.cellIdFolder);
+  j.at("graphFolder").get_to(d.graphFolder);
+  j.at("labelsUntilLevel").get_to(d.labelsUntilLevel);
+  j.at("cellIdsCalculated").get_to(d.cellIdsCalculated);
+  j.at("hubLabelsCalculated").get_to(d.hubLabelsCalculated);
 }

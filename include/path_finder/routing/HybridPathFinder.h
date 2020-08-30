@@ -1,10 +1,4 @@
-//
-// Created by sokol on 17.06.20.
-//
-
-#ifndef MASTER_ARBEIT_HYBRIDPATHFINDER_H
-#define MASTER_ARBEIT_HYBRIDPATHFINDER_H
-
+#pragma once
 #include "PathFinderBase.h"
 #include "path_finder/graphs/CHGraph.h"
 #include "path_finder/helper/Static.h"
@@ -27,6 +21,18 @@ namespace pathFinder {
  * @tparam CellIdStore
  */
 class HybridPathFinder : public PathFinderBase {
+private:
+  typedef std::vector<CostNode> costNodeVec_t;
+
+  std::shared_ptr<HubLabelStore> m_hubLabelStore;
+  std::shared_ptr<CHGraph> m_graph;
+  std::shared_ptr<CellIdStore> m_cellIdStore;
+  Level m_labelsUntilLevel;
+  bool m_hubLabelsCalculated;
+  bool m_cellIdsCalculated;
+  std::vector<Distance> m_cost;
+  std::vector<NodeId> m_visited;
+
 public:
   /**
    * @brief
@@ -36,13 +42,12 @@ public:
    * @param cellIdStore store for egde -> oscar cell id
    * @param labelsUntilLevel level until the labels are computed in the store
    */
-  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, std::shared_ptr<CHGraph> graph,
-                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel,
-                   bool hubLabelsCalculated = false, bool cellIdsCalculated = false)
-      : m_hubLabelStore(std::move(hubLabelStore)), m_graph(graph),
-        m_cellIdStore(std::move(cellIdStore)), m_labelsUntilLevel(labelsUntilLevel),
-        m_hubLabelsCalculated(hubLabelsCalculated),
-        m_cellIdsCalculated(cellIdsCalculated){
+  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, const std::shared_ptr<CHGraph> &graph,
+                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel, bool hubLabelsCalculated = false,
+                   bool cellIdsCalculated = false)
+      : m_hubLabelStore(std::move(hubLabelStore)), m_graph(graph), m_cellIdStore(std::move(cellIdStore)),
+        m_labelsUntilLevel(labelsUntilLevel), m_hubLabelsCalculated(hubLabelsCalculated),
+        m_cellIdsCalculated(cellIdsCalculated) {
     m_cost.reserve(graph->getNumberOfNodes());
     while (m_cost.size() < graph->getNumberOfNodes())
       m_cost.push_back(MAX_DISTANCE);
@@ -82,17 +87,6 @@ public:
   std::shared_ptr<CHGraph> getGraph();
   Level getMaxLevel();
   void setLabelsUntilLevel(Level level);
-private:
-  bool m_cellIdsCalculated;
-  bool m_hubLabelsCalculated;
-  typedef std::vector<CostNode> costNodeVec_t;
-
-  std::shared_ptr<HubLabelStore> m_hubLabelStore;
-  std::shared_ptr<CHGraph> m_graph;
-  std::shared_ptr<CellIdStore> m_cellIdStore;
-  Level m_labelsUntilLevel = 0;
-  std::vector<Distance> m_cost;
-  std::vector<NodeId> m_visited;
 
   /**
    * @brief
@@ -107,7 +101,7 @@ private:
    * @return returns a vector which contains the label elements [nodeId, cost,
    * previousNode]
    */
-  costNodeVec_t calcLabelHybrid(NodeId source, EdgeDirection direction, CalcLabelTimingInfo& calcLabelTimingInfo);
+  costNodeVec_t calcLabelHybrid(NodeId source, EdgeDirection direction, CalcLabelTimingInfo &calcLabelTimingInfo);
 
   /**
    * @brief
@@ -116,9 +110,7 @@ private:
    * @param direction
    * @return edge path vector
    */
-  std::vector<CHEdge>
-  getEdgeVectorFromNodeIdPath(const std::vector<NodeId> &path,
-                              EdgeDirection direction);
+  std::vector<CHEdge> getEdgeVectorFromNodeIdPath(const std::vector<NodeId> &path, EdgeDirection direction);
 
   /**
    * @brief
@@ -136,8 +128,7 @@ private:
    * @param sourceId
    * @return vector with nodeId visited in the path
    */
-  std::vector<NodeId> getShortestPathFromLabel(const costNodeVec_t &label,
-                                               NodeId topNode, NodeId sourceId);
+  std::vector<NodeId> getShortestPathFromLabel(const costNodeVec_t &label, NodeId topNode, NodeId sourceId);
 
   /**
    * finds the element given an id in a label
@@ -145,10 +136,6 @@ private:
    * @param label
    * @return the found element
    */
-  std::optional<CostNode> findElementInLabel(NodeId nodeId,
-                                             const costNodeVec_t &label);
-
+  std::optional<CostNode> findElementInLabel(NodeId nodeId, const costNodeVec_t &label);
 };
 } // namespace pathFinder
-#endif // MASTER_ARBEIT_HYBRIDPATHFINDER_H
-

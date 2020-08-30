@@ -1,14 +1,9 @@
-//
-// Created by sokol on 01.04.20.
-//
-
-#ifndef MASTER_ARBEIT_VECTORBASE_H
-#define MASTER_ARBEIT_VECTORBASE_H
-
+#pragma once
 #include <vector>
 
 namespace pathFinder {
-template <typename T, typename Allocator = std::allocator<T>> class VectorBase {
+template <typename T, typename Allocator = std::allocator<T>>
+class VectorBase {
 public:
   virtual T &operator[](size_t index);
 
@@ -32,11 +27,13 @@ T &VectorBase<T, Allocator>::operator[](size_t index) {
   return nullptr;
 }
 
-template <typename T, typename Allocator> T *VectorBase<T, Allocator>::begin() {
+template <typename T, typename Allocator>
+T *VectorBase<T, Allocator>::begin() {
   return nullptr;
 }
 
-template <typename T, typename Allocator> T *VectorBase<T, Allocator>::end() {
+template <typename T, typename Allocator>
+T *VectorBase<T, Allocator>::end() {
   return nullptr;
 }
 
@@ -48,7 +45,8 @@ size_t VectorBase<T, Allocator>::size() {
 template <typename T, typename Allocator>
 void VectorBase<T, Allocator>::push_back(T element) {}
 
-template <typename T, typename Allocator> T *VectorBase<T, Allocator>::data() {
+template <typename T, typename Allocator>
+T *VectorBase<T, Allocator>::data() {
   return nullptr;
 }
 
@@ -58,4 +56,3 @@ void VectorBase<T, Allocator>::clear() {}
 template <typename T, typename Allocator>
 void VectorBase<T, Allocator>::shrink_to_fit() {}
 } // namespace pathFinder
-#endif // MASTER_ARBEIT_VECTORBASE_H

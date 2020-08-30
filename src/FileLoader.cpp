@@ -1,5 +1,4 @@
 #include <fstream>
-#include <path_finder/helper/Timer.h>
 #include <path_finder/routing/CHDijkstra.h>
 #include <path_finder/storage/FileLoader.h>
 namespace pathFinder {
@@ -48,7 +47,7 @@ std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std
   chGraphCreateInfo.midPoint = config.midPoint;
 
   // set up grid
-  if(config.gridCalculated) {
+  if (config.gridCalculated) {
     std::ifstream gridStream(graphFolder + config.gridMapFile);
     std::string gridStr((std::istreambuf_iterator<char>(gridStream)), std::istreambuf_iterator<char>());
     auto gridConfig = pathFinder::DataConfig::getFromFile<GridMapEntries>(gridStr);
@@ -84,10 +83,14 @@ std::shared_ptr<pathFinder::HubLabelStore> pathFinder::FileLoader::loadHubLabels
   std::ifstream t(hubLabelFolder + "/config.json");
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   auto config = pathFinder::DataConfig::getFromFile<HubLabelDataInfo>(str);
-  auto forwardHublabels = Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder, config.forwardHublabels.mmap);
-  auto backwardHublabels = Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder, config.backwardHublabels.mmap);
-  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder, config.forwardHublabelOffset.mmap);
-  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder, config.backwardHublabelOffset.mmap);
+  auto forwardHublabels =
+      Static::getFromFile<CostNode>(config.forwardHublabels, hubLabelFolder, config.forwardHublabels.mmap);
+  auto backwardHublabels =
+      Static::getFromFile<CostNode>(config.backwardHublabels, hubLabelFolder, config.backwardHublabels.mmap);
+  auto forwardHublabelOffset = Static::getFromFile<OffsetElement>(config.forwardHublabelOffset, hubLabelFolder,
+                                                                  config.forwardHublabelOffset.mmap);
+  auto backwardHublabelOffset = Static::getFromFile<OffsetElement>(config.backwardHublabelOffset, hubLabelFolder,
+                                                                   config.backwardHublabelOffset.mmap);
 
   HubLabelStoreInfo hubLabelStoreInfo{};
   hubLabelStoreInfo.numberOfLabels = config.forwardHublabelOffset.size;
@@ -113,4 +116,4 @@ std::shared_ptr<CHDijkstra> FileLoader::loadCHDijkstraShared(const std::string &
   auto graph = loadGraph(configFolder + "/graph/");
   return std::make_shared<CHDijkstra>(graph);
 }
-}
+} // namespace pathFinder

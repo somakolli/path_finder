@@ -1,10 +1,4 @@
-//
-// Created by sokol on 11.08.20.
-//
-
-#ifndef PATH_FINDER_BENCHMARKER_H
-#define PATH_FINDER_BENCHMARKER_H
-
+#pragma once
 #include <path_finder/routing/CHDijkstra.h>
 #include <path_finder/storage/FileLoader.h>
 #include <string>
@@ -12,17 +6,16 @@ namespace pathFinder {
 class Benchmarker {
 public:
   using BenchResult = std::pair<Level, RoutingResultTimingInfo>;
-  Benchmarker(const std::string& dataPath, std::string  outPutPath);
-  Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam,
-              std::shared_ptr<HybridPathFinder> pathFinderMMap,
-              std::shared_ptr<CHDijkstra> chDijkstraRam,
-              std::shared_ptr<CHDijkstra> chDijkstraMMap,
-              std::string  outPutPath);
+  Benchmarker(const std::string &dataPath, std::string outPutPath);
+  Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam, std::shared_ptr<HybridPathFinder> pathFinderMMap,
+              std::shared_ptr<CHDijkstra> chDijkstraRam, std::shared_ptr<CHDijkstra> chDijkstraMMap,
+              std::string outPutPath);
   std::vector<BenchResult> benchmarkAllLevel(uint32_t numberOfQueries);
   BenchResult benchmarkLevel(uint32_t level, uint32_t numberOfQueries);
   double benchMarkNearestNeighbour(uint32_t numberOfQueries);
   RoutingResultTimingInfo benchmarkCHDijkstra(uint32_t numberOfQueries);
-  static void printRoutingResultForOctave(std::ostream& distanceStream, const std::vector<BenchResult>& ramResult, double chResult) {
+  static void printRoutingResultForOctave(std::ostream &distanceStream, const std::vector<BenchResult> &ramResult,
+                                          double chResult) {
     std::stringstream plotLevel;
     plotLevel << "level = [";
     std::stringstream hybridRam;
@@ -32,8 +25,8 @@ public:
     chRam << "chRam = [";
     pathUnpackRam << "pathUnpackRam = [";
     bool first = true;
-    for(auto [level, result]:ramResult) {
-      if(!first){
+    for (auto [level, result] : ramResult) {
+      if (!first) {
         plotLevel << ',';
         hybridRam << ',';
         chRam << ',';
@@ -51,11 +44,11 @@ public:
     distanceStream << plotLevel.str();
     distanceStream << hybridRam.str();
     distanceStream << chRam.str();
-    distanceStream
-        << "plot(level, hybridRam, \"g\", level, chRam, \"g\")\n";
+    distanceStream << "plot(level, hybridRam, \"g\", level, chRam, \"g\")\n";
     distanceStream << "print -djpg image.jpg\n";
     distanceStream << pathUnpackRam.str();
   }
+
 private:
   std::string m_dataPath;
   std::string m_outputPath;
@@ -63,7 +56,4 @@ private:
   std::shared_ptr<CHDijkstra> m_chDijkstra;
   static void dropCaches();
 };
-}
-
-
-#endif // PATH_FINDER_BENCHMARKER_H
+} // namespace pathFinder
