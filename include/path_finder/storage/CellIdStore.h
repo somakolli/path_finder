@@ -45,7 +45,8 @@ public:
   [[nodiscard]] size_t offsetSize() const;
   [[nodiscard]] size_t cellIdSize() const;
   void shrink_to_fit();
-  std::vector<CellId_t> getCellIds(size_t edgeId);
+  [[nodiscard]] std::vector<CellId_t> getCellIds(size_t edgeId) const;
+  std::vector<CellId_t> getCellIds(const std::vector<size_t>& edgeId) const;
 };
 }
 #endif // MASTER_ARBEIT_CELLIDSTORE_H

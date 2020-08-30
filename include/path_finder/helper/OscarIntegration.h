@@ -22,48 +22,60 @@ public:
 };
 class OscarIntegrator {
 public:
-  template<typename GeoPoint, typename CellIdsForEdge, typename DiskWriter, typename KVStore>
-  static void writeCellIdsForEdges(const CHGraph& graph, CellIdsForEdge cellIdsForEdge, DiskWriter diskWriter, KVStore& store) {
+  template<typename GeoPoint, typename CellIdsForEdge, typename KVStore>
+  static void writeCellIdsForEdges(const CHGraph& graph, CellIdsForEdge cellIdsForEdge, CellIdStore& cellIdStore, KVStore& store) {
      const auto edges = graph.getEdges();
     int progress = 0;
-#pragma omp parallel for default(none) shared(edges, graph, cellIdsForEdge, diskWriter, store, progress, std::cout)
+#pragma omp parallel for default(none) shared(edges, graph, cellIdsForEdge, cellIdStore, store, progress, std::cout)
     for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
       const auto& edge = edges[i];
       std::vector<uint32_t> cellIds;
-      std::vector<CHEdge> fullEdges;
       if(edge.child1.has_value()){
-        fullEdges = graph.getPathFromShortcut(edge, 0);
-      } else {
-        fullEdges.emplace_back(edge);
+        continue;
       }
-      for(const auto& edge: fullEdges) {
-        const auto sourceNode = graph.getNode(edge.source);
-        const auto targetNode = graph.getNode(edge.target);
-        GeoPoint sourcePoint;
-        sourcePoint.lat() = sourceNode.latLng.lat;
-        sourcePoint.lon() = sourceNode.latLng.lng;
-        GeoPoint targetPoint;
-        targetPoint.lat() = targetNode.latLng.lat;
-        targetPoint.lon() = targetNode.latLng.lng;
+      const auto sourceNode = graph.getNode(edge.source);
+      const auto targetNode = graph.getNode(edge.target);
+      GeoPoint sourcePoint;
+      sourcePoint.lat() = sourceNode.latLng.lat;
+      sourcePoint.lon() = sourceNode.latLng.lng;
+      GeoPoint targetPoint;
+      targetPoint.lat() = targetNode.latLng.lat;
+      targetPoint.lon() = targetNode.latLng.lng;
 
-        try {
-          auto cellIdsEdge = cellIdsForEdge(sourcePoint, targetPoint);
-          cellIds.insert(cellIds.end(), cellIdsEdge.begin(), cellIdsEdge.end());
-        } catch (std::exception& e) {
-
-        }
-      }
-
+      try {
+        auto cellIdsEdge = cellIdsForEdge(sourcePoint, targetPoint);
+        cellIds.insert(cellIds.end(), cellIdsEdge.begin(), cellIdsEdge.end());
+      } catch (std::exception& e) {}
       cellIds.erase(std::remove(cellIds.begin(), cellIds.end(), 4294967295), cellIds.end());
  #pragma omp critical
       {
-        diskWriter(i, cellIds);
+        cellIdStore.storeCellIds(i, cellIds);
         ++progress;
         if(progress % 1000 == 0)
             std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
         //std::cout << "count: " << cellIds.size() << '\n';
       }
     }
+#pragma omp parallel for default(none) shared(graph, edges, cellIdStore)
+    for(int i = 0; i < graph.getNumberOfEdges(); ++i) {
+      const auto& edge = edges[i];
+      if(edge.child1.has_value()) {
+        const auto fullEdges = graph.getPathFromShortcut(edge, 0);
+        std::vector<size_t> fullEdgeIds;
+        fullEdgeIds.resize(fullEdges.size());
+        for(const auto fullEdge : fullEdges) {
+          fullEdgeIds.emplace_back(graph.getEdgePosition(fullEdge, EdgeDirection::FORWARD).value());
+        }
+        auto fullCellIds = cellIdStore.getCellIds(fullEdgeIds);
+        sort(fullCellIds.begin(), fullCellIds.end());
+        (fullCellIds)
+            .erase(unique(fullCellIds.begin(), fullCellIds.end()),
+                   fullCellIds.end());
+#pragma omp critical
+        cellIdStore.storeCellIds(i, fullCellIds);
+      }
+    }
+    cellIdStore.shrink_to_fit();
   }
 };
 } // namespace pathFinder
