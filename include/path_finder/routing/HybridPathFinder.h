@@ -24,9 +24,9 @@ class HybridPathFinder : public PathFinderBase {
 private:
   typedef std::vector<CostNode> costNodeVec_t;
 
-  const HubLabelStore& m_hubLabelStore;
-  const CHGraph& m_graph;
-  const CellIdStore& m_cellIdStore;
+  std::shared_ptr<HubLabelStore> m_hubLabelStore;
+  std::shared_ptr<CHGraph> m_graph;
+  std::shared_ptr<CellIdStore> m_cellIdStore;
   Level m_labelsUntilLevel;
   bool m_hubLabelsCalculated;
   bool m_cellIdsCalculated;
@@ -39,17 +39,17 @@ public:
    * Initialize stores, graph, level, cost array.
    * @param hubLabelStore store with computed hubLabels
    * @param graph contraction hierarchy graph
-   * @param cellIdStore store for edge -> oscar cell id
+   * @param cellIdStore store for egde -> oscar cell id
    * @param labelsUntilLevel level until the labels are computed in the store
    */
-  HybridPathFinder(const HubLabelStore& hubLabelStore, const CHGraph& graph,
-                   CellIdStore& cellIdStore, Level labelsUntilLevel, bool hubLabelsCalculated = false,
+  HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, const std::shared_ptr<CHGraph> &graph,
+                   std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel, bool hubLabelsCalculated = false,
                    bool cellIdsCalculated = false)
-      : m_hubLabelStore(hubLabelStore), m_graph(graph), m_cellIdStore(std::move(cellIdStore)),
+      : m_hubLabelStore(std::move(hubLabelStore)), m_graph(graph), m_cellIdStore(std::move(cellIdStore)),
         m_labelsUntilLevel(labelsUntilLevel), m_hubLabelsCalculated(hubLabelsCalculated),
         m_cellIdsCalculated(cellIdsCalculated) {
-    m_cost.reserve(graph.getNumberOfNodes());
-    while (m_cost.size() < graph.getNumberOfNodes())
+    m_cost.reserve(graph->getNumberOfNodes());
+    while (m_cost.size() < graph->getNumberOfNodes())
       m_cost.push_back(MAX_DISTANCE);
   }
 
@@ -83,9 +83,9 @@ public:
    */
   RoutingResult getShortestPath(LatLng source, LatLng target) override;
   size_t graphNodeSize();
-  [[nodiscard]] Level labelsUntilLevel() const;
+  Level labelsUntilLevel();
   std::shared_ptr<CHGraph> getGraph();
-  [[nodiscard]] Level getMaxLevel() const;
+  Level getMaxLevel();
   void setLabelsUntilLevel(Level level);
 
   /**
@@ -93,7 +93,7 @@ public:
    * Calculates the label for a given source node id and direction.
    * @details
    * Does a ch query search until all labels which need to be fetched are known
-   * and merges those labels to dynamically generate a hub label.
+   * and merges those labels to dynamicaly generate a hub label.
    * If the label is already pre computed it just returns that label.
    * @param source node id of the node where the search starts
    * @param direction direction in which to search (either use the forward
@@ -136,6 +136,6 @@ public:
    * @param label
    * @return the found element
    */
-  static std::optional<CostNode> findElementInLabel(NodeId nodeId, const costNodeVec_t &label);
+  std::optional<CostNode> findElementInLabel(NodeId nodeId, const costNodeVec_t &label);
 };
 } // namespace pathFinder

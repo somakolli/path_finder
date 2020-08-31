@@ -32,20 +32,20 @@ RoutingResult HybridPathFinder::getShortestPath(NodeId source, NodeId target) {
   // unpack edges
   std::vector<CHEdge> edgePathWithoutShortcuts;
   for (auto edge : edgePathWithShortcuts) {
-    for (auto e : m_graph.getPathFromShortcut(edge, 0))
+    for (auto e : m_graph->getPathFromShortcut(edge, 0))
       edgePathWithoutShortcuts.emplace_back(e);
   }
 
   for (auto e : edgePathWithoutShortcuts) {
-    routingResult.edgeIds.emplace_back(m_graph.getEdgePosition(e, EdgeDirection::FORWARD).value());
+    routingResult.edgeIds.emplace_back(m_graph->getEdgePosition(e, EdgeDirection::FORWARD).value());
   }
 
   // get lat longs
   std::vector<LatLng> latLngPath;
   if (!edgePathWithoutShortcuts.empty())
-    latLngPath.push_back(m_graph.getNode(edgePathWithoutShortcuts[0].source).latLng);
+    latLngPath.push_back(m_graph->getNode(edgePathWithoutShortcuts[0].source).latLng);
   for (auto edge : edgePathWithoutShortcuts) {
-    latLngPath.push_back(m_graph.getNode(edge.target).latLng);
+    latLngPath.push_back(m_graph->getNode(edge.target).latLng);
   }
   routingResult.path = latLngPath;
   routingResult.routingResultTimingInfo.pathTime = stopwatch.elapsedMicro();
@@ -66,8 +66,8 @@ RoutingResult HybridPathFinder::getShortestPath(NodeId source, NodeId target) {
 
 RoutingResult HybridPathFinder::getShortestPath(LatLng source, LatLng target) {
   Stopwatch stopwatch;
-  NodeId sourceId = m_graph.getNodeIdFor(source);
-  NodeId targetId = m_graph.getNodeIdFor(target);
+  NodeId sourceId = m_graph->getNodeIdFor(source);
+  NodeId targetId = m_graph->getNodeIdFor(target);
   auto nodeSearchTime = stopwatch.elapsedMicro();
   RoutingResult routingResult = getShortestPath(sourceId, targetId);
   routingResult.routingResultTimingInfo.nodeSearchTime = nodeSearchTime;
@@ -77,10 +77,10 @@ RoutingResult HybridPathFinder::getShortestPath(LatLng source, LatLng target) {
 std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirection direction,
                                                         CalcLabelTimingInfo &calcLabelTimingInfo) {
   Stopwatch stopwatch;
-  if (m_graph.getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
+  if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
     CostNode *sourceLabel;
     size_t size;
-    m_hubLabelStore.retrieve(source, direction, sourceLabel, size);
+    m_hubLabelStore->retrieve(source, direction, sourceLabel, size);
     costNodeVec_t vec;
     for (auto i = sourceLabel; i < sourceLabel + size; ++i)
       vec.push_back(*i);
@@ -105,7 +105,7 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
     if (costNode.cost > m_cost[costNode.id])
       continue;
     settledNodes.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
-    auto currentNode = m_graph.getNode(costNode.id);
+    auto currentNode = m_graph->getNode(costNode.id);
     if (currentNode.level >= m_labelsUntilLevel) {
       if (labelsToCollectMap.find(costNode.previousNode) == labelsToCollectMap.end()) {
         labelsToCollectMap[costNode.previousNode] = std::vector<NodeId>();
@@ -114,8 +114,8 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
         labelsToCollectMap[costNode.previousNode].emplace_back(costNode.id);
       continue;
     }
-    for (const auto &edge : m_graph.edgesFor(costNode.id, direction)) {
-      if (m_graph.getLevel(edge.source) > m_graph.getLevel(edge.target))
+    for (const auto &edge : m_graph->edgesFor(costNode.id, direction)) {
+      if (m_graph->getLevel(edge.source) > m_graph->getLevel(edge.target))
         continue;
       auto addedCost = costNode.cost + edge.distance;
       if (addedCost < m_cost[edge.target]) {
@@ -133,7 +133,7 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
       // stopwatch1.reset();
       CostNode *label;
       size_t labelSize;
-      m_hubLabelStore.retrieve(id, direction, label, labelSize);
+      m_hubLabelStore->retrieve(id, direction, label, labelSize);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
       stopwatch1.reset();
       std::byte stackBuffer[sizeof(CostNode) * (settledNodes.size() + labelSize)];
@@ -156,7 +156,7 @@ std::vector<CHEdge> HybridPathFinder::getEdgeVectorFromNodeIdPath(const std::vec
                                                                   EdgeDirection direction) {
   std::vector<CHEdge> edgePath;
   for (int i = 0; i < path.size() - 1; ++i) {
-    for (CHEdge edge : m_graph.edgesFor(path[i], direction)) {
+    for (CHEdge edge : m_graph->edgesFor(path[i], direction)) {
       if (edge.target == path[i + 1])
         edgePath.emplace_back(edge);
     }
@@ -171,11 +171,11 @@ std::vector<CHEdge> HybridPathFinder::getEdgeVectorFromNodeIdPath(const std::vec
 
 void HybridPathFinder::addCellIds(const CHEdge &edge, std::vector<CellId_t> &result) {
   // edge always needs to be in forward order
-  auto edgeId = m_graph.getEdgePosition(edge, EdgeDirection::FORWARD);
+  auto edgeId = m_graph->getEdgePosition(edge, EdgeDirection::FORWARD);
   if (!edgeId.has_value())
     throw std::runtime_error("[Hublabels.addCellIds]could not find edgeId for edge(" + std::to_string(edge.source) +
                              "," + std::to_string(edge.target) + ")");
-  for (auto cellId : m_cellIdStore.getCellIds(edgeId.value())) {
+  for (auto cellId : m_cellIdStore->getCellIds(edgeId.value())) {
     result.push_back(cellId);
   }
 }
@@ -206,13 +206,13 @@ std::optional<CostNode> HybridPathFinder::findElementInLabel(NodeId nodeId, cons
   return std::nullopt;
 }
 
-size_t HybridPathFinder::graphNodeSize() { return m_graph.getNumberOfNodes(); }
+size_t HybridPathFinder::graphNodeSize() { return m_graph->getNumberOfNodes(); }
 
-Level HybridPathFinder::labelsUntilLevel() const { return m_labelsUntilLevel; }
+Level HybridPathFinder::labelsUntilLevel() { return m_labelsUntilLevel; }
 
-std::shared_ptr<CHGraph> HybridPathFinder::getGraph() { return std::make_shared<CHGraph>(m_graph); }
+std::shared_ptr<CHGraph> HybridPathFinder::getGraph() { return m_graph; }
 
-Level HybridPathFinder::getMaxLevel() const { return m_hubLabelStore.maxLevel; }
+Level HybridPathFinder::getMaxLevel() { return m_hubLabelStore->maxLevel; }
 
 void HybridPathFinder::setLabelsUntilLevel(Level level) { m_labelsUntilLevel = level; }
 } // namespace pathFinder
