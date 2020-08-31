@@ -136,10 +136,16 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
       m_hubLabelStore.retrieve(id, direction, label, labelSize);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
       stopwatch1.reset();
-      costNodeVec_t resultVec = Static::merge(settledNodes.begin(), settledNodes.end(), label, label + labelSize,
-                                              m_cost[id], PreviousReplacer(previousNodeId));
+      std::byte stackBuffer[sizeof(CostNode) * (settledNodes.size() + labelSize)];
+      std::pmr::monotonic_buffer_resource rsrc(stackBuffer, sizeof(stackBuffer));
+      std::pmr::vector<CostNode> result{&rsrc};
+      result.reserve(settledNodes.size() + labelSize);
+      Static::merge(settledNodes.begin(), settledNodes.end(), label, label + labelSize,
+                                              m_cost[id], PreviousReplacer(previousNodeId), result);
       free(label);
-      settledNodes = std::move(resultVec);
+      settledNodes.clear();
+      for(const auto costNode : result)
+        settledNodes.emplace_back(costNode);
       calcLabelTimingInfo.mergeTime += stopwatch1.elapsedMicro();
     }
   }

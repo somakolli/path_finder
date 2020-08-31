@@ -78,7 +78,7 @@ private:
    * @param direction direction for which the label will be computed
    * @return the computed label
    */
-  std::vector<CostNode> calcLabel(NodeId id, EdgeDirection direction) const;
+  [[nodiscard]] std::vector<CostNode> calcLabel(NodeId id, EdgeDirection direction) const;
   /**
    * @brief
    * removes not shortest distances in labels
@@ -93,7 +93,7 @@ private:
    * @param nodeId id of the node corresponding to the label
    * @param direction edge direction of the hub label
    */
-  void selfPrune(costNodeVec_t &label, NodeId nodeId, EdgeDirection direction) const;
+  void selfPrune(std::vector<CostNode> &label, NodeId nodeId, EdgeDirection direction) const;
   /**
    * @brief
    * calculates the shortest distance between two nodes if the labels are already

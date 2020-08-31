@@ -88,7 +88,7 @@ void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, CostNode *&stor
     return;
   }
   auto labelEnd = offsetElement.position + offsetElement.size;
-  storeVec = (CostNode *)calloc(offsetElement.size, sizeof(CostNode));
+  storeVec = (CostNode *)alloca(offsetElement.size * sizeof(CostNode));
   size = offsetElement.size;
   const auto storePointer = forward ? m_forwardLabels : m_backwardLabels;
   for (auto i = offsetElement.position, j = (size_t)0; i < labelEnd; ++i, ++j) {

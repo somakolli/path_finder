@@ -12,8 +12,10 @@ TEST(HubLabels, MergeWorks) {
       pathFinder::CostNode(1, 0, 0), pathFinder::CostNode(3, 2, 0), pathFinder::CostNode(5, 4, 0),
       pathFinder::CostNode(6, 5, 0), pathFinder::CostNode(7, 6, 0),
   };
-  std::vector<pathFinder::CostNode> result = Static::merge(
-      costNodeVec1.begin(), costNodeVec1.end(), costNodeVec2.begin(), costNodeVec2.end(), 1, PreviousReplacer(0));
+
+  std::vector<CostNode> result;
+  Static::merge(
+      costNodeVec1.begin(), costNodeVec1.end(), costNodeVec2.begin(), costNodeVec2.end(), 1, PreviousReplacer(0),result);
   for (int i = 0; i < result.size(); ++i) {
     ASSERT_EQ(result[i].id, i);
     ASSERT_EQ(result[i].cost, i);
@@ -25,22 +27,23 @@ TEST(HubLabels, EmptyMergeWorks) {
       pathFinder::CostNode(1, 0, 0), pathFinder::CostNode(3, 2, 0), pathFinder::CostNode(5, 4, 0),
       pathFinder::CostNode(6, 5, 0), pathFinder::CostNode(7, 6, 0),
   };
-  std::vector<pathFinder::CostNode> result = Static::merge(
-      costNodeVec1.begin(), costNodeVec1.end(), costNodeVec2.begin(), costNodeVec2.end(), 1, PreviousReplacer(0));
+  std::vector<CostNode> result;
+  Static::merge(
+      costNodeVec1.begin(), costNodeVec1.end(), costNodeVec2.begin(), costNodeVec2.end(), 1, PreviousReplacer(0), result);
   for (int i = 0; i < result.size(); ++i) {
     ASSERT_EQ(result[i].id, result[i].cost);
   }
   ASSERT_EQ(costNodeVec2.size(), result.size());
   result.clear();
-  result = Static::merge(costNodeVec2.begin(), costNodeVec2.end(), costNodeVec1.begin(), costNodeVec1.end(), 1,
-                         PreviousReplacer(0));
+  Static::merge(costNodeVec2.begin(), costNodeVec2.end(), costNodeVec1.begin(), costNodeVec1.end(), 1,
+                         PreviousReplacer(0), result);
   for (int i = 0; i < result.size(); ++i) {
     ASSERT_EQ(result[i].id - 1, result[i].cost);
   }
   ASSERT_EQ(costNodeVec2.size(), result.size());
   result.clear();
-  result = Static::merge(costNodeVec1.begin(), costNodeVec1.end(), costNodeVec1.begin(), costNodeVec1.end(), 1,
-                         PreviousReplacer(0));
+  Static::merge(costNodeVec1.begin(), costNodeVec1.end(), costNodeVec1.begin(), costNodeVec1.end(), 1,
+                         PreviousReplacer(0), result);
   ASSERT_EQ(0, result.size());
 }
 } // namespace pathFinder

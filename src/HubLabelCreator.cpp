@@ -68,26 +68,31 @@ void HubLabelCreator::processRangeParallel(const std::pair<uint32_t, uint32_t> &
 
 std::vector<CostNode> HubLabelCreator::calcLabel(NodeId nodeId, EdgeDirection direction) const {
   Level level = m_graph->getLevel(nodeId);
-  costNodeVec_t label;
+  std::vector<CostNode> label;
   label.reserve(1000);
   for (const auto &edge : m_graph->edgesFor(nodeId, direction)) {
     if (level < m_graph->getLevel(edge.target)) {
       auto targetLabel = m_hubLabelStore->retrieveIt(edge.target, direction);
-      costNodeVec_t newLabel = Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(),
-                                             edge.distance, PreviousReplacer(nodeId));
-      label = std::move(newLabel);
+      std::byte stackBuffer[sizeof(CostNode) * (label.size() + targetLabel.size())];
+      std::pmr::monotonic_buffer_resource rsrc(stackBuffer, sizeof(stackBuffer));
+      std::pmr::vector<CostNode> result{&rsrc};
+      result.reserve(label.size() + targetLabel.size());
+      Static::merge(label.begin(), label.end(), targetLabel.begin(), targetLabel.end(),
+                                             edge.distance, PreviousReplacer(nodeId), result);
+      label.clear();
+      for(const auto& costNode: result)
+        label.emplace_back(costNode);
     }
   }
   label.emplace_back(nodeId, 0, nodeId);
   Static::sortLabel(label);
-  int sizeBeforePrune = label.size();
   selfPrune(label, nodeId, direction);
   label.shrink_to_fit();
   Static::sortLabel(label);
   return label;
 }
 
-void HubLabelCreator::selfPrune(costNodeVec_t &label, NodeId nodeId, EdgeDirection direction) const {
+void HubLabelCreator::selfPrune(std::vector<CostNode> &label, NodeId nodeId, EdgeDirection direction) const {
   auto other = (pathFinder::EdgeDirection)!direction;
   for (int i = (int)label.size() - 1; i >= 0; --i) {
     auto &[id, cost, previousNode] = label[i];

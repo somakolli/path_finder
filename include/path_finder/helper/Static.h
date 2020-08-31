@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <iomanip>
 #include <iostream>
+#include <memory_resource>
 #include <sstream>
 #include <sys/mman.h>
 #include <time.h>
@@ -35,12 +36,12 @@ public:
    * @param result
    * @param replacePrevious
    */
-  template <typename ItA, typename ItB, typename Distance, typename ReplacePrevious>
-  static inline std::vector<CostNode> merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel,
-                                            ReplacePrevious replacePrevious) {
+  template <typename ItA, typename ItB, typename Distance, typename ReplacePrevious, typename ResultContainer>
+  static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel,
+                                            ReplacePrevious replacePrevious, ResultContainer& result) {
     auto i = aBegin;
     auto j = bBegin;
-    std::vector<CostNode> result;
+
     while (i < aEnd && j < bEnd) {
       if (i->id < j->id) {
         result.push_back(replacePrevious(*i));
@@ -65,7 +66,6 @@ public:
       result.emplace_back(replacePrevious(j->id, j->cost + distanceToLabel, j->previousNode));
       ++j;
     }
-    return result;
   }
 
   template <typename T>
@@ -126,7 +126,8 @@ public:
    * sorts a label by node ids
    * @param label input label to be store
    */
-  static inline void sortLabel(std::vector<CostNode> &label) {
+  template <typename CostNodeVec>
+  static inline void sortLabel(CostNodeVec &label) {
     std::sort(label.begin(), label.end(), [](const CostNode &node1, const CostNode &node2) {
       return node1.id == node2.id ? node1.cost < node2.cost : node1.id < node2.id;
     });
