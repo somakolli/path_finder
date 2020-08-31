@@ -16,7 +16,7 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) {
   if (config.hubLabelsCalculated)
     hubLabelStore = loadHubLabels(configFolder + "/hubLabels");
 
-  return std::make_shared<HybridPathFinder>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
+  return std::make_shared<HybridPathFinder>(*hubLabelStore, *chGraph, *cellIdStore, hubLabelStore->calculatedUntilLevel,
                                             config.hubLabelsCalculated, config.cellIdsCalculated);
 }
 std::shared_ptr<pathFinder::CHGraph> pathFinder::FileLoader::loadGraph(const std::string &graphFolder) {

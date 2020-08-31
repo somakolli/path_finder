@@ -18,7 +18,7 @@ TEST(RoutingTest, DistanceWorks) {
   hlc.create(labelsUntilLevel);
 
   CellIdStore ramCellIdStore(chGraph->getNumberOfEdges());
-  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph, std::make_shared<CellIdStore>(ramCellIdStore),
+  HybridPathFinder hybridPathFinder(*hubLabelStore, *chGraph, ramCellIdStore,
                                     labelsUntilLevel);
 
   Dijkstra dijkstra(graph);
@@ -43,7 +43,7 @@ TEST(RoutingTest, PathFindingWorks) {
   int labelsUntilLevel = 0;
   hlc.create(labelsUntilLevel);
   auto ramCellIdStore = std::make_shared<CellIdStore>(chGraph->getNumberOfEdges());
-  HybridPathFinder hybridPathFinder(hubLabelStore, chGraph, ramCellIdStore, labelsUntilLevel);
+  HybridPathFinder hybridPathFinder(*hubLabelStore, *chGraph, *ramCellIdStore, labelsUntilLevel);
 
   auto routingResult = hybridPathFinder.getShortestPath(0, 0);
   ASSERT_TRUE(routingResult.path.empty());
