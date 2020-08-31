@@ -7,10 +7,10 @@ void FileWriter::writeGraph(const CHGraph &graph, const std::string &graphName, 
   pathFinder::GraphDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.nodes = {"nodes", graph.m_numberOfNodes, true};
-  dataConfig.forwardEdges = {"forwardEdges", graph.m_numberOfEdges, true};
+  dataConfig.nodes = {"nodes", graph.m_numberOfNodes, false};
+  dataConfig.forwardEdges = {"forwardEdges", graph.m_numberOfEdges, false};
   dataConfig.forwardOffset = {"forwardOffset", graph.m_numberOfNodes + 1, false};
-  dataConfig.backwardEdges = {"backwardEdges", graph.m_numberOfEdges, true};
+  dataConfig.backwardEdges = {"backwardEdges", graph.m_numberOfEdges, false};
   dataConfig.backwardOffset = {"backwardOffset", graph.m_numberOfNodes + 1, false};
   Static::writeVectorToFile(graph.m_nodes, graph.m_numberOfNodes, (folder + dataConfig.nodes.path).c_str());
   Static::writeVectorToFile(graph.m_edges, graph.m_numberOfEdges, (folder + dataConfig.forwardEdges.path).c_str());
@@ -51,8 +51,8 @@ void FileWriter::writeHubLabels(const HubLabelStore &hubLabelStore, const std::s
   pathFinder::HubLabelDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.forwardHublabels = {"forwardHubLabels", hubLabelStore.getForwardLabelsSize(), true};
-  dataConfig.backwardHublabels = {"backwardHubLabels", hubLabelStore.getBackwardLabelsSize(), true};
+  dataConfig.forwardHublabels = {"forwardHubLabels", hubLabelStore.getForwardLabelsSize(), false};
+  dataConfig.backwardHublabels = {"backwardHubLabels", hubLabelStore.getBackwardLabelsSize(), false};
   dataConfig.forwardHublabelOffset = {"forwardHubLabelOffset", hubLabelStore.getForwardOffsetSize(), false};
   dataConfig.backwardHublabelOffset = {"backwardHubLabelOffset", hubLabelStore.getBackwardOffsetSize(), false};
   dataConfig.maxLevel = hubLabelStore.maxLevel;
@@ -81,8 +81,8 @@ void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &g
   pathFinder::CellDataInfo dataConfig;
   dataConfig.graphName = graphName;
   dataConfig.timestamp = Static::getTimeStampString();
-  dataConfig.cellIds = {"cellIds", cellIdStore.cellIdSize()};
-  dataConfig.cellIdsOffset = {"cellIdsOffset", cellIdStore.offsetSize()};
+  dataConfig.cellIds = {"cellIds", cellIdStore.cellIdSize(), false};
+  dataConfig.cellIdsOffset = {"cellIdsOffset", cellIdStore.offsetSize(), false};
   Static::writeVectorToFile(cellIdStore._cellIds, cellIdStore._cellIdSize, (folder + dataConfig.cellIds.path).c_str());
   Static::writeVectorToFile(cellIdStore._offsetVector, cellIdStore._offsetVectorSize,
                             (folder + dataConfig.cellIdsOffset.path).c_str());

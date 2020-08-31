@@ -16,7 +16,7 @@ public:
 
 private:
   std::queue<std::function<void()>> m_taskQueue;
-  [[maybe_unused]] size_t m_numberOfThreads;
+  size_t m_numberOfThreads;
   std::mutex queueMutex;
   std::vector<std::thread> threads;
   void threadLoop();

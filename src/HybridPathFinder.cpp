@@ -78,15 +78,7 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
                                                         CalcLabelTimingInfo &calcLabelTimingInfo) {
   Stopwatch stopwatch;
   if (m_graph->getLevel(source) >= m_labelsUntilLevel && m_hubLabelsCalculated) {
-    CostNode *sourceLabel;
-    size_t size;
-    m_hubLabelStore->retrieve(source, direction, sourceLabel, size);
-    costNodeVec_t vec;
-    for (auto i = sourceLabel; i < sourceLabel + size; ++i)
-      vec.push_back(*i);
-    free(sourceLabel);
-    calcLabelTimingInfo.lookUpTime = stopwatch.elapsedMicro();
-    return vec;
+    return m_hubLabelStore->retrieve(source, direction);
   }
 
   std::vector<CostNode> settledNodes;
@@ -130,19 +122,16 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
   Stopwatch stopwatch1;
   for (auto [previousNodeId, labelsToCollect] : labelsToCollectMap) {
     for (auto id : labelsToCollect) {
-      // stopwatch1.reset();
-      CostNode *label;
-      size_t labelSize;
-      m_hubLabelStore->retrieve(id, direction, label, labelSize);
+      stopwatch1.reset();
+      auto label = m_hubLabelStore->retrieveIt(id, direction);
       calcLabelTimingInfo.lookUpTime += stopwatch1.elapsedMicro();
       stopwatch1.reset();
-      std::byte stackBuffer[sizeof(CostNode) * (settledNodes.size() + labelSize)];
+      CostNode stackBuffer[settledNodes.size() + label.size()];
       std::pmr::monotonic_buffer_resource rsrc(stackBuffer, sizeof(stackBuffer));
       std::pmr::vector<CostNode> result{&rsrc};
-      result.reserve(settledNodes.size() + labelSize);
-      Static::merge(settledNodes.begin(), settledNodes.end(), label, label + labelSize,
+      result.reserve(settledNodes.size() + label.size());
+      Static::merge(settledNodes.begin(), settledNodes.end(), label.begin(), label.end(),
                                               m_cost[id], PreviousReplacer(previousNodeId), result);
-      free(label);
       settledNodes.clear();
       for(const auto costNode : result)
         settledNodes.emplace_back(costNode);
