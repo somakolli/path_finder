@@ -6,7 +6,7 @@
 namespace pathFinder {
 class PathFinderBase {
 public:
-  virtual RoutingResult getShortestPath(NodeId source, NodeId target);
-  virtual RoutingResult getShortestPath(LatLng source, LatLng target);
+  virtual auto getShortestPath(NodeId source, NodeId target) -> RoutingResult;
+  virtual auto getShortestPath(LatLng source, LatLng target) -> RoutingResult;
 };
 } // namespace pathFinder

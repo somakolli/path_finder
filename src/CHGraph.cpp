@@ -105,9 +105,9 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) 
   }
   return position;
 }
-pathFinder::CHNode pathFinder::CHGraph::getNode(pathFinder::NodeId id) const { return m_nodes[id]; }
-std::optional<size_t> pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
-                                                           pathFinder::EdgeDirection direction) const {
+auto pathFinder::CHGraph::getNode(pathFinder::NodeId id) const -> pathFinder::CHNode { return m_nodes[id]; }
+auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
+                                                           pathFinder::EdgeDirection direction) const -> std::optional<size_t> {
   auto offsetPointer = direction ? m_offset : m_backOffset;
   auto edgePointer = direction ? m_edges : m_backEdges;
   for (auto i = offsetPointer[edge.source]; i < offsetPointer[edge.source + 1]; ++i) {
@@ -118,8 +118,8 @@ std::optional<size_t> pathFinder::CHGraph::getEdgePosition(const pathFinder::CHE
   }
   return std::nullopt;
 }
-std::vector<pathFinder::CHEdge> pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
-                                                                         double minLength) const {
+auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
+                                                                         double minLength) const -> std::vector<pathFinder::CHEdge> {
   std::vector<CHEdge> path;
   if (__glibc_unlikely(shortcut.source >= m_numberOfNodes || shortcut.target >= m_numberOfNodes))
     throw std::out_of_range("shortcut out of range");
@@ -149,17 +149,17 @@ std::vector<pathFinder::CHEdge> pathFinder::CHGraph::getPathFromShortcut(pathFin
   }
   return path;
 }
-double pathFinder::CHGraph::beeLineWithoutSquareRoot(pathFinder::LatLng latLng1, pathFinder::LatLng latLng2) {
+auto pathFinder::CHGraph::beeLineWithoutSquareRoot(pathFinder::LatLng latLng1, pathFinder::LatLng latLng2) -> double {
   return pow(latLng1.lat - latLng2.lat, 2) + pow(latLng1.lng - latLng2.lng, 2);
 }
-pathFinder::MyIterator<const pathFinder::CHNode *> pathFinder::CHGraph::getNodes() const {
+auto pathFinder::CHGraph::getNodes() const -> pathFinder::MyIterator<const pathFinder::CHNode *> {
   return pathFinder::MyIterator<const pathFinder::CHNode *>(m_nodes, m_nodes + m_numberOfNodes);
 }
-pathFinder::MyIterator<const pathFinder::CHEdge *> pathFinder::CHGraph::getEdges() const {
+auto pathFinder::CHGraph::getEdges() const -> pathFinder::MyIterator<const pathFinder::CHEdge *> {
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
-pathFinder::MyIterator<const pathFinder::CHEdge *>
-pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const {
+auto
+pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const -> pathFinder::MyIterator<const pathFinder::CHEdge *> {
   switch (direction) {
   case FORWARD:
     return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
@@ -168,8 +168,8 @@ pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection
   }
   return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
 }
-pathFinder::Level pathFinder::CHGraph::getLevel(pathFinder::NodeId nodeId) const { return m_nodes[nodeId].level; }
-pathFinder::MyIterator<const pathFinder::NodeId *> pathFinder::CHGraph::getForwardOffset() const {
+auto pathFinder::CHGraph::getLevel(pathFinder::NodeId nodeId) const -> pathFinder::Level { return m_nodes[nodeId].level; }
+auto pathFinder::CHGraph::getForwardOffset() const -> pathFinder::MyIterator<const pathFinder::NodeId *> {
   return pathFinder::MyIterator<const pathFinder::NodeId *>(m_offset, m_offset + m_numberOfNodes);
 }
 pathFinder::MyIterator<const pathFinder::NodeId *> pathFinder::CHGraph::getBackwardOffset() const {
@@ -183,18 +183,18 @@ pathFinder::CHGraph::~CHGraph() {
   pathFinder::Static::conditionalFree(m_backOffset, m_backOffsetMMap, (m_numberOfNodes + 1) * sizeof(NodeId));
 }
 pathFinder::CHGraph::CHGraph() {}
-bool pathFinder::CHGraph::isValidNodeId(pathFinder::NodeId id) const { return id < m_numberOfNodes; }
-size_t pathFinder::CHGraph::getNumberOfNodes() const { return m_numberOfNodes; }
+auto pathFinder::CHGraph::isValidNodeId(pathFinder::NodeId id) const -> bool { return id < m_numberOfNodes; }
+auto pathFinder::CHGraph::getNumberOfNodes() const -> size_t { return m_numberOfNodes; }
 pathFinder::MyIterator<const pathFinder::CHEdge *> pathFinder::CHGraph::getBackEdges() const {
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
-size_t pathFinder::CHGraph::getNumberOfEdges() const { return m_numberOfEdges; }
-pathFinder::MyIterator<pathFinder::CHNode *> pathFinder::CHGraph::getNodesMutable() {
+auto pathFinder::CHGraph::getNumberOfEdges() const -> size_t { return m_numberOfEdges; }
+auto pathFinder::CHGraph::getNodesMutable() -> pathFinder::MyIterator<pathFinder::CHNode *> {
   return MyIterator<pathFinder::CHNode *>(m_nodes, m_nodes + m_numberOfNodes);
 }
-pathFinder::MyIterator<pathFinder::CHEdge *> pathFinder::CHGraph::getEdgesMutable() {
+auto pathFinder::CHGraph::getEdgesMutable() -> pathFinder::MyIterator<pathFinder::CHEdge *> {
   return pathFinder::MyIterator<pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
-pathFinder::MyIterator<pathFinder::CHEdge *> pathFinder::CHGraph::getBackEdgesMutable() {
+auto pathFinder::CHGraph::getBackEdgesMutable() -> pathFinder::MyIterator<pathFinder::CHEdge *> {
   return pathFinder::MyIterator<pathFinder::CHEdge *>(m_backEdges, m_backEdges + m_numberOfEdges);
 }

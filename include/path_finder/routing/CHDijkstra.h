@@ -9,8 +9,8 @@ namespace pathFinder {
 class CHDijkstra : public PathFinderBase {
 public:
   explicit CHDijkstra(std::shared_ptr<CHGraph> graph);
-  std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
-  std::vector<CostNode> shortestDistance(NodeId source, EdgeDirection direction);
+  auto getShortestDistance(NodeId source, NodeId target) -> std::optional<Distance>;
+  auto shortestDistance(NodeId source, EdgeDirection direction) -> std::vector<CostNode>;
 
 private:
   std::vector<Distance> cost;

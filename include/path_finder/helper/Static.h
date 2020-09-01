@@ -38,7 +38,7 @@ public:
    */
   template <typename ItA, typename ItB, typename Distance, typename ReplacePrevious, typename ResultContainer>
   static inline void merge(ItA aBegin, ItA aEnd, ItB bBegin, ItB bEnd, Distance distanceToLabel,
-                                            ReplacePrevious replacePrevious, ResultContainer& result) {
+                           ReplacePrevious replacePrevious, ResultContainer &result) {
     auto i = aBegin;
     auto j = bBegin;
 

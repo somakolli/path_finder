@@ -13,11 +13,11 @@ public:
 
   void reset() { *this = Stopwatch(); }
 
-  typename Clock::duration elapsed() const { return Clock::now() - _last; }
-  [[maybe_unused]] double elapsedMil() const {
+  auto elapsed() const -> typename Clock::duration { return Clock::now() - _last; }
+  [[maybe_unused]] [[nodiscard]] auto elapsedMil() const -> double {
     return std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - _last).count();
   }
-  [[nodiscard]] double elapsedMicro() const {
+  [[nodiscard]] auto elapsedMicro() const -> double {
     return std::chrono::duration_cast<std::chrono::microseconds>(Clock::now() - _last).count();
   }
 };

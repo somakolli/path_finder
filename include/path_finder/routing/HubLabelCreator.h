@@ -78,7 +78,7 @@ private:
    * @param direction direction for which the label will be computed
    * @return the computed label
    */
-  [[nodiscard]] std::vector<CostNode> calcLabel(NodeId id, EdgeDirection direction) const;
+  [[nodiscard]] auto calcLabel(NodeId id, EdgeDirection direction) const -> std::vector<CostNode>;
   /**
    * @brief
    * removes not shortest distances in labels
@@ -107,6 +107,6 @@ private:
    * @param target node id
    * @return shortest distance value and nullopt if shortest distance is not known
    */
-  std::optional<pathFinder::Distance> getShortestDistance(NodeId source, NodeId target);
+  auto getShortestDistance(NodeId source, NodeId target) -> std::optional<pathFinder::Distance>;
 };
 } // namespace pathFinder

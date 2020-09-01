@@ -64,7 +64,7 @@ public:
    * @param target node id of the target node
    * @return RoutingResult object with path, distance, cell ids
    */
-  RoutingResult getShortestPath(NodeId source, NodeId target) override;
+  auto getShortestPath(NodeId source, NodeId target) -> RoutingResult override;
 
   /**
    * @brief
@@ -81,11 +81,11 @@ public:
    * container
    * @return RoutingResult object with path, distance, cell ids
    */
-  RoutingResult getShortestPath(LatLng source, LatLng target) override;
-  size_t graphNodeSize();
-  Level labelsUntilLevel();
-  std::shared_ptr<CHGraph> getGraph();
-  Level getMaxLevel();
+  auto getShortestPath(LatLng source, LatLng target) -> RoutingResult override;
+  auto graphNodeSize() -> size_t;
+  auto labelsUntilLevel() -> Level;
+  auto getGraph() -> std::shared_ptr<CHGraph>;
+  auto getMaxLevel() -> Level;
   void setLabelsUntilLevel(Level level);
 
   /**
@@ -101,7 +101,7 @@ public:
    * @return returns a vector which contains the label elements [nodeId, cost,
    * previousNode]
    */
-  costNodeVec_t calcLabelHybrid(NodeId source, EdgeDirection direction, CalcLabelTimingInfo &calcLabelTimingInfo);
+  auto calcLabelHybrid(NodeId source, EdgeDirection direction, CalcLabelTimingInfo &calcLabelTimingInfo) -> costNodeVec_t;
 
   /**
    * @brief
@@ -110,7 +110,7 @@ public:
    * @param direction
    * @return edge path vector
    */
-  std::vector<CHEdge> getEdgeVectorFromNodeIdPath(const std::vector<NodeId> &path, EdgeDirection direction);
+  auto getEdgeVectorFromNodeIdPath(const std::vector<NodeId> &path, EdgeDirection direction) -> std::vector<CHEdge>;
 
   /**
    * @brief
@@ -128,7 +128,7 @@ public:
    * @param sourceId
    * @return vector with nodeId visited in the path
    */
-  std::vector<NodeId> getShortestPathFromLabel(const costNodeVec_t &label, NodeId topNode, NodeId sourceId);
+  auto getShortestPathFromLabel(const costNodeVec_t &label, NodeId topNode, NodeId sourceId) -> std::vector<NodeId>;
 
   /**
    * finds the element given an id in a label
@@ -136,6 +136,6 @@ public:
    * @param label
    * @return the found element
    */
-  std::optional<CostNode> findElementInLabel(NodeId nodeId, const costNodeVec_t &label);
+  auto findElementInLabel(NodeId nodeId, const costNodeVec_t &label) -> std::optional<CostNode>;
 };
 } // namespace pathFinder

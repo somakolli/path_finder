@@ -26,7 +26,7 @@ void CellIdStore::storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellT
   }
 }
 
-std::vector<CellId_t> CellIdStore::getCellIds(size_t edgeId) const {
+auto CellIdStore::getCellIds(size_t edgeId) const -> std::vector<CellId_t> {
   auto offsetElement = _offsetVector[edgeId];
   std::vector<CellId_t> resultVec;
   resultVec.reserve(offsetElement.size);
@@ -36,9 +36,9 @@ std::vector<CellId_t> CellIdStore::getCellIds(size_t edgeId) const {
   return resultVec;
 }
 
-size_t CellIdStore::cellIdSize() const { return _cellIdSize; }
+auto CellIdStore::cellIdSize() const -> size_t { return _cellIdSize; }
 
-size_t CellIdStore::offsetSize() const { return _offsetVectorSize; }
+auto CellIdStore::offsetSize() const -> size_t { return _offsetVectorSize; }
 
 CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
   _cellIds = cellIdStoreCreateInfo.cellIds;
@@ -54,7 +54,7 @@ CellIdStore::~CellIdStore() {
   Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
 }
 void CellIdStore::shrink_to_fit() { _cellIds = (CellId_t *)realloc(_cellIds, sizeof(CellId_t) * (_cellIdSize)); }
-std::vector<CellId_t> CellIdStore::getCellIds(const std::vector<size_t> &edgeIds) const {
+auto CellIdStore::getCellIds(const std::vector<size_t> &edgeIds) const -> std::vector<CellId_t> {
   std::vector<CellId_t> cellIds;
   for (auto edgeId : edgeIds) {
     auto currentCellIds = getCellIds(edgeId);
