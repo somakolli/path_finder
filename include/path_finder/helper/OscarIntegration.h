@@ -44,20 +44,18 @@ public:
         // std::cout << "count: " << cellIds.size() << '\n';
       }
     }
-#pragma omp parallel for default(none) shared(graph, edges, cellIdStore)
     for (int i = 0; i < graph.getNumberOfEdges(); ++i) {
       const auto &edge = edges[i];
       if (edge.child1.has_value()) {
         const auto fullEdges = graph.getPathFromShortcut(edge, 0);
         std::vector<size_t> fullEdgeIds;
-        fullEdgeIds.resize(fullEdges.size());
+        fullEdgeIds.reserve(fullEdges.size());
         for (const auto fullEdge : fullEdges) {
           fullEdgeIds.emplace_back(graph.getEdgePosition(fullEdge, EdgeDirection::FORWARD).value());
         }
         auto fullCellIds = cellIdStore.getCellIds(fullEdgeIds);
         sort(fullCellIds.begin(), fullCellIds.end());
         (fullCellIds).erase(unique(fullCellIds.begin(), fullCellIds.end()), fullCellIds.end());
-#pragma omp critical
         cellIdStore.storeCellIds(i, fullCellIds);
       }
     }
