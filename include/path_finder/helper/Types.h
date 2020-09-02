@@ -128,6 +128,12 @@ struct RoutingResult {
   std::vector<CellId_t> cellIds;
   Distance distance;
   RoutingResultTimingInfo routingResultTimingInfo;
+  void operator+=(const RoutingResult& other) {
+    distance += other.distance;
+    routingResultTimingInfo += other.routingResultTimingInfo;
+    path.insert(path.end(), other.path.begin(), other.path.end());
+    cellIds.insert(cellIds.end(), other.cellIds.begin(), other.cellIds.end());
+  }
 };
 // used for dijkstra PQ
 struct CostNode {
