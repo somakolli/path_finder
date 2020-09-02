@@ -8,20 +8,20 @@ class GraphStats {
 
 public:
   explicit GraphStats(Graph &graph);
-  std::uint32_t getDegree(NodeId id);
-  float getAverageDegree();
-  std::uint32_t getNodeCountWithLevelSmallerThan(Level level);
-  Level getHighestLevel();
+  auto getDegree(NodeId id) -> std::uint32_t;
+  auto getAverageDegree() -> float;
+  auto getNodeCountWithLevelSmallerThan(Level level) -> std::uint32_t;
+  auto getHighestLevel() -> Level;
   void printStats(std::ostream &ss);
 };
 template <typename Graph>
 pathFinder::GraphStats<Graph>::GraphStats(Graph &graph) : graph(graph) {}
 template <typename Graph>
-std::uint32_t pathFinder::GraphStats<Graph>::getDegree(pathFinder::NodeId id) {
+auto pathFinder::GraphStats<Graph>::getDegree(pathFinder::NodeId id) -> std::uint32_t {
   return graph.edgesFor(id, EdgeDirection::BACKWARD).size() + graph.edgesFor(id, EdgeDirection::FORWARD).size();
 }
 template <typename Graph>
-float pathFinder::GraphStats<Graph>::getAverageDegree() {
+auto pathFinder::GraphStats<Graph>::getAverageDegree() -> float {
   size_t accumulator = 0;
   for (auto node : graph.getNodes()) {
     accumulator += getDegree(node.id);
@@ -29,7 +29,7 @@ float pathFinder::GraphStats<Graph>::getAverageDegree() {
   return (float)accumulator / graph.numberOfNodes;
 }
 template <typename Graph>
-std::uint32_t pathFinder::GraphStats<Graph>::getNodeCountWithLevelSmallerThan(pathFinder::Level level) {
+auto pathFinder::GraphStats<Graph>::getNodeCountWithLevelSmallerThan(pathFinder::Level level) -> std::uint32_t {
   size_t count = 0;
   for (auto node : graph.getNodes()) {
     if (node.level < level)
@@ -38,7 +38,7 @@ std::uint32_t pathFinder::GraphStats<Graph>::getNodeCountWithLevelSmallerThan(pa
   return count;
 }
 template <typename Graph>
-pathFinder::Level pathFinder::GraphStats<Graph>::getHighestLevel() {
+auto pathFinder::GraphStats<Graph>::getHighestLevel() -> pathFinder::Level {
   Level highestLevel = 0;
   for (const auto &node : graph.getNodes())
     if (node.level > highestLevel)

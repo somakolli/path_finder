@@ -10,10 +10,10 @@ public:
   Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam, std::shared_ptr<HybridPathFinder> pathFinderMMap,
               std::shared_ptr<CHDijkstra> chDijkstraRam, std::shared_ptr<CHDijkstra> chDijkstraMMap,
               std::string outPutPath);
-  std::vector<BenchResult> benchmarkAllLevel(uint32_t numberOfQueries);
-  BenchResult benchmarkLevel(uint32_t level, uint32_t numberOfQueries);
-  double benchMarkNearestNeighbour(uint32_t numberOfQueries);
-  RoutingResultTimingInfo benchmarkCHDijkstra(uint32_t numberOfQueries);
+  auto benchmarkAllLevel(uint32_t numberOfQueries) -> std::vector<BenchResult>;
+  auto benchmarkLevel(uint32_t level, uint32_t numberOfQueries) -> BenchResult;
+  auto benchMarkNearestNeighbour(uint32_t numberOfQueries) -> double;
+  auto benchmarkCHDijkstra(uint32_t numberOfQueries) -> RoutingResultTimingInfo;
   static void printRoutingResultForOctave(std::ostream &distanceStream, const std::vector<BenchResult> &ramResult,
                                           double chResult) {
     std::stringstream plotLevel;

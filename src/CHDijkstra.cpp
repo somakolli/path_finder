@@ -9,8 +9,8 @@ pathFinder::CHDijkstra::CHDijkstra(std::shared_ptr<CHGraph> graph) : graph(graph
     cost.emplace_back(MAX_DISTANCE);
 }
 
-std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathFinder::NodeId source,
-                                                                           pathFinder::EdgeDirection direction) {
+auto pathFinder::CHDijkstra::shortestDistance(pathFinder::NodeId source,
+                                                                           pathFinder::EdgeDirection direction) -> std::vector<pathFinder::CostNode> {
   std::vector<CostNode> settledNodes;
   for (auto nodeId : visited)
     cost[nodeId] = MAX_DISTANCE;
@@ -39,8 +39,8 @@ std::vector<pathFinder::CostNode> pathFinder::CHDijkstra::shortestDistance(pathF
   }
   return settledNodes;
 }
-std::optional<pathFinder::Distance> pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
-                                                                                pathFinder::NodeId target) {
+auto pathFinder::CHDijkstra::getShortestDistance(pathFinder::NodeId source,
+                                                                                pathFinder::NodeId target) -> std::optional<pathFinder::Distance> {
   if (source >= graph->getNumberOfNodes() || target >= graph->getNumberOfNodes())
     return std::nullopt;
   auto forwardLabel = shortestDistance(source, EdgeDirection::FORWARD);

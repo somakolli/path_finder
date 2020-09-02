@@ -3,6 +3,8 @@
 //
 #include <path_finder/helper/Benchmarker.h>
 
+
+#include <path_finder/graphs/GraphStats.h>
 #include <fstream>
 #include <random>
 #include <utility>

@@ -17,7 +17,7 @@ public:
   auto begin() { return m_grid.cbegin(); };
   auto end() { return m_grid.cend(); };
   auto &operator[](GridKey index) { return m_grid[index]; };
-  [[nodiscard]] GridKey getKeyFor(LatLng latLng) const;
+  GridKey getKeyFor(LatLng latLng) const;
   PositionPair operator[](LatLng latLng) const;
   Grid(double latStretchFactor, double lngStretchFactor);
 

@@ -14,6 +14,6 @@ private:
 
 public:
   explicit Dijkstra(const Graph &graph);
-  std::optional<Distance> getShortestDistance(NodeId source, NodeId target);
+  auto getShortestDistance(NodeId source, NodeId target) -> std::optional<Distance>;
 };
 } // namespace pathFinder

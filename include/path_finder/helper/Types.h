@@ -42,9 +42,9 @@ class Node {
 public:
   NodeId id;
   LatLng latLng;
-  [[nodiscard]] double quickBeeLine(const LatLng &other) const;
-  [[nodiscard]] double quickBeeLine(const Node &other) const;
-  [[nodiscard]] double euclid(const Node &other) const;
+  [[nodiscard]] auto quickBeeLine(const LatLng &other) const -> double;
+  [[nodiscard]] auto quickBeeLine(const Node &other) const -> double;
+  [[nodiscard]] auto euclid(const Node &other) const -> double;
 };
 class Edge {
 public:
@@ -53,14 +53,14 @@ public:
   NodeId distance;
   Edge(NodeId source, NodeId target, Distance distance) : source(source), target(target), distance(distance) {}
   Edge() = default;
-  friend std::ostream &operator<<(std::ostream &Str, const Edge &edge) {
+  friend auto operator<<(std::ostream &Str, const Edge &edge) -> std::ostream & {
     Str << "source: " << edge.source << ' ' << "target: " << edge.target << " distance: " << edge.distance;
     return Str;
   }
 };
 struct CHNode : Node {
   Level level;
-  Node toNode() { return Node{id, latLng}; }
+  auto toNode() -> Node { return Node{id, latLng}; }
 };
 struct CHEdge : Edge {
   std::optional<NodeId> child1 = std::nullopt;
@@ -82,14 +82,14 @@ struct CalcLabelTimingInfo {
     lookUpTime /= other;
     graphSearchTime /= other;
   }
-  CalcLabelTimingInfo operator/(double other) const {
+  auto operator/(double other) const -> CalcLabelTimingInfo {
     CalcLabelTimingInfo c{};
     c.mergeTime = this->mergeTime / other;
     c.lookUpTime = this->lookUpTime / other;
     c.graphSearchTime = this->graphSearchTime / other;
     return c;
   }
-  friend std::ostream &operator<<(std::ostream &os, const CalcLabelTimingInfo &calcLabelTimingInfo) {
+  friend auto operator<<(std::ostream &os, const CalcLabelTimingInfo &calcLabelTimingInfo) -> std::ostream & {
     os << "mergeTime: " << calcLabelTimingInfo.mergeTime << '\n';
     os << "lookUpTime: " << calcLabelTimingInfo.lookUpTime << '\n';
     os << "graphSearchTime: " << calcLabelTimingInfo.graphSearchTime << '\n';
@@ -104,7 +104,7 @@ struct RoutingResultTimingInfo {
   double nodeSearchTime = 0;
   CalcLabelTimingInfo calcLabelTimingInfo{};
   // operator to calculate averages
-  RoutingResultTimingInfo operator/(uint32_t numberOfQueries) const {
+  auto operator/(uint32_t numberOfQueries) const -> RoutingResultTimingInfo {
     RoutingResultTimingInfo r{};
     r.distanceTime = this->distanceTime / numberOfQueries;
     r.nodeSearchTime = this->nodeSearchTime / numberOfQueries;
@@ -120,7 +120,7 @@ struct RoutingResultTimingInfo {
     nodeSearchTime += other.nodeSearchTime;
     calcLabelTimingInfo += other.calcLabelTimingInfo;
   }
-  [[nodiscard]] std::string toJson() const;
+  [[nodiscard]] auto toJson() const -> std::string;
 };
 struct RoutingResult {
   std::vector<uint32_t> edgeIds;
@@ -142,10 +142,10 @@ struct CostNode {
   NodeId previousNode;
   CostNode() = default;
 
-  bool operator<(const CostNode &rhs) const { return cost > rhs.cost; }
+  auto operator<(const CostNode &rhs) const -> bool { return cost > rhs.cost; }
   CostNode(NodeId id, size_t cost, NodeId previousNode) : id(id), cost(cost), previousNode(previousNode) {}
 
-  bool operator==(const CostNode &rhs) const {
+  auto operator==(const CostNode &rhs) const -> bool {
     return id == rhs.id && cost == rhs.cost && previousNode == rhs.previousNode;
   }
 };

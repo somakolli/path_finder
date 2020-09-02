@@ -13,7 +13,8 @@ public:
                                    KVStore &store) {
     const auto edges = graph.getEdges();
     int progress = 0;
-#pragma omp parallel  for default(none) shared(edges, graph, cellIdsForEdge, cellIdStore, store, progress, std::cout) num_threads(16)
+#pragma omp parallel for default(none) shared(edges, graph, cellIdsForEdge, cellIdStore, store, progress, std::cout)   \
+    num_threads(16)
     for (int i = 0; i < graph.getNumberOfEdges(); ++i) {
       const auto &edge = edges[i];
       std::vector<uint32_t> cellIds;

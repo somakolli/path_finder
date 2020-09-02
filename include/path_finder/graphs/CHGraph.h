@@ -40,32 +40,32 @@ public:
 
   explicit CHGraph(CHGraphCreateInfo chGraphCreateInfo);
 
-  [[maybe_unused]] static std::shared_ptr<CHGraph> makeShared(const CHGraphCreateInfo &chGraphCreateInfo);
+  [[maybe_unused]] static auto makeShared(const CHGraphCreateInfo &chGraphCreateInfo) -> std::shared_ptr<CHGraph>;
 
   std::shared_ptr<Grid> grid;
   BoundingBox boundingBox;
-  LatLng midPoint;
+  LatLng midPoint{};
 
-  [[nodiscard]] Level getLevel(NodeId nodeId) const;
+  [[nodiscard]] auto getLevel(NodeId nodeId) const -> Level;
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   void randomizeLatLngs();
-  [[nodiscard]] NodeId getNodeIdFor(LatLng latLng) const;
+  [[nodiscard]] auto getNodeIdFor(LatLng latLng) const -> NodeId;
 
-  [[nodiscard]] MyIterator<const CHEdge *> edgesFor(NodeId node, EdgeDirection direction) const;
-  [[nodiscard]] CHNode getNode(NodeId id) const;
-  [[nodiscard]] std::optional<size_t> getEdgePosition(const CHEdge &edge, EdgeDirection direction) const;
-  [[nodiscard]] std::vector<CHEdge> getPathFromShortcut(CHEdge shortcut, double minLength) const;
-  [[nodiscard]] bool isValidNodeId(NodeId id) const;
-  [[nodiscard]] size_t getNumberOfNodes() const;
-  [[nodiscard]] size_t getNumberOfEdges() const;
-  [[nodiscard]] MyIterator<const CHNode *> getNodes() const;
-  [[nodiscard]] MyIterator<const CHEdge *> getEdges() const;
-  [[nodiscard]] MyIterator<const CHEdge *> getBackEdges() const;
-  [[nodiscard]] MyIterator<const NodeId *> getForwardOffset() const;
-  [[nodiscard]] MyIterator<const NodeId *> getBackwardOffset() const;
+  [[nodiscard]] auto edgesFor(NodeId node, EdgeDirection direction) const -> MyIterator<const CHEdge *>;
+  [[nodiscard]] auto getNode(NodeId id) const -> CHNode;
+  [[nodiscard]] auto getEdgePosition(const CHEdge &edge, EdgeDirection direction) const -> std::optional<size_t>;
+  [[nodiscard]] auto getPathFromShortcut(CHEdge shortcut, double minLength) const -> std::vector<CHEdge>;
+  [[nodiscard]] auto isValidNodeId(NodeId id) const -> bool;
+  [[nodiscard]] auto getNumberOfNodes() const -> size_t;
+  [[nodiscard]] auto getNumberOfEdges() const -> size_t;
+  [[nodiscard]] auto getNodes() const -> MyIterator<const CHNode *>;
+  [[nodiscard]] auto getEdges() const -> MyIterator<const CHEdge *>;
+  [[nodiscard]] auto getBackEdges() const -> MyIterator<const CHEdge *>;
+  [[nodiscard]] auto getForwardOffset() const -> MyIterator<const NodeId *>;
+  [[nodiscard]] auto getBackwardOffset() const -> MyIterator<const NodeId *>;
 
-  static double beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2);
+  static auto beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2) -> double;
 
 private:
   CHNode *m_nodes = nullptr;
@@ -73,8 +73,8 @@ private:
   CHEdge *m_backEdges = nullptr;
   NodeId *m_offset = nullptr;
   NodeId *m_backOffset = nullptr;
-  size_t m_numberOfEdges;
-  size_t m_numberOfNodes;
+  size_t m_numberOfEdges{};
+  size_t m_numberOfNodes{};
 
   bool m_nodesMMap = false;
   bool m_edgesMMap = false;
@@ -82,8 +82,8 @@ private:
   bool m_offsetMMap = false;
   bool m_backOffsetMMap = false;
 
-  MyIterator<CHNode *> getNodesMutable();
-  MyIterator<CHEdge *> getEdgesMutable();
-  MyIterator<CHEdge *> getBackEdgesMutable();
+  auto getNodesMutable() -> MyIterator<CHNode *>;
+  auto getEdgesMutable() -> MyIterator<CHEdge *>;
+  auto getBackEdgesMutable() -> MyIterator<CHEdge *>;
 };
 } // namespace pathFinder

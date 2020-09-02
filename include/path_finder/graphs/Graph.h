@@ -28,7 +28,7 @@ public:
   nodeVector nodes;
   Graph() = default;
   ~Graph() = default;
-  const friend std::ostream &operator<<(std::ostream &Str, Graph graph) {
+  friend auto operator<<(std::ostream &Str, Graph graph) -> std::ostream & {
 
     for (auto edge : graph.edges) {
       Str << edge << '\n';
@@ -41,11 +41,11 @@ public:
     Str << "offset: " << graph.offset.size() << std::endl;
     return Str;
   }
-  [[nodiscard]] MyIterator<const Edge *> edgesFor(NodeId node) const {
+  [[nodiscard]] auto edgesFor(NodeId node) const -> MyIterator<const Edge *> {
     return {&edges[offset[node]], &edges[offset[node + 1]]};
   }
-  [[maybe_unused]] [[nodiscard]] NodeId getNodeId(LatLng latLng) const;
-  [[maybe_unused]] [[nodiscard]] LatLng getLatLng(NodeId nodeId) const;
+  [[maybe_unused]] [[nodiscard]] auto getNodeId(LatLng latLng) const -> NodeId;
+  [[maybe_unused]] [[nodiscard]] auto getLatLng(NodeId nodeId) const -> LatLng;
 };
 class PreviousReplacer {
 private:
@@ -53,7 +53,7 @@ private:
 
 public:
   explicit PreviousReplacer(NodeId id) { currentNode = id; }
-  CostNode operator()(CostNode costNode) const {
+  auto operator()(CostNode costNode) const -> CostNode {
     if (costNode.previousNode == costNode.id) {
       // the previous node of the label has not been set so replace it
       // with the current node
@@ -61,7 +61,7 @@ public:
     }
     return costNode;
   }
-  CostNode operator()(NodeId id, Distance cost, NodeId previousNode) {
+  auto operator()(NodeId id, Distance cost, NodeId previousNode) -> CostNode {
     return (*this)(CostNode(id, cost, previousNode));
   }
 };
