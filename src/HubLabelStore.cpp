@@ -149,6 +149,10 @@ size_t HubLabelStore::getBackwardOffsetSize() const { return m_numberOfLabels; }
 std::shared_ptr<HubLabelStore> HubLabelStore::makeShared(size_t numberOfLabels) {
   return std::make_shared<HubLabelStore>(numberOfLabels);
 }
-size_t HubLabelStore::getSpaceConsumption() { return 0; };
+auto HubLabelStore::getSpaceConsumption() const -> size_t {
+    return (m_forwardLabelSize + m_backwardLabelSize) * sizeof(CostNode)
+         + (m_numberOfLabels + m_numberOfLabels) * sizeof (OffsetElement);
+
+};
 
 } // namespace pathFinder

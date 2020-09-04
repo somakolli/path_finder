@@ -11,33 +11,24 @@
 #include <zconf.h>
 
 namespace pathFinder {
-[[maybe_unused]] Benchmarker::Benchmarker(const std::string &dataPath, std::string outPutPath)
-    : m_dataPath(dataPath), m_outputPath(std::move(outPutPath)) {
-  m_pathFinder = FileLoader::loadHubLabelsShared(dataPath);
-  m_chDijkstra = FileLoader::loadCHDijkstraShared(dataPath);
-}
-[[maybe_unused]] Benchmarker::Benchmarker(std::shared_ptr<HybridPathFinder> pathFinderRam,
-                                          std::shared_ptr<HybridPathFinder> pathFinderMMap,
-                                          std::shared_ptr<CHDijkstra> chDijkstraRam,
-                                          std::shared_ptr<CHDijkstra> chDijkstraMMap, std::string outPutPath)
-    : m_pathFinder(pathFinderMMap), m_outputPath(std::move(outPutPath)) {}
-std::vector<Benchmarker::BenchResult> Benchmarker::benchmarkAllLevel(uint32_t numberOfQueries) {
+auto Benchmarker::benchmarkAllLevel(HybridPathFinder& pathFinder
+                                    ,uint32_t numberOfQueries) -> std::vector<Benchmarker::BenchResult> {
   std::vector<BenchResult> returnVec;
-  uint32_t numberOfNodes = m_pathFinder->graphNodeSize();
+  uint32_t numberOfNodes = pathFinder.graphNodeSize();
   std::uniform_int_distribution<> distr(0, numberOfNodes - 1);
-  auto maxLevel = m_pathFinder->getMaxLevel();
-  auto labelsUntilLevel = m_pathFinder->labelsUntilLevel();
+  auto maxLevel = pathFinder.getMaxLevel();
+  auto labelsUntilLevel = pathFinder.labelsUntilLevel();
   for (int level = maxLevel; level >= labelsUntilLevel; --level) {
-    BenchResult resultForOneLevel = benchmarkLevel(level, numberOfQueries);
+    BenchResult resultForOneLevel = benchmarkLevel(pathFinder, level, numberOfQueries);
     returnVec.push_back(resultForOneLevel);
   }
   return returnVec;
 }
 
-Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t numberOfQueries) {
+auto Benchmarker::benchmarkLevel(HybridPathFinder& pathFinder, uint32_t level, uint32_t numberOfQueries) -> Benchmarker::BenchResult {
   std::random_device rd;  // obtain a random number from hardware
   std::mt19937 gen(rd()); // seed the generator
-  std::uniform_int_distribution<> distr(0, m_pathFinder->graphNodeSize() - 1);
+  std::uniform_int_distribution<> distr(0, pathFinder.graphNodeSize() - 1);
   RoutingResultTimingInfo totalRoutingResult{};
   for (uint32_t i = 0; i < numberOfQueries; ++i) {
     uint32_t sourceId = distr(gen);
@@ -45,8 +36,8 @@ Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t nu
     // LatLng sourceLatLng(48.797818160096874,9.214439392089846);
     // LatLng targetLatLng(48.75890477584505, 9.149551391601564);
     try {
-      m_pathFinder->setLabelsUntilLevel((Level)level);
-      auto resultReturn = m_pathFinder->getShortestPath(sourceId, targetId).routingResultTimingInfo;
+      pathFinder.setLabelsUntilLevel((Level)level);
+      auto resultReturn = pathFinder.getShortestPath(sourceId, targetId).routingResultTimingInfo;
       totalRoutingResult += resultReturn;
     } catch (const std::runtime_error &e) {
     }
@@ -61,14 +52,15 @@ Benchmarker::BenchResult Benchmarker::benchmarkLevel(uint32_t level, uint32_t nu
 void Benchmarker::dropCaches() {
   sync();
 
-  std::ofstream ofs("/proc/sys/vm/drop_caches");
-  ofs << "3" << std::endl;
+  if(system("sudo /usr/local/bin/drop_caches.sh") != 0) {
+    throw std::runtime_error("could not drop caches!");
+  };
 }
-RoutingResultTimingInfo Benchmarker::benchmarkCHDijkstra(uint32_t numberOfQueries) {
+auto Benchmarker::benchmarkCHDijkstra(CHDijkstra& chDijkstra,uint32_t numberOfQueries) -> RoutingResultTimingInfo {
 
   std::random_device rd;  // obtain a random number from hardware
   std::mt19937 gen(rd()); // seed the generator
-  uint32_t numberOfNodes = m_pathFinder->graphNodeSize();
+  uint32_t numberOfNodes = chDijkstra.getNodeCount();
   std::uniform_int_distribution<> distr(0, numberOfNodes - 1);
 
   double totalTime = 0;
@@ -76,7 +68,7 @@ RoutingResultTimingInfo Benchmarker::benchmarkCHDijkstra(uint32_t numberOfQuerie
     uint32_t sourceId = distr(gen);
     uint32_t targetId = distr(gen);
     Stopwatch mmapWatch;
-    auto distance = m_chDijkstra->getShortestDistance(sourceId, targetId);
+    auto distance = chDijkstra.getShortestDistance(sourceId, targetId);
     auto elapsedTime = mmapWatch.elapsedMicro();
     totalTime += elapsedTime;
     dropCaches();
@@ -94,15 +86,60 @@ RoutingResultTimingInfo Benchmarker::benchmarkCHDijkstra(uint32_t numberOfQuerie
   std::cout << line;
   return routingResult;
 }
-double Benchmarker::benchMarkNearestNeighbour(uint32_t numberOfQueries) {
+auto Benchmarker::benchMarkNearestNeighbour(const CHGraph& graph,uint32_t numberOfQueries) -> double {
   double totalTime = 0;
   for (int i = 0; i < numberOfQueries; ++i) {
     Stopwatch stopwatch;
     LatLng latLng(49.52520834197442, 10.744628906250002);
-    auto nodeId = m_pathFinder->getGraph()->getNodeIdFor(latLng);
+    auto nodeId = graph.getNodeIdFor(latLng);
     totalTime += stopwatch.elapsedMicro();
-    CHNode node = m_pathFinder->getGraph()->getNode(nodeId);
   }
   return totalTime / numberOfQueries;
+}
+void Benchmarker::printRoutingResultForOctave(std::ostream &distanceStream, const std::vector<BenchResult> &ramResult) {
+  std::stringstream plotLevel;
+  plotLevel << "level = [";
+  std::stringstream hybridRam;
+  std::stringstream pathUnpackRam;
+  std::stringstream searchTime;
+  std::stringstream lookUpTime;
+  std::stringstream mergeTime;
+  hybridRam << "distance= [";
+  searchTime << "searchTime = [";
+  lookUpTime << "lookUpTime = [";
+  mergeTime << "mergeTime = [";
+  pathUnpackRam << "pathUnpackRam = [";
+  bool first = true;
+  for (auto [level, result] : ramResult) {
+    if (!first) {
+      plotLevel << ',';
+      hybridRam << ',';
+      pathUnpackRam << ',';
+      lookUpTime << ',';
+      mergeTime << ',';
+      searchTime << ',';
+    }
+    first = false;
+    plotLevel << level;
+    hybridRam << result.distanceTime;
+    pathUnpackRam << result.pathTime;
+    mergeTime << result.calcLabelTimingInfo.mergeTime;
+    searchTime << result.calcLabelTimingInfo.graphSearchTime;
+    lookUpTime << result.calcLabelTimingInfo.lookUpTime;
+  }
+  plotLevel << "]\n";
+  hybridRam << "]\n";
+  pathUnpackRam << "]\n";
+  lookUpTime << "]\n";
+  searchTime << "]\n";
+  mergeTime << "]\n";
+  distanceStream << plotLevel.str();
+  distanceStream << lookUpTime.str();
+  distanceStream << searchTime.str();
+  distanceStream << mergeTime.str();
+  distanceStream << hybridRam.str();
+  distanceStream << pathUnpackRam.str();
+  distanceStream << "plot(level, hybridRam, \"g\")\n";
+  distanceStream << "print -djpg image.jpg\n";
 }
 } // namespace pathFinder

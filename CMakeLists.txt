@@ -65,6 +65,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STXXL_CXX_FLAGS}")
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(vendor/nlohmann_json)
+set(TBB_BUILD_TESTS OFF CACHE INTERNAL "")
 add_subdirectory(vendor/tbb)
 
 option(PACKAGE_TESTS "Build the tests" OFF)
@@ -85,3 +86,8 @@ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} OpenMP::OpenMP_CXX nloh
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" tbb)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS "-fPIC")
+#if(CMAKE_BUILD_TYPE=Release OR CMAKE_BUILD_TYPE=ultra)
+    message("lto set")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+#endif()
+
