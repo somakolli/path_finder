@@ -50,7 +50,7 @@ public:
   void sortByLevel(std::vector<CHNode> &sortedNodes);
   void sortEdges();
   void randomizeLatLngs();
-  [[nodiscard]] auto getNodeIdFor(LatLng latLng) const -> NodeId;
+  [[nodiscard]] auto getNodeIdFor(LatLng latLng, LatLng midPoint = LatLng(0,0)) const -> NodeId;
 
   [[nodiscard]] auto edgesFor(NodeId node, EdgeDirection direction) const -> MyIterator<const CHEdge *>;
   [[nodiscard]] auto getNode(NodeId id) const -> CHNode;

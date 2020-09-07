@@ -66,8 +66,8 @@ RoutingResult HybridPathFinder::getShortestPath(NodeId source, NodeId target) {
 
 RoutingResult HybridPathFinder::getShortestPath(LatLng source, LatLng target) {
   Stopwatch stopwatch;
-  NodeId sourceId = m_graph->getNodeIdFor(source);
-  NodeId targetId = m_graph->getNodeIdFor(target);
+  NodeId sourceId = m_graph->getNodeIdFor(source, target);
+  NodeId targetId = m_graph->getNodeIdFor(target, source);
   auto nodeSearchTime = stopwatch.elapsedMicro();
   RoutingResult routingResult = getShortestPath(sourceId, targetId);
   routingResult.routingResultTimingInfo.nodeSearchTime = nodeSearchTime;

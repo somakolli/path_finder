@@ -73,11 +73,13 @@ void pathFinder::CHGraph::sortEdges() {
     m_edges[j++] = edge;
   }
 }
-pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng) const {
+pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, pathFinder::LatLng other ) const {
   double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
-  if (!boundingBox.contains(latLng)) {
+  if (!boundingBox.contains(latLng) && boundingBox.contains(other)) {
     // get point at correct edge of bounding box
+    latLng = boundingBox.getIntersectionPoint(other, latLng);
+  } else if(!boundingBox.contains(latLng) && !boundingBox.contains(other)) {
     latLng = boundingBox.getIntersectionPoint(midPoint, latLng);
   }
   auto gridPositions = (*grid)[latLng];
