@@ -4,38 +4,37 @@
 #include <fstream>
 #include <iostream>
 #include <path_finder/helper/Benchmarker.h>
+#include "CLI11.hpp"
 int main(int argc, char* argv[]) {
-  std::string dataPath = "/home/sokol/Uni/master-arbeit/build/data";
-  int level = -1;
-  int numberOfQueries = 100;
-  for (int i = 1; i < argc; ++i) {
-    std::string option = argv[i];
-    if (option == "-l"){
-      level = std::stoi(argv[++i]);
-    }
-    else if (option == "-n") {
-      numberOfQueries = std::stoi(argv[++i]);
-    }
-    else if(option == "-f") {
-      dataPath = argv[++i];
-    }
-    else {
-      std::cerr << "Unknown option: " << option << '\n';
-      return 1;
-    }
+  CLI::App app("routing-file-creator");
+
+  std::string routingDataPath;
+  app.add_option("-f, --routingData", routingDataPath,
+                 "Path to routing data!")->required();
+  int numberOfQueries;
+  app.add_option("-n, --numberOfQueries", numberOfQueries,
+                 "number of queries query query run!")->required();
+  std::string outputPath;
+  app.add_option("-o, --outPutPathForOcatve", outputPath,
+                 "Into this file the results will be printed in octave syntax")->required();
+  bool hybrid = false;
+  app.add_flag("-a, --hybrid", hybrid);
+  bool chDijkstra = false;
+  app.add_flag("-d, --chDijkstra", chDijkstra);
+  CLI11_PARSE(app, argc, argv);
+
+
+  if(chDijkstra) {
+    std::cout << routingDataPath << '\n';
+    auto chDijkstraData = pathFinder::FileLoader::loadCHDijkstraShared(routingDataPath);
+    pathFinder::Benchmarker::benchmarkCHDijkstra(*chDijkstraData, numberOfQueries);
   }
-  pathFinder::Benchmarker benchmarker(dataPath, dataPath);
-  if(level >= 0) {
-    benchmarker.benchmarkLevel(level, numberOfQueries);
-    benchmarker.benchmarkCHDijkstra(numberOfQueries);
-    benchmarker.benchMarkNearestNeighbour(numberOfQueries);
-  }
-  else {
-    std::vector<pathFinder::Benchmarker::BenchResult> hybResult = benchmarker.benchmarkAllLevel(numberOfQueries);
-    pathFinder::RoutingResultTimingInfo chResult = benchmarker.benchmarkCHDijkstra(numberOfQueries * 10);
+  if(hybrid) {
+    auto hubLabels = pathFinder::FileLoader::loadHubLabelsShared(routingDataPath);
+    auto result = pathFinder::Benchmarker::benchmarkAllLevel(*hubLabels, numberOfQueries);
     std::ofstream plotOutputFile;
-    plotOutputFile.open ("plot.txt");
-    pathFinder::Benchmarker::printRoutingResultForOctave(plotOutputFile, hybResult, chResult.distanceTime);
+    plotOutputFile.open (outputPath);
+    pathFinder::Benchmarker::printRoutingResultForOctave(plotOutputFile, result);
     plotOutputFile.close();
   }
   return 0;

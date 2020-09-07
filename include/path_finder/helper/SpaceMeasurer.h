@@ -10,5 +10,6 @@ private:
 public:
   void setSpaceConsumption(Level level, size_t space);
   [[maybe_unused]] auto getSpaceConsumption(Level level) -> size_t;
+  std::string print() const;
 };
 } // namespace pathFinder

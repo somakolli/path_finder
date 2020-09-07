@@ -147,8 +147,9 @@ public:
    * @return
    */
   template <typename IteratorType, typename OtherIteratorType>
-  static inline std::optional<pathFinder::Distance>
-  getShortestDistance(IteratorType forwardLabels, OtherIteratorType backwardLabels, NodeId &topNode) {
+  static inline auto
+  getShortestDistance(IteratorType forwardLabels, OtherIteratorType backwardLabels, NodeId &topNode)
+      -> std::optional<pathFinder::Distance> {
     Distance shortestDistance = MAX_DISTANCE;
     topNode = 0;
     auto i = forwardLabels.begin();
@@ -177,7 +178,7 @@ public:
     edge.target = copyEdge.source;
   }
 
-  static std::string getTimeStampString() {
+  static auto getTimeStampString() -> std::string {
     auto t = time(nullptr);
     auto tm = *localtime(&t);
 
@@ -185,7 +186,7 @@ public:
     oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
     return oss.str();
   }
-  static std::string humanReadable(size_t bytes) {
+  static auto humanReadable(size_t bytes) -> std::string {
     std::stringstream ss;
     std::string suffix[] = {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"}; // Longs run out around EB
     if (bytes == 0)

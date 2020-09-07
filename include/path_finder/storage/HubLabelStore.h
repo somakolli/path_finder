@@ -58,7 +58,7 @@ public:
   [[nodiscard]] size_t getBackwardLabelsSize() const;
   [[nodiscard]] size_t getForwardOffsetSize() const;
   [[nodiscard]] size_t getBackwardOffsetSize() const;
-  static size_t getSpaceConsumption();
+  [[nodiscard]] auto getSpaceConsumption() const -> size_t;
   [[maybe_unused]] [[nodiscard]] std::string printStore() const;
 };
 } // namespace pathFinder

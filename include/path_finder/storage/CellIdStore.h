@@ -32,10 +32,10 @@ public:
   explicit CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo);
   ~CellIdStore();
   void storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd);
-  [[nodiscard]] size_t offsetSize() const;
-  [[nodiscard]] size_t cellIdSize() const;
+  [[nodiscard]] auto offsetSize() const -> size_t;
+  [[nodiscard]] auto cellIdSize() const -> size_t;
   void shrink_to_fit();
-  [[nodiscard]] std::vector<CellId_t> getCellIds(size_t edgeId) const;
-  [[nodiscard]] std::vector<CellId_t> getCellIds(const std::vector<size_t> &edgeId) const;
+  [[nodiscard]] auto getCellIds(size_t edgeId) const -> std::vector<CellId_t>;
+  [[nodiscard]] auto getCellIds(const std::vector<size_t> &edgeId) const -> std::vector<CellId_t>;
 };
 } // namespace pathFinder

@@ -58,6 +58,9 @@ public:
         sort(fullCellIds.begin(), fullCellIds.end());
         (fullCellIds).erase(unique(fullCellIds.begin(), fullCellIds.end()), fullCellIds.end());
         cellIdStore.storeCellIds(i, fullCellIds);
+        ++progress;
+        if (progress % 1000 == 0)
+          std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
       }
     }
     cellIdStore.shrink_to_fit();

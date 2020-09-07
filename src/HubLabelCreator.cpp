@@ -43,17 +43,16 @@ void HubLabelCreator::constructAllLabels(const std::vector<std::pair<uint32_t, u
     std::cout << "constructing level: " << currentLevel << std::endl;
     processRangeParallel(sameLevelRange, EdgeDirection::FORWARD);
     processRangeParallel(sameLevelRange, EdgeDirection::BACKWARD);
-    if (spaceMeasurer != nullptr)
-      spaceMeasurer->setSpaceConsumption(currentLevel, m_hubLabelStore->getSpaceConsumption());
+      spaceMeasurer.setSpaceConsumption(currentLevel, m_hubLabelStore->getSpaceConsumption());
     if (--currentLevel < labelsUntilLevel)
       break;
   }
+  std::cout << spaceMeasurer.print() << std::endl;
 }
 
 void HubLabelCreator::processRangeParallel(const std::pair<uint32_t, uint32_t> &range, EdgeDirection edgeDirection) {
   auto begin = &m_sortedNodes[range.first];
   auto end = &m_sortedNodes[range.second];
-  std::mutex m;
   std::vector<std::pair<NodeId, costNodeVec_t>> labels;
   size_t rangeSize = range.second - range.first;
   labels.resize(rangeSize);
@@ -63,6 +62,7 @@ void HubLabelCreator::processRangeParallel(const std::pair<uint32_t, uint32_t> &
     auto label = calcLabel(id, edgeDirection);
     return std::make_pair(id, label);
   });
+
   m_hubLabelStore->store(labels, edgeDirection);
 }
 

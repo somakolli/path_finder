@@ -22,7 +22,7 @@ private:
 public:
   std::shared_ptr<CHGraph> m_graph;
   std::shared_ptr<HubLabelStore> m_hubLabelStore;
-  std::shared_ptr<SpaceMeasurer> spaceMeasurer;
+  SpaceMeasurer spaceMeasurer;
 
   /**
    * @brief
