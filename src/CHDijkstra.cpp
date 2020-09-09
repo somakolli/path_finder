@@ -10,8 +10,7 @@ CHDijkstra::CHDijkstra(std::shared_ptr<CHGraph> graph) : graph(graph) {
 }
 
 auto CHDijkstra::shortestDistance(pathFinder::NodeId source,
-                                              pathFinder::EdgeDirection direction) ->
-    std::vector<pathFinder::CostNode> {
+                                  pathFinder::EdgeDirection direction) -> std::vector<pathFinder::CostNode> {
   std::vector<CostNode> settledNodes;
   for (auto nodeId : visited)
     cost[nodeId] = MAX_DISTANCE;
@@ -27,13 +26,15 @@ auto CHDijkstra::shortestDistance(pathFinder::NodeId source,
     if (costNode.cost > cost[costNode.id])
       continue;
     settledNodes.push_back(costNode);
+    Level sourceLevel = graph->getLevel(costNode.id);
     for (const auto &edge : graph->edgesFor(costNode.id, direction)) {
-      if (graph->getLevel(edge.source) > graph->getLevel(edge.target))
+      if (sourceLevel > graph->getLevel(edge.target))
         continue;
       auto addedCost = costNode.cost + edge.distance;
-      if (addedCost < cost[edge.target]) {
+      auto& targetCost = cost[edge.target];
+      if (addedCost < targetCost) {
         visited.emplace_back(edge.target);
-        cost[edge.target] = addedCost;
+        targetCost = addedCost;
         q.emplace(edge.target, addedCost, edge.source);
       }
     }
@@ -51,8 +52,9 @@ auto CHDijkstra::getShortestDistance(pathFinder::NodeId source,
   Static::sortLabel(backwardLabel);
   NodeId topNode;
   return Static::getShortestDistance(
-      MyIterator<volatile const CostNode *>(forwardLabel.begin().base(), forwardLabel.end().base()),
-      MyIterator<volatile const CostNode *>(backwardLabel.begin().base(), backwardLabel.end().base()), topNode);
+      MyIterator<const CostNode *>(forwardLabel.begin().base(), forwardLabel.end().base()),
+      MyIterator<const CostNode *>(backwardLabel.begin().base(), backwardLabel.end().base()),
+          topNode);
 }
 auto CHDijkstra::getNodeCount() const -> size_t { return graph->getNumberOfNodes();}
 } // namespace pathFinder

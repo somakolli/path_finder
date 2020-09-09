@@ -106,13 +106,15 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
         labelsToCollectMap[costNode.previousNode].emplace_back(costNode.id);
       continue;
     }
+    Level sourceLevel = m_graph->getLevel(costNode.id);
     for (const auto &edge : m_graph->edgesFor(costNode.id, direction)) {
-      if (m_graph->getLevel(edge.source) > m_graph->getLevel(edge.target))
+      if (sourceLevel > m_graph->getLevel(edge.target))
         continue;
       auto addedCost = costNode.cost + edge.distance;
-      if (addedCost < m_cost[edge.target]) {
+      auto& targetCost = m_cost[edge.target];
+      if (addedCost < targetCost) {
         m_visited.emplace_back(edge.target);
-        m_cost[edge.target] = addedCost;
+        targetCost = addedCost;
         q.emplace(edge.target, addedCost, edge.source);
       }
     }

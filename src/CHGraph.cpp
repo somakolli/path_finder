@@ -161,7 +161,9 @@ auto pathFinder::CHGraph::getEdges() const -> pathFinder::MyIterator<const pathF
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
 auto
-pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const -> pathFinder::MyIterator<const pathFinder::CHEdge *> {
+pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const ->
+    pathFinder::MyIterator<const pathFinder::CHEdge *>
+{
   switch (direction) {
   case FORWARD:
     return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
@@ -174,7 +176,7 @@ auto pathFinder::CHGraph::getLevel(pathFinder::NodeId nodeId) const -> pathFinde
 auto pathFinder::CHGraph::getForwardOffset() const -> pathFinder::MyIterator<const pathFinder::NodeId *> {
   return pathFinder::MyIterator<const pathFinder::NodeId *>(m_offset, m_offset + m_numberOfNodes);
 }
-pathFinder::MyIterator<const pathFinder::NodeId *> pathFinder::CHGraph::getBackwardOffset() const {
+auto pathFinder::CHGraph::getBackwardOffset() const -> pathFinder::MyIterator<const pathFinder::NodeId *> {
   return pathFinder::MyIterator<const pathFinder::NodeId *>(m_backOffset, m_backOffset + m_numberOfNodes);
 }
 pathFinder::CHGraph::~CHGraph() {
