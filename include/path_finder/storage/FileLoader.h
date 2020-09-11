@@ -5,10 +5,10 @@ namespace pathFinder {
 
 class FileLoader {
 public:
-  static std::shared_ptr<HybridPathFinder> loadHubLabelsShared(const std::string &configFolder);
-  static std::shared_ptr<CHDijkstra> loadCHDijkstraShared(const std::string &configFolder);
-  static std::shared_ptr<CHGraph> loadGraph(const std::string &graphFolder);
-  static std::shared_ptr<CellIdStore> loadCellIds(const std::string &cellIdFolder);
-  static std::shared_ptr<HubLabelStore> loadHubLabels(const std::string &hubLabelFolder);
+  static auto loadHubLabelsShared(const std::string &configFolder) -> std::shared_ptr<HybridPathFinder>;
+  static auto loadCHDijkstraShared(const std::string &configFolder) -> std::shared_ptr<CHDijkstra>;
+  static auto loadGraph(const std::string &graphFolder) -> std::shared_ptr<CHGraph>;
+  static auto loadCellIds(const std::string &cellIdFolder) -> std::shared_ptr<CellIdStore>;
+  static auto loadHubLabels(const std::string &hubLabelFolder) -> std::shared_ptr<HubLabelStore>;
 };
 } // namespace pathFinder

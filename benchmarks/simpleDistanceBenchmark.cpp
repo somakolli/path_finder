@@ -49,11 +49,15 @@ auto main(int argc, char* argv[]) -> int {
       plotOutputFile.close();
     } else {
       while(true) {
+        auto dijkstra = pathFinder::FileLoader::loadCHDijkstraShared(routingDataPath);
         std::cout << "enter level: " << '\n';
         std::string in;
         std::cin >> in;
         pathFinder::Level level = std::stoi(in);
         pathFinder::Benchmarker::benchmarkLevel(*hubLabels, level, numberOfQueries);
+        auto additionalSpace = hubLabels->m_spaceMeasurer.getSpaceConsumption(level);
+        std::cout << "additional Space Required: " << pathFinder::Static::humanReadable(additionalSpace) << '\n';
+        pathFinder::Benchmarker::benchmarkCHDijkstra(*dijkstra, numberOfQueries);
       }
 
     }

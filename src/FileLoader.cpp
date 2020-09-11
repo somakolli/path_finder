@@ -22,9 +22,14 @@ pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) -> 
   }
   if (config.hubLabelsCalculated)
     hubLabelStore = loadHubLabels(configFolder + "/hubLabels");
-
+  SpaceMeasurer spaceMeasurer;
+  if (config.spaceConsumptionCalculated) {
+    std::ifstream spaceStream(configFolder + "/spaceConsumption.json");
+    std::string spaceString((std::istreambuf_iterator<char>(spaceStream)), std::istreambuf_iterator<char>());
+    spaceMeasurer = pathFinder::DataConfig::getFromFile<SpaceMeasurer>(spaceString);
+  }
   return std::make_shared<HybridPathFinder>(hubLabelStore, chGraph, cellIdStore, hubLabelStore->calculatedUntilLevel,
-                                            config.hubLabelsCalculated, config.cellIdsCalculated);
+                                            config.hubLabelsCalculated, config.cellIdsCalculated, spaceMeasurer);
 }
 auto pathFinder::FileLoader::loadGraph(const std::string &graphFolder) -> std::shared_ptr<pathFinder::CHGraph> {
   std::ifstream t(graphFolder + "/config.json");

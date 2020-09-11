@@ -61,6 +61,7 @@ struct HybridPfDataInfo {
   int labelsUntilLevel = -1;
   bool cellIdsCalculated = false;
   bool hubLabelsCalculated = false;
+  bool spaceConsumptionCalculated = false;
 };
 
 struct DataConfig {

@@ -32,8 +32,8 @@ private:
   bool m_cellIdsCalculated;
   std::vector<Distance> m_cost;
   std::vector<NodeId> m_visited;
-
 public:
+  SpaceMeasurer m_spaceMeasurer;
   /**
    * @brief
    * Initialize stores, graph, level, cost array.
@@ -44,10 +44,10 @@ public:
    */
   HybridPathFinder(std::shared_ptr<HubLabelStore> hubLabelStore, const std::shared_ptr<CHGraph> &graph,
                    std::shared_ptr<CellIdStore> cellIdStore, Level labelsUntilLevel, bool hubLabelsCalculated = false,
-                   bool cellIdsCalculated = false)
+                   bool cellIdsCalculated = false, SpaceMeasurer spaceMeasurer = SpaceMeasurer())
       : m_hubLabelStore(std::move(hubLabelStore)), m_graph(graph), m_cellIdStore(std::move(cellIdStore)),
         m_labelsUntilLevel(labelsUntilLevel), m_hubLabelsCalculated(hubLabelsCalculated),
-        m_cellIdsCalculated(cellIdsCalculated) {
+        m_cellIdsCalculated(cellIdsCalculated), m_spaceMeasurer(std::move(spaceMeasurer)) {
     m_cost.reserve(graph->getNumberOfNodes());
     while (m_cost.size() < graph->getNumberOfNodes())
       m_cost.push_back(MAX_DISTANCE);

@@ -1,4 +1,5 @@
 #include <fstream>
+#include <path_finder/helper/SpaceMeasurer.h>
 #include <path_finder/storage/FileWriter.h>
 namespace pathFinder {
 void FileWriter::writeGraph(const CHGraph &graph, const std::string &graphName, const std::string &folder) {
@@ -74,6 +75,8 @@ void FileWriter::writeHubLabels(const HubLabelStore &hubLabelStore, const std::s
   std::string jsonString = j.dump();
   out << j.dump(1, '\t', true);
   out.close();
+
+
 }
 void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &graphName, const std::string &folder) {
   std::string command = "mkdir " + folder;
@@ -95,7 +98,8 @@ void FileWriter::writeCells(const CellIdStore &cellIdStore, const std::string &g
   out.close();
 }
 void FileWriter::writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore,
-                          std::shared_ptr<CellIdStore> cellIdStore, const std::string &folder) {
+                          std::shared_ptr<CellIdStore> cellIdStore, const std::string &folder,
+                          SpaceMeasurer* spaceMeasurer) {
   std::string command = "mkdir " + folder;
   system(command.c_str());
   pathFinder::HybridPfDataInfo dataInfo;
@@ -116,11 +120,21 @@ void FileWriter::writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLab
     writeCells(*cellIdStore, "stgt", folder + '/' + dataInfo.cellIdFolder);
     dataInfo.cellIdsCalculated = true;
   }
+  if(spaceMeasurer != nullptr) {
+    // write spaceConsumption
+    dataInfo.spaceConsumptionCalculated = true;
+    std::ofstream spaceOut(folder + "/spaceConsumption.json");
+    nlohmann::json spaceJ;
+    to_json(spaceJ, *spaceMeasurer);
+    spaceOut << spaceJ.dump(1, '\t', true);
+    spaceOut.close();
+  }
   // write config to file
   std::ofstream out(folder + "/config.json");
   nlohmann::json j;
   to_json(j, dataInfo);
   out << j.dump(1, '\t', true);
   out.close();
+
 }
 } // namespace pathFinder

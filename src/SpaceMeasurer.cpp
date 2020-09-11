@@ -29,3 +29,27 @@ auto pathFinder::SpaceMeasurer::print() const -> std::string {
   }
   return levelStream.str() + "]" +  '\n' + spaceStream.str() + ']';
 }
+pathFinder::SpaceMeasurer::SpaceMeasurer(const std::vector<size_t>& spaceVector) {
+  for(int i = 0; i < spaceVector.size(); ++i) {
+    setSpaceConsumption(i, spaceVector[i]);
+  }
+}
+auto pathFinder::SpaceMeasurer::toVector()const  -> std::vector<size_t> {
+  std::vector<size_t> spaceVec;
+  spaceVec.resize(spaceConsumption.size());
+  for (auto [level, size] : spaceConsumption) {
+    spaceVec[level] = size;
+  }
+  return spaceVec;
+}
+pathFinder::SpaceMeasurer::SpaceMeasurer() = default;
+void pathFinder::to_json(nlohmann::json &j, const pathFinder::SpaceMeasurer &spaceMeasurer) {
+  j = nlohmann::json{
+      {"spaceConsumption", spaceMeasurer.toVector()}
+  };
+}
+void pathFinder::from_json(const nlohmann::json &j, pathFinder::SpaceMeasurer &spaceMeasurer) {
+  auto test = j.at("spaceConsumption");
+  auto vector = test.get<std::vector<size_t>>();
+  spaceMeasurer = SpaceMeasurer(vector);
+}

@@ -155,6 +155,7 @@ void pathFinder::to_json(nlohmann::json &j, const pathFinder::HybridPfDataInfo &
       {"labelsUntilLevel", d.labelsUntilLevel},
       {"cellIdsCalculated", d.cellIdsCalculated},
       {"hubLabelsCalculated", d.hubLabelsCalculated},
+      {"spaceConsumptionCalculated", d.spaceConsumptionCalculated}
   };
 }
 
@@ -165,4 +166,5 @@ void pathFinder::from_json(const nlohmann::json &j, pathFinder::HybridPfDataInfo
   j.at("labelsUntilLevel").get_to(d.labelsUntilLevel);
   j.at("cellIdsCalculated").get_to(d.cellIdsCalculated);
   j.at("hubLabelsCalculated").get_to(d.hubLabelsCalculated);
+  j.at("spaceConsumptionCalculated").get_to(d.spaceConsumptionCalculated);
 }

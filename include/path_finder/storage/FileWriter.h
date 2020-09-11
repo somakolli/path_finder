@@ -13,6 +13,8 @@ public:
                              const std::string &folder);
   static void writeCells(const CellIdStore &cellIdStore, const std::string &graphName, const std::string &folder);
   static void writeAll(std::shared_ptr<CHGraph> graph, std::shared_ptr<HubLabelStore> hubLabelStore,
-                       std::shared_ptr<CellIdStore> cellIdStore, const std::string &folder);
+                       std::shared_ptr<CellIdStore> cellIdStore, const std::string &folder,
+                       SpaceMeasurer* spaceMeasurer = nullptr);
+
 };
 } // namespace pathFinder
