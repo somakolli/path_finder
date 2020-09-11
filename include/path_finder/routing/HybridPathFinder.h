@@ -83,7 +83,7 @@ public:
    */
   auto getShortestPath(LatLng source, LatLng target) -> RoutingResult override;
   auto graphNodeSize() -> size_t;
-  auto labelsUntilLevel() -> Level;
+  auto labelsUntilLevel() const -> Level;
   auto getGraph() -> std::shared_ptr<CHGraph>;
   auto getMaxLevel() -> Level;
   void setLabelsUntilLevel(Level level);
@@ -136,6 +136,6 @@ public:
    * @param label
    * @return the found element
    */
-  auto findElementInLabel(NodeId nodeId, const costNodeVec_t &label) -> std::optional<CostNode>;
+  static auto findElementInLabel(NodeId nodeId, const costNodeVec_t &label) -> std::optional<CostNode>;
 };
 } // namespace pathFinder

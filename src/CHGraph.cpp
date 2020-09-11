@@ -121,15 +121,12 @@ auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
   return std::nullopt;
 }
 auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
-                                                                         double minLength) const -> std::vector<pathFinder::CHEdge> {
+                                              double minLength) const -> std::vector<pathFinder::CHEdge> {
   std::vector<CHEdge> path;
   if (__glibc_unlikely(shortcut.source >= m_numberOfNodes || shortcut.target >= m_numberOfNodes))
     throw std::out_of_range("shortcut out of range");
-  Node source = m_nodes[shortcut.source].toNode();
-  Node target = m_nodes[shortcut.target].toNode();
-  double length = source.euclid(target);
 
-  if (!shortcut.child2.has_value() || length <= minLength) {
+  if (!shortcut.child2.has_value()) {
     path.push_back(shortcut);
     return path;
   }
@@ -142,7 +139,7 @@ auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
     auto &edgeIdx = edgesStack.top();
     edgesStack.pop();
     const auto &edge = m_edges[edgeIdx];
-    if (edge.child1.has_value() && m_nodes[edge.source].euclid(m_nodes[edge.target]) > minLength) {
+    if (edge.child1.has_value()) {
       edgesStack.push(edge.child2.value());
       edgesStack.push(edge.child1.value());
     } else {

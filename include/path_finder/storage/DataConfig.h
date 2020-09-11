@@ -84,13 +84,13 @@ struct DataConfig {
   BinaryFileDescription cellIdsOffset;
   std::vector<GridMapEntry> gridMapEntries;
 
-  std::string toJson();
+  auto toJson() -> std::string;
   template <typename T>
-  static T getFromFile(const std::string &filepath);
+  static auto getFromFile(const std::string &filepath) -> T;
 };
 
 template <typename T>
-T pathFinder::DataConfig::getFromFile(const std::string &filepath) {
+auto pathFinder::DataConfig::getFromFile(const std::string &filepath) -> T {
   auto j = nlohmann::json::parse(filepath);
   return j.get<T>();
 }
