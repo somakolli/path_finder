@@ -110,15 +110,7 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, 
 auto pathFinder::CHGraph::getNode(pathFinder::NodeId id) const -> pathFinder::CHNode { return m_nodes[id]; }
 auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
                                                            pathFinder::EdgeDirection direction) const -> std::optional<size_t> {
-  auto offsetPointer = direction ? m_offset : m_backOffset;
-  auto edgePointer = direction ? m_edges : m_backEdges;
-  for (auto i = offsetPointer[edge.source]; i < offsetPointer[edge.source + 1]; ++i) {
-    auto e = edgePointer[i];
-    if (e.target == edge.target) {
-      return i;
-    }
-  }
-  return std::nullopt;
+  return getEdgePosition(edge.source, edge.target, direction);
 }
 auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
                                               double minLength) const -> std::vector<pathFinder::CHEdge> {
@@ -198,4 +190,45 @@ auto pathFinder::CHGraph::getEdgesMutable() -> pathFinder::MyIterator<pathFinder
 }
 auto pathFinder::CHGraph::getBackEdgesMutable() -> pathFinder::MyIterator<pathFinder::CHEdge *> {
   return pathFinder::MyIterator<pathFinder::CHEdge *>(m_backEdges, m_backEdges + m_numberOfEdges);
+}
+auto pathFinder::CHGraph::getEdgePosition(pathFinder::NodeId source, pathFinder::NodeId target,
+                                          pathFinder::EdgeDirection direction) const -> std::optional<size_t> {
+  auto offsetPointer = direction ? m_offset : m_backOffset;
+  auto edgePointer = direction ? m_edges : m_backEdges;
+  for (auto i = offsetPointer[source]; i < offsetPointer[source + 1]; ++i) {
+    auto e = edgePointer[i];
+    if (e.target == target) {
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+auto pathFinder::CHGraph::getDepthFirstSearchOrdering(size_t startEdgeId) const -> std::vector<size_t> {
+  std::vector<size_t> orderingVec;
+  orderingVec.reserve(m_numberOfEdges);
+  std::vector<bool> discovered;
+  discovered.resize(m_numberOfEdges, false);
+  std::stack<std::pair<NodeId, NodeId>> stack;
+  auto startEdge = m_edges[startEdgeId];
+  stack.emplace(startEdge.source, startEdge.target);
+  while (!stack.empty()) {
+    auto [source, target] = stack.top();
+    stack.pop();
+    auto positionOpt = getEdgePosition(source, target, EdgeDirection::FORWARD);
+    if(!positionOpt.has_value())
+      continue;
+    auto edgeIdx = positionOpt.value();
+    orderingVec.emplace_back(edgeIdx);
+    discovered[edgeIdx] = true;
+    for(auto edge: edgesFor(target, EdgeDirection::FORWARD)) {
+      auto edgeId = getEdgePosition(edge, EdgeDirection::FORWARD);
+      if(edgeId.has_value() && !discovered[edgeId.value()])
+        stack.emplace(edge.source, edge.target);
+    }
+  }
+  for(int i = 0; i < discovered.size(); ++i) {
+    if(!discovered[i])
+      orderingVec.emplace_back(i);
+  }
+  return orderingVec;
 }
