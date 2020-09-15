@@ -27,9 +27,22 @@ auto CHDijkstra::shortestDistance(pathFinder::NodeId source,
       continue;
     settledNodes.push_back(costNode);
     Level sourceLevel = graph->getLevel(costNode.id);
+
+    bool stallNode = false;
+    // stall on demand
+    for(const auto &incomingEdge : graph->edgesFor(costNode.id, static_cast<EdgeDirection>(!direction))) {
+      if(sourceLevel > graph->getLevel(incomingEdge.target))
+        continue;
+      if(cost[incomingEdge.target] + incomingEdge.distance < costNode.cost)
+        stallNode = true;
+    }
+    if(stallNode)
+      continue;
+
     for (const auto &edge : graph->edgesFor(costNode.id, direction)) {
       if (sourceLevel > graph->getLevel(edge.target))
         continue;
+      
       auto addedCost = costNode.cost + edge.distance;
       auto& targetCost = cost[edge.target];
       if (addedCost < targetCost) {

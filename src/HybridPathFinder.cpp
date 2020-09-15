@@ -97,6 +97,17 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
     q.pop();
     if (costNode.cost > m_cost[costNode.id])
       continue;
+    Level sourceLevel = m_graph->getLevel(costNode.id);
+    bool stallNode = false;
+    // stall on demand
+    for(const auto &incomingEdge : m_graph->edgesFor(costNode.id, static_cast<EdgeDirection>(!direction))) {
+      if(sourceLevel > m_graph->getLevel(incomingEdge.target))
+        continue;
+      if(m_cost[incomingEdge.target] + incomingEdge.distance < costNode.cost)
+        stallNode = true;
+    }
+    if(stallNode)
+      continue;
     settledNodes.emplace_back(costNode.id, costNode.cost, costNode.previousNode);
     auto currentNode = m_graph->getNode(costNode.id);
     if (currentNode.level >= m_labelsUntilLevel) {
@@ -107,7 +118,6 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
         labelsToCollectMap[costNode.previousNode].emplace_back(costNode.id);
       continue;
     }
-    Level sourceLevel = m_graph->getLevel(costNode.id);
     for (const auto &edge : m_graph->edgesFor(costNode.id, direction)) {
       if (sourceLevel > m_graph->getLevel(edge.target))
         continue;
