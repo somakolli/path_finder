@@ -16,8 +16,8 @@ TEST(RoutingTest, DistanceWorks) {
   CHDijkstra chDijkstra(chGraph);
   auto hubLabelStore = HubLabelStore::makeShared(chGraph->getNodes().size());
   HubLabelCreator hlc(chGraph, hubLabelStore);
-  int labelsUntilLevel = 0;
-  hlc.create(labelsUntilLevel);
+  int labelsUntilLevel = 3;
+  hlc.create(3);
 
   CellIdStore ramCellIdStore(chGraph->getNumberOfEdges());
   HybridPathFinder hybridPathFinder(hubLabelStore, chGraph, std::make_shared<CellIdStore>(ramCellIdStore),

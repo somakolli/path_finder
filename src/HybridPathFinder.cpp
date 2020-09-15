@@ -103,7 +103,8 @@ std::vector<CostNode> HybridPathFinder::calcLabelHybrid(NodeId source, EdgeDirec
     for(const auto &incomingEdge : m_graph->edgesFor(costNode.id, static_cast<EdgeDirection>(!direction))) {
       if(sourceLevel > m_graph->getLevel(incomingEdge.target))
         continue;
-      if(m_cost[incomingEdge.target] + incomingEdge.distance < costNode.cost)
+      size_t targetCost = m_cost[incomingEdge.target];
+      if(targetCost + incomingEdge.distance < costNode.cost)
         stallNode = true;
     }
     if(stallNode)
