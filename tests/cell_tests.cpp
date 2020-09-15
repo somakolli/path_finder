@@ -29,21 +29,6 @@ TEST(CellIdStore, StoreAndRetrieveWorks) {
       ++j;
     }
   }
-  FileWriter::writeCells(store, "testGraph", "testCellIds/");
 
-  auto mmapStore = FileLoader::loadCellIds("testCellIds");
-  {
-    int i = 0;
-    for (auto cellId : mmapStore->getCellIds(0)) {
-      ASSERT_EQ(cellId, cellIds0[i]);
-      ++i;
-    }
-    ASSERT_EQ(mmapStore->getCellIds(1).size(), 0);
-    int j = 0;
-    for (auto cellId : mmapStore->getCellIds(2)) {
-      ASSERT_EQ(cellId, cellIds2[j]);
-      ++j;
-    }
-  }
 }
 } // namespace pathFinder

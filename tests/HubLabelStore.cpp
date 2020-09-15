@@ -63,22 +63,6 @@ TEST(HubLabelStore, StoreAndRetrieveMulti) {
       ASSERT_EQ(vec2[i++], costNode);
     }
   }
-  {
-    std::vector<pathFinder::CostNode> resultVec1 = hubLabelStore.retrieve(0, pathFinder::EdgeDirection::BACKWARD);
-    std::vector<pathFinder::CostNode> resultVec2 = hubLabelStore.retrieve(1, pathFinder::EdgeDirection::BACKWARD);
-
-    ASSERT_EQ(resultVec1.size(), vec1.size());
-    ASSERT_EQ(resultVec2.size(), vec2.size());
-
-    int i = 0;
-    for (pathFinder::CostNode costNode : resultVec1) {
-      ASSERT_EQ(vec1[i++], costNode);
-    }
-    i = 0;
-    for (pathFinder::CostNode costNode : resultVec2) {
-      ASSERT_EQ(vec2[i++], costNode);
-    }
-  }
 }
 
 TEST(HubLabelStore, StoreAndRetrieveMmap) {

@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 #include <path_finder/graphs/Graph.h>
+#include <path_finder/routing/CHDijkstra.h>
 #include <path_finder/routing/Dijkstra.h>
 #include <path_finder/routing/HubLabelCreator.h>
 #include <path_finder/routing/HybridPathFinder.h>
@@ -12,6 +13,7 @@ TEST(RoutingTest, DistanceWorks) {
   GraphReader::readFmiFile(graph, path + "test.fmi");
   std::shared_ptr<CHGraph> chGraph = std::make_shared<CHGraph>();
   GraphReader::readCHFmiFile(chGraph, path + "test.chfmi", false);
+  CHDijkstra chDijkstra(chGraph);
   auto hubLabelStore = HubLabelStore::makeShared(chGraph->getNodes().size());
   HubLabelCreator hlc(chGraph, hubLabelStore);
   int labelsUntilLevel = 0;
@@ -25,8 +27,10 @@ TEST(RoutingTest, DistanceWorks) {
   for (int i = 0; i < graph.numberOfNodes; ++i) {
     for (int j = 0; j < graph.numberOfNodes; ++j) {
       auto normalDistance = dijkstra.getShortestDistance(i, j);
+      auto chDistance = chDijkstra.getShortestDistance(i, j);
       auto routingResult = hybridPathFinder.getShortestPath(i, j);
       ASSERT_EQ(normalDistance, routingResult.distance);
+      ASSERT_EQ(normalDistance, chDistance.value());
     }
   }
 

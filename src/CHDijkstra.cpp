@@ -33,7 +33,9 @@ auto CHDijkstra::shortestDistance(pathFinder::NodeId source,
     for(const auto &incomingEdge : graph->edgesFor(costNode.id, static_cast<EdgeDirection>(!direction))) {
       if(sourceLevel > graph->getLevel(incomingEdge.target))
         continue;
-      if(cost[incomingEdge.target] + incomingEdge.distance < costNode.cost)
+      // make cost size larger to avoid integer overflow in the case that cost is max
+      size_t targetCost = cost[incomingEdge.target];
+      if(targetCost + incomingEdge.distance < costNode.cost)
         stallNode = true;
     }
     if(stallNode)
