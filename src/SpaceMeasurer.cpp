@@ -35,10 +35,12 @@ pathFinder::SpaceMeasurer::SpaceMeasurer(const std::vector<size_t>& spaceVector)
   }
 }
 auto pathFinder::SpaceMeasurer::toVector()const  -> std::vector<size_t> {
-  std::vector<size_t> spaceVec;
-  spaceVec.resize(spaceConsumption.size());
+  std::vector<size_t> spaceVec(spaceConsumption.size(), 0);
   for (auto [level, size] : spaceConsumption) {
-    spaceVec[level] = size;
+	if (spaceVec.size() <= level) {
+		spaceVec.resize(level+1, 0);
+	}
+    spaceVec.at(level) = size;
   }
   return spaceVec;
 }

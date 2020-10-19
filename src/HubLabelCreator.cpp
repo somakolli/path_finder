@@ -24,7 +24,7 @@ void HubLabelCreator::create(Level untilLevel) {
   auto currentLevel = m_sortedNodes.begin()->level;
   for (auto j = 0; j < m_sortedNodes.size(); ++j) {
     auto i = j;
-    while (m_sortedNodes[j].level == currentLevel && j < m_sortedNodes.size()) {
+    while (j < m_sortedNodes.size() && m_sortedNodes[j].level == currentLevel) {
       ++j;
     }
     sameLevelRanges.emplace_back(i, j);
