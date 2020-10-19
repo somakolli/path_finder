@@ -40,7 +40,7 @@ public:
         {
           cellIdStore.storeCellIds(graph.getEdgePosition(edge, EdgeDirection::FORWARD).value(), cellIds);
           ++progress;
-          if (progress % 1000 == 0)
+          if (false) //progress % 1000 == 0)
             std::cout << "progress: " << progress << "/" << graph.getNumberOfEdges() << '\n';
           // std::cout << "count: " << cellIds.size() << '\n';
         }
