@@ -25,7 +25,6 @@ CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
 CellIdStore::~CellIdStore() {
   Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
   Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
-  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
 }
 
 void CellIdStore::storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd) {
