@@ -13,6 +13,21 @@ CellIdStore::CellIdStore(size_t numberOfEdges) {
   _offsetVectorSize = numberOfEdges;
 }
 
+CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
+  _cellIds = cellIdStoreCreateInfo.cellIds;
+  _cellIdSize = cellIdStoreCreateInfo.cellIdSize;
+  _offsetVector = cellIdStoreCreateInfo.offsetVector;
+  _offsetVectorSize = cellIdStoreCreateInfo.offsetSize;
+  _cellIdsMMap = cellIdStoreCreateInfo.cellIdsMMap;
+  _offsetMMap = cellIdStoreCreateInfo.offsetMMap;
+}
+
+CellIdStore::~CellIdStore() {
+  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
+  Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
+  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
+}
+
 void CellIdStore::storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd) {
   _offsetVector[edgeId].position = _cellIdSize;
   _offsetVector[edgeId].size = cellToAdd.size();
@@ -40,19 +55,6 @@ auto CellIdStore::cellIdSize() const -> size_t { return _cellIdSize; }
 
 auto CellIdStore::offsetSize() const -> size_t { return _offsetVectorSize; }
 
-CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
-  _cellIds = cellIdStoreCreateInfo.cellIds;
-  _cellIdSize = cellIdStoreCreateInfo.cellIdSize;
-  _offsetVector = cellIdStoreCreateInfo.offsetVector;
-  _offsetVectorSize = cellIdStoreCreateInfo.offsetSize;
-  _cellIdsMMap = cellIdStoreCreateInfo.cellIdsMMap;
-  _offsetMMap = cellIdStoreCreateInfo.offsetMMap;
-}
-CellIdStore::~CellIdStore() {
-  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
-  Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
-  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
-}
 void CellIdStore::shrink_to_fit() { _cellIds = (CellId_t *)realloc(_cellIds, sizeof(CellId_t) * (_cellIdSize)); }
 auto CellIdStore::getCellIds(const std::vector<size_t> &edgeIds) const -> std::vector<CellId_t> {
   std::vector<CellId_t> cellIds;

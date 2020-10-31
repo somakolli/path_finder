@@ -28,6 +28,8 @@ private:
   bool _offsetMMap = true;
 
 public:
+  CellIdStore() = delete;
+  CellIdStore(CellIdStore const &) = delete;
   explicit CellIdStore(size_t numberOfEdges);
   explicit CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo);
   ~CellIdStore();
