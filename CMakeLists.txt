@@ -58,12 +58,10 @@ find_package(OpenMP)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+find_package(TBB REQUIRED COMPONENTS tbb)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(vendor/nlohmann_json)
-
-set(TBB_BUILD_TESTS OFF CACHE INTERNAL "")
-add_subdirectory(vendor/tbb)
 
 option(PACKAGE_TESTS "Build the tests" OFF)
 if(PACKAGE_TESTS)
@@ -80,8 +78,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
 target_link_libraries(${PROJECT_NAME}
 	OpenMP::OpenMP_CXX
 	nlohmann_json::nlohmann_json
-	tbb_static
 	Threads::Threads
+	TBB::tbb
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -90,7 +88,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE
 	"-fPIC"
 )
 target_compile_features(${PROJECT_NAME} PUBLIC
-	cxx_std_17
+	cxx_std_20
 )
 
 if(CMAKE_BUILD_TYPE=Release OR CMAKE_BUILD_TYPE=ultra)
