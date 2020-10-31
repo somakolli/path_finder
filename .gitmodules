@@ -5,9 +5,6 @@
 [submodule "vendor/nlohmann_json"]
 	path = vendor/nlohmann_json
 	url = https://github.com/nlohmann/json.git
-[submodule "vendor/liboscar"]
-	path = vendor/liboscar
-	url = https://github.com/dbahrdt/liboscar.git
 [submodule "vendor/tbb"]
 	path = vendor/tbb
 	url = https://github.com/wjakob/tbb.git
