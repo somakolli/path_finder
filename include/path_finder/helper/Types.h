@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <path_finder/graphs/GeometricType.h>

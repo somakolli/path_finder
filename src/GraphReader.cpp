@@ -3,7 +3,6 @@
 //
 #include "path_finder/storage/GraphReader.h"
 #include "path_finder/graphs/Grid.h"
-#include <boost/algorithm/string.hpp>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
