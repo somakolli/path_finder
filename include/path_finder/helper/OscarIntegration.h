@@ -23,7 +23,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		CellIdStore &cellIdStore;
 		CellIdsForEdge & edge2CellIds;
 		std::vector<std::atomic<uint64_t>> finishedNodes;
-		std::atomic<std::size_t> progress;
+		std::atomic<std::size_t> progress{0};
 		const std::size_t numberOfNodes;
 		std::mutex cellIdStoreLock;
 		
@@ -31,20 +31,22 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		graph(graph),
 		cellIdStore(cellIdStore),
 		edge2CellIds(edge2CellIds),
-		finishedNodes(graph.getNumberOfNodes() / 64 + 1),
-		numberOfNodes(graph.getNumberOfNodes()) {}
+		finishedNodes(graph.getNumberOfNodes() / 64 + 1, 0),
+		numberOfNodes(graph.getNumberOfNodes())
+		{}
 		
 		bool takeNode(NodeId nodeId) {
 			std::size_t chunk = nodeId / 64;
 			std::size_t bit = nodeId % 64;
 			uint64_t flag = static_cast<uint64_t>(1) << bit;
-			uint64_t prev = finishedNodes.at(chunk).fetch_or(nodeId, std::memory_order_relaxed);
-			if (prev & flag) {
-				progress.fetch_add(1, std::memory_order_relaxed);
+			uint64_t prev = finishedNodes.at(chunk).fetch_or(flag, std::memory_order_relaxed);
+			if (prev & flag) { //already taken
+				return false;
 			}
-			return false;
+			progress.fetch_add(1, std::memory_order_relaxed);
+			return true;
 		}
-	};
+	} state(graph, cellIdStore, edge2CellIds);
 
 	struct Worker {
 		struct DFSElement {
@@ -62,7 +64,8 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		std::vector<DFSElement> stack;
 		std::default_random_engine rndgen;
 		std::uniform_int_distribution<uint32_t> nodeIdRnd;
-		std::vector< std::pair<std::size_t, std::vector<uint32_t>> > buffer;
+		std::vector< std::pair<std::size_t, std::vector<uint32_t>> > buffer; //edgeId -> cellIds
+		std::size_t apxBufferSizeInBytes{0};
 		Worker(State *state) :
 		state(state),
 		edge2CellIds(state->edge2CellIds),
@@ -90,6 +93,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 							if (state->takeNode(nid)) {
 								break;
 							}
+							assert(state->finishedNodes[i].load() == std::numeric_limits<uint64_t>::max());
 						}
 					}
 					//No node found, this means that all were processed during search for a new one
@@ -106,27 +110,32 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 					//Check if we're at the end of our edge list
 					if (stack.back().it == stack.back().edges.end()) {
 						stack.pop_back();
-						break;
+						continue;
 					}
 					//expand next edge
 					auto edge = *stack.back().it;
 					++stack.back().it; //move to next edge immediately in case we need to skip this edge
 					if (edge.child1.has_value()) { //skip shortcut edges
-						break;
+						continue;
 					}
 					const auto sourceNode = state->graph.getNode(edge.source);
 					const auto targetNode = state->graph.getNode(edge.target);
-					GeoPoint sourcePoint;
-					sourcePoint.lat() = sourceNode.latLng.lat;
-					sourcePoint.lon() = sourceNode.latLng.lng;
-					GeoPoint targetPoint;
-					targetPoint.lat() = targetNode.latLng.lat;
-					targetPoint.lon() = targetNode.latLng.lng;
-					decltype(stack.back().hint) hint = stack.back().hint;
-					buffer.emplace_back(state->graph.getEdgePosition(edge, EdgeDirection::FORWARD).value(), edge2CellIds(sourcePoint, targetPoint, hint));
+					auto hint = stack.back().hint;
+					buffer.emplace_back(
+						state->graph.getEdgePosition(edge, EdgeDirection::FORWARD).value(),
+						edge2CellIds(   sourceNode.latLng.lat, sourceNode.latLng.lng,
+										targetNode.latLng.lat, targetNode.latLng.lng,
+										hint
+									)
+					);
+					apxBufferSizeInBytes += sizeof(std::decay_t<decltype(buffer)>::value_type) + buffer.back().second.size()*sizeof(uint32_t);
 					//check if we can descend into the node
 					if (state->takeNode(targetNode.id)) {
 						stack.emplace_back(state->graph.edgesFor(targetNode.id, EdgeDirection::FORWARD), hint);
+					}
+					//check if we need to flush our buffer
+					if (apxBufferSizeInBytes > 128*1024*1024) {
+						flush();
 					}
 				}
 			}
@@ -137,8 +146,19 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 				state->cellIdStore.storeCellIds(x.first, std::move(x.second));
 			}
 			buffer.clear();
+			apxBufferSizeInBytes = 0;
 		}
 	};
+	{
+		std::vector<std::thread> threads;
+		for(std::size_t i(0), s(std::thread::hardware_concurrency()); i < s; ++i) {
+			threads.emplace_back(Worker(&state));
+		}
+		for(auto & x : threads) {
+			x.join();
+		}
+	}
+	
 	struct PendingEdge {
 		uint8_t pending = 2;
 		uint32_t edgePos; 
@@ -148,7 +168,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 	std::unordered_map<uint32_t, uint8_t> pendingChildren; //shortcut -> num unfinished children
 	std::unordered_map<uint32_t, uint32_t> edgeParent; //maps from shortcut-child->shortcut
 	std::unordered_set<uint32_t> edgesWithChildren; //contains all shortcuts for which both children have their cellids computed
-	//first get all shortcuts
+	//first get all shortcuts and set them as parent of their respective children
 	for (uint32_t i(0), s(graph.getNumberOfEdges()); i < s; ++i) {
 		const auto &edge = edges[i];
 		if (edge.child1.has_value()) {
@@ -165,7 +185,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 			auto & x = pendingChildren.at(parent);
 			x -= 1;
 			assert(x <= 2);
-			if (x == 0) {
+			if (x == 0) { //our parent has all of its children set
 				edgesWithChildren.insert(parent);
 				pendingChildren.erase(parent);
 			}
@@ -174,28 +194,29 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 	}
 	//now compute the union of the cellids of the children
 	//We do this recursivley kind of bottom up, but the unordered_set defines the actual order
-	//however this houls not reduce the performance since the edges have static dependencies and
-	//thus the work to be done does not depend on the order we do it
+	//however this should not reduce the performance since the edges have static dependencies and
+	//thus the work to be done does not depend on the order we do it (apart from cache issues)
 	while (edgesWithChildren.size()) {
 		uint32_t edgeId = *edgesWithChildren.begin();
 		auto const & edge = edges[edgeId];
 		//get the cellids of the children, these are sorted, thus we can use std::set_union
 		auto c1cids = cellIdStore.getCellIds(edge.child1.value());
 		auto c2cids = cellIdStore.getCellIds(edge.child2.value());
+		assert(c1cids.size());
+		assert(c2cids.size());
 		assert(std::is_sorted(c1cids.begin(), c1cids.end()));
 		assert(std::is_sorted(c2cids.begin(), c2cids.end()));
 		std::vector<std::decay_t<decltype(c2cids)>::value_type> ecids;
 		std::set_union(c1cids.begin(), c1cids.end(), c2cids.begin(), c2cids.end(), std::back_inserter(ecids));
-		cellIdStore.storeCellIds(edgeId, ecids);
+		cellIdStore.storeCellIds(edgeId, std::move(ecids));
 		
 		//take care of parent
 		auto parent = edgeParent.at(edgeId);
-		auto & avc = pendingChildren.at(parent);
-		avc -= 1;
-		assert(avc <= 2);
-		if (avc == 0) { //transition parent from pendingChildren to edgesWithChildren
+		auto & ppc = pendingChildren.at(parent);
+		ppc -= 1;
+		assert(ppc <= 2);
+		if (ppc == 0) { //transition parent from pendingChildren to edgesWithChildren
 			edgesWithChildren.insert(parent);
-			auto const & pe = edges[parent];
 			pendingChildren.erase(parent);
 		}
 		
