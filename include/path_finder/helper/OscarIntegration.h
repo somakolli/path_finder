@@ -6,6 +6,7 @@
 #include <random>
 #include <unordered_map>
 #include <unordered_set>
+#include <thread>
 
 #include <path_finder/storage/CellIdStore.h>
 #include <path_finder/graphs/CHGraph.h>
@@ -24,6 +25,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		CellIdsForEdge & edge2CellIds;
 		std::vector<std::atomic<uint64_t>> finishedNodes;
 		std::atomic<std::size_t> progress{0};
+		std::size_t edgeProgress{0};
 		const std::size_t numberOfNodes;
 		std::mutex cellIdStoreLock;
 		
@@ -31,9 +33,13 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		graph(graph),
 		cellIdStore(cellIdStore),
 		edge2CellIds(edge2CellIds),
-		finishedNodes(graph.getNumberOfNodes() / 64 + 1, 0),
+		finishedNodes(graph.getNumberOfNodes() / 64 + 1),
 		numberOfNodes(graph.getNumberOfNodes())
-		{}
+		{
+			for(auto & x : finishedNodes) {
+				x = 0;
+			}
+		}
 		
 		bool takeNode(NodeId nodeId) {
 			std::size_t chunk = nodeId / 64;
@@ -69,7 +75,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		Worker(State *state) :
 		state(state),
 		edge2CellIds(state->edge2CellIds),
-		nodeIdRnd(0, state->numberOfNodes)
+		nodeIdRnd(0, state->numberOfNodes-1)
 		{}
 		~Worker() {
 			flush();
@@ -82,24 +88,28 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 				// first try a random nodeId if that fails, sample all
 				NodeId nid = nodeIdRnd(rndgen);
 				if (!state->takeNode(nid)) { //try all from the beginning
-					nid = std::numeric_limits<NodeId>::max();
-					for(std::size_t i(0), s(state->finishedNodes.size()); i < 0; ++i) {
+					nid = state->numberOfNodes;
+					for(std::size_t i(0), s(state->finishedNodes.size()); i < s && nid >= state->numberOfNodes; ++i) {
 						uint64_t tmp = state->finishedNodes[i].load(std::memory_order_relaxed);
-						if (tmp != std::numeric_limits<uint64_t>::max()) {
+						while(tmp != std::numeric_limits<uint64_t>::max() && nid >= state->numberOfNodes) {
 							tmp = ~tmp;
 							static_assert(std::is_same<unsigned long, unsigned long>::value);
 							//tmp cannot be 0 otherwise we wouldn't be here
 							nid = i*64 + 63-__builtin_clzl(tmp);
-							if (state->takeNode(nid)) {
-								break;
+							if (!state->takeNode(nid)) {
+								nid = state->numberOfNodes;
+								tmp = state->finishedNodes[i].load(std::memory_order_relaxed);
 							}
-							assert(state->finishedNodes[i].load() == std::numeric_limits<uint64_t>::max());
 						}
 					}
-					//No node found, this means that all were processed during search for a new one
-					assert(state->progress == state->numberOfNodes);
-					break;
+					if (nid >= state->numberOfNodes) {
+						//No node found, this means that all were processed during search for a new one
+						flush();
+						assert(state->progress == state->numberOfNodes);
+						break;
+					}
 				}
+				assert(nid < state->numberOfNodes);
 				{
 					auto node = state->graph.getNode(nid);
 					typename CellIdsForEdge::Hint fh;
@@ -128,7 +138,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 										hint
 									)
 					);
-					apxBufferSizeInBytes += sizeof(std::decay_t<decltype(buffer)>::value_type) + buffer.back().second.size()*sizeof(uint32_t);
+					apxBufferSizeInBytes += sizeof(typename std::decay_t<decltype(buffer)>::value_type) + buffer.back().second.size()*sizeof(uint32_t);
 					//check if we can descend into the node
 					if (state->takeNode(targetNode.id)) {
 						stack.emplace_back(state->graph.edgesFor(targetNode.id, EdgeDirection::FORWARD), hint);
@@ -141,15 +151,19 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 			}
 		}
 		void flush() {
-			std::lock_guard<std::mutex> lck(state->cellIdStoreLock);
-			for(auto & x : buffer) {
-				state->cellIdStore.storeCellIds(x.first, std::move(x.second));
+			if (buffer.size()) {
+				std::lock_guard<std::mutex> lck(state->cellIdStoreLock);
+				for(auto & x : buffer) {
+					state->cellIdStore.storeCellIds(x.first, std::move(x.second));
+				}
+				state->edgeProgress += buffer.size();
+				buffer.clear();
+				apxBufferSizeInBytes = 0;
 			}
-			buffer.clear();
-			apxBufferSizeInBytes = 0;
 		}
 	};
-	{
+	std::cout << "Computing cell ids for regular edges..." << std::flush;
+	if (1) {
 		std::vector<std::thread> threads;
 		for(std::size_t i(0), s(std::thread::hardware_concurrency()); i < s; ++i) {
 			threads.emplace_back(Worker(&state));
@@ -158,6 +172,12 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 			x.join();
 		}
 	}
+	else {
+		Worker w(&state);
+		w();
+	}
+	std::cout << "done" << std::endl;
+	std::cout << "Found " << state.edgeProgress << " regular edges our of a total of " << graph.getNumberOfEdges() << std::endl;
 	
 	struct PendingEdge {
 		uint8_t pending = 2;
@@ -166,22 +186,40 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 	int progress = 0;
 	const auto &edges = graph.getEdges();
 	std::unordered_map<uint32_t, uint8_t> pendingChildren; //shortcut -> num unfinished children
-	std::unordered_map<uint32_t, uint32_t> edgeParent; //maps from shortcut-child->shortcut
+	std::unordered_multimap<uint32_t, uint32_t> edgeParents; //maps from shortcut-children->shortcuts, note that an edge may have multiple parents
 	std::unordered_set<uint32_t> edgesWithChildren; //contains all shortcuts for which both children have their cellids computed
+	
 	//first get all shortcuts and set them as parent of their respective children
+	std::cout << "Computing shortcut dependency tree..." << std::flush;
 	for (uint32_t i(0), s(graph.getNumberOfEdges()); i < s; ++i) {
 		const auto &edge = edges[i];
 		if (edge.child1.has_value()) {
-			edgeParent[edge.child1.value()] = i;
-			edgeParent[edge.child2.value()] = i;
+			assert(edge.child1 != edge.child2);
+			edgeParents.emplace(edge.child1.value(), i);
+			edgeParents.emplace(edge.child2.value(), i);
 			pendingChildren[i] = 2;
 		}
+		else {
+			state.edgeProgress -= 1;
+		}
 	}
+	std::cout << "done" << std::endl;
+	assert(!state.edgeProgress);
+	
 	//Find shortcuts that have a regular edge as a parent
+	std::cout << "Computing cell ids for shortcut edges..." << std::flush;
 	for (uint32_t i(0), s(graph.getNumberOfEdges()); i < s; ++i) {
 		auto const & edge = edges[i];
-		if (!edge.child1.has_value() && edgeParent.count(i)) {
-			auto parent = edgeParent.at(i);
+		if (edge.child1.has_value()) {
+			continue;
+		}
+		if (!edgeParents.count(i)) {
+			continue;
+		}
+		
+		auto parents = edgeParents.equal_range(i);
+		for(auto it(parents.first); it != parents.second; ++it) {
+			auto parent = it->second;
 			auto & x = pendingChildren.at(parent);
 			x -= 1;
 			assert(x <= 2);
@@ -189,7 +227,6 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 				edgesWithChildren.insert(parent);
 				pendingChildren.erase(parent);
 			}
-			edgeParent.erase(i);
 		}
 	}
 	//now compute the union of the cellids of the children
@@ -202,8 +239,6 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		//get the cellids of the children, these are sorted, thus we can use std::set_union
 		auto c1cids = cellIdStore.getCellIds(edge.child1.value());
 		auto c2cids = cellIdStore.getCellIds(edge.child2.value());
-		assert(c1cids.size());
-		assert(c2cids.size());
 		assert(std::is_sorted(c1cids.begin(), c1cids.end()));
 		assert(std::is_sorted(c2cids.begin(), c2cids.end()));
 		std::vector<std::decay_t<decltype(c2cids)>::value_type> ecids;
@@ -211,19 +246,21 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		cellIdStore.storeCellIds(edgeId, std::move(ecids));
 		
 		//take care of parent
-		auto parent = edgeParent.at(edgeId);
-		auto & ppc = pendingChildren.at(parent);
-		ppc -= 1;
-		assert(ppc <= 2);
-		if (ppc == 0) { //transition parent from pendingChildren to edgesWithChildren
-			edgesWithChildren.insert(parent);
-			pendingChildren.erase(parent);
+		auto parents = edgeParents.equal_range(edgeId);
+		for(auto it(parents.first); it != parents.second; ++it) {
+			auto parent = it->second;
+			auto & x = pendingChildren.at(parent);
+			x -= 1;
+			assert(x <= 2);
+			if (x == 0) { //our parent has all of its children set
+				edgesWithChildren.insert(parent);
+				pendingChildren.erase(parent);
+			}
 		}
-		
 		//remove ourself
-		edgeParent.erase(edgeId);
 		edgesWithChildren.erase(edgeId);
 	}
+	std::cout << "done" << std::endl;
 	if (pendingChildren.size()) {
 		throw std::runtime_error("Could not compute all shortcut cellids");
 	}
