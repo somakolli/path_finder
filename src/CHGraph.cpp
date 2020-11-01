@@ -107,7 +107,7 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, 
   }
   return position;
 }
-auto pathFinder::CHGraph::getNode(pathFinder::NodeId id) const -> pathFinder::CHNode { return m_nodes[id]; }
+auto pathFinder::CHGraph::getNode(pathFinder::NodeId id) const -> pathFinder::CHNode const & { return m_nodes[id]; }
 auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
                                                            pathFinder::EdgeDirection direction) const -> std::optional<size_t> {
   return getEdgePosition(edge.source, edge.target, direction);
