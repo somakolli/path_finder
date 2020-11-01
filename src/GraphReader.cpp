@@ -32,7 +32,7 @@ void pathFinder::GraphReader::readFmiFile(pathFinder::Graph &graph, const std::s
   while (--i > 0 && in >> edge.source >> edge.target >> edge.distance >> type >> maxSpeed) {
     graph.edges.push_back(edge);
   }
-  buildOffset(graph.edges.begin().base(), graph.edges.size(), graph.offset);
+  buildOffset(graph.edges.begin().base(), graph.edges.size(), graph.nodes.size(), graph.offset);
 }
 
 void pathFinder::GraphReader::readCHFmiFile(std::shared_ptr<pathFinder::CHGraph> graph, const std::string &filepath,
@@ -56,8 +56,8 @@ void pathFinder::GraphReader::readCHFmiFile(std::shared_ptr<pathFinder::CHGraph>
   LatLng::Lat lat;
   LatLng::Lng lng;
   uint32_t el;
-  int i = graph->m_numberOfNodes + 1;
-  int j = 0;
+  int64_t i = graph->m_numberOfNodes + 1;
+  int64_t j = 0;
   CHNode node{};
   while (--i > 0 && in >> node.id >> osmId >> lat >> lng >> el >> node.level) {
     node.latLng = {lat, lng};
@@ -79,9 +79,9 @@ void pathFinder::GraphReader::readCHFmiFile(std::shared_ptr<pathFinder::CHGraph>
   graph->randomizeLatLngs();
 #endif
   graph->sortEdges();
-  buildOffset(graph->m_edges, graph->m_numberOfEdges, graph->m_offset);
+  buildOffset(graph->m_edges, graph->m_numberOfEdges, graph->m_numberOfNodes, graph->m_offset);
   buildBackEdges(graph->m_edges, graph->m_backEdges, graph->m_numberOfEdges);
-  buildOffset(graph->m_backEdges, graph->m_numberOfEdges, graph->m_backOffset);
+  buildOffset(graph->m_backEdges, graph->m_numberOfEdges, graph->m_numberOfNodes, graph->m_backOffset);
 }
 
 void pathFinder::GraphReader::sortEdges(MyIterator<CHEdge *> edges) {
@@ -89,14 +89,16 @@ void pathFinder::GraphReader::sortEdges(MyIterator<CHEdge *> edges) {
     return (edge1.source == edge2.source) ? edge1.target <= edge2.target : edge1.source < edge2.source;
   });
 }
-void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge *edges, size_t edgeSize, NodeId *&offset) {
+void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge *edges, size_t edgeSize, size_t nodeSize, NodeId *&offset) {
   if (edgeSize == 0)
     return;
-  NodeId numberOfNodes = edges[edgeSize - 1].source + 1;
   free(offset);
-  offset = (NodeId *)std::calloc((numberOfNodes + 1), sizeof(NodeId));
-  size_t offsetSize = numberOfNodes + 1;
-  offset[numberOfNodes] = edgeSize;
+  size_t offsetSize = nodeSize + 1;
+  offset = (NodeId *)std::calloc(offsetSize, sizeof(NodeId));
+  for(size_t i(0); i < offsetSize; ++i) {
+	 offset[i] = std::numeric_limits<uint32_t>::max(); 
+  }
+  offset[nodeSize] = edgeSize;
   for (int i = edgeSize - 1; i >= 0; --i) {
     offset[edges[i].source] = i;
   }
@@ -118,7 +120,18 @@ void pathFinder::GraphReader::buildOffset(const pathFinder::CHEdge *edges, size_
     }
   }
   offset[0] = 0;
-  offset[offsetSize - 1] = edgeSize;
+  offset[offsetSize-1] = edgeSize;
+  //check for nodes without edges
+  std::size_t nodesWithoutEdges = 0;
+  for(uint64_t i(offsetSize-2); i > 1; --i) {
+    if (offset[i] == std::numeric_limits<uint32_t>::max()) {
+      ++nodesWithoutEdges;
+      offset[i] = offset[i+1];
+    }
+  }
+  if (nodesWithoutEdges) {
+    std::cerr << "Found " << nodesWithoutEdges << " nodes without edges" << std::endl;
+  }
 }
 void pathFinder::GraphReader::buildBackEdges(const pathFinder::CHEdge *forwardEdges, pathFinder::CHEdge *&backEdges,
                                              size_t numberOfEdges) {
@@ -133,11 +146,12 @@ void pathFinder::GraphReader::buildBackEdges(const pathFinder::CHEdge *forwardEd
   }
   sortEdges(MyIterator(backEdges, backEdges + numberOfEdges));
 }
-void pathFinder::GraphReader::buildOffset(const pathFinder::Edge *edges, size_t edgeSize, std::vector<NodeId> &offset) {
+void pathFinder::GraphReader::buildOffset(const pathFinder::Edge *edges, size_t edgeSize, size_t nodeSize, std::vector<NodeId> &offset) {
   if (edgeSize == 0)
     return;
 
   NodeId numberOfNodes = edges[edgeSize - 1].source + 1;
+  assert(numberOfNodes == nodeSize); //BUG: this is verly likely false
   offset.reserve(numberOfNodes + 1);
   for (int i = 0; i < numberOfNodes + 1; ++i) {
     offset.emplace_back(0);
