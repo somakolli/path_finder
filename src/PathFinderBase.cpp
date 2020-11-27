@@ -4,6 +4,9 @@
 #include "path_finder/routing/PathFinderBase.h"
 #include <path_finder/helper/Types.h>
 
+pathFinder::PathFinderBase::~PathFinderBase()
+{}
+
 pathFinder::RoutingResult pathFinder::PathFinderBase::getShortestPath(pathFinder::NodeId source,
                                                                       pathFinder::NodeId target) {
   return RoutingResult();

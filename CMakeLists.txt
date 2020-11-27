@@ -31,6 +31,7 @@ set(SOURCES
 	src/Benchmarker.cpp
 	src/ThreadPool.cpp
 	src/GeometricTypes.cpp
+	src/HybridPathFinderBundle.cpp
 )
 
 set(INCLUDES
@@ -41,6 +42,7 @@ set(INCLUDES
 	include/path_finder/storage/GraphReader.h
 	include/path_finder/graphs/GraphStats.h
 	include/path_finder/routing/PathFinderBase.h
+	include/path_finder/routing/HybridPathFinderBundle.h
 	include/path_finder/storage/HubLabelStore.h
 	include/path_finder/storage/MmapVector.h
 	include/path_finder/helper/Static.h
@@ -59,6 +61,7 @@ find_package(OpenMP)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED COMPONENTS tbb)
+find_package(Boost REQUIRED)
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(vendor/nlohmann_json)
@@ -83,6 +86,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	${Boost_INCLUDE_DIRS}
 )
 target_compile_options(${PROJECT_NAME} PRIVATE
 	"-fPIC"
