@@ -138,13 +138,19 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 					const auto sourceNode = state->graph.getNode(edge.source);
 					const auto targetNode = state->graph.getNode(edge.target);
 					auto hint = stack.back().hint;
-					buffer.emplace_back(
-						state->graph.getEdgePosition(edge, EdgeDirection::FORWARD).value(),
-						edge2CellIds(   sourceNode.latLng.lat, sourceNode.latLng.lng,
-										targetNode.latLng.lat, targetNode.latLng.lng,
-										hint
-									)
-					);
+					auto edgePos = state->graph.getEdgePosition(edge, EdgeDirection::FORWARD);
+					if (edgePos) {
+						buffer.emplace_back(
+							edgePos.value(),
+							edge2CellIds(   sourceNode.latLng.lat, sourceNode.latLng.lng,
+											targetNode.latLng.lat, targetNode.latLng.lng,
+											hint
+										)
+						);
+					}
+					else {
+						std::cerr << "BUG: Edge " << edge << " has no forward position" << std::endl;
+					}
 					apxBufferSizeInBytes += sizeof(typename std::decay_t<decltype(buffer)>::value_type) + buffer.back().second.size()*sizeof(uint32_t);
 					//check if we can descend into the node
 					if (state->takeNode(targetNode.id)) {
