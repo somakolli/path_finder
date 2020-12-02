@@ -99,7 +99,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 						uint64_t tmp = state->finishedNodes[i].load(std::memory_order_relaxed);
 						while(tmp != std::numeric_limits<uint64_t>::max() && nid >= state->numberOfNodes) {
 							tmp = ~tmp;
-							static_assert(std::is_same<unsigned long, unsigned long>::value);
+							static_assert(std::is_same<unsigned long, decltype(tmp)>::value);
 							//tmp cannot be 0 otherwise we wouldn't be here
 							nid = i*64 + 63-__builtin_clzl(tmp);
 							if (!state->takeNode(nid)) {
