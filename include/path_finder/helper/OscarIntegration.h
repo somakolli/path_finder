@@ -54,6 +54,12 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		}
 	} state(graph, cellIdStore, edge2CellIds);
 
+	//A worker explores the graph depth-first
+	//For each node we store the hint given by the cellId operator and reuse it when backtracking
+	//Since multiple workers work in parallel we have to make sure that a node is not visited twice
+	//This is tracked in the finishedNodes vector
+	//If the node queue is empty then we choose a new random node and try to explore from there
+	//If the node is already taken then we sample all nodes from the beginning to make sure that each node is visited
 	struct Worker {
 		struct DFSElement {
 			decltype(graph.edgesFor(0, EdgeDirection::FORWARD)) edges;
@@ -113,6 +119,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 				{
 					auto node = state->graph.getNode(nid);
 					typename CellIdsForEdge::Hint fh;
+					//Get the face hint for this node
 					edge2CellIds(node.latLng.lat, node.latLng.lng, node.latLng.lat, node.latLng.lng, fh);
 					stack.emplace_back(state->graph.edgesFor(nid, EdgeDirection::FORWARD), fh);
 				}
