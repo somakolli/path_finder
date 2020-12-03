@@ -49,7 +49,10 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 			if (prev & flag) { //already taken
 				return false;
 			}
-			progress.fetch_add(1, std::memory_order_relaxed);
+			auto p = progress.fetch_add(1, std::memory_order_relaxed);
+			if (p%1000 == 0) {
+				std::cout << '\xd' << p << "/" << numberOfNodes << "=" << double(p)/numberOfNodes*100 << "%" << std::flush;
+			}
 			return true;
 		}
 	} state(graph, cellIdStore, edge2CellIds);
