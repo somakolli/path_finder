@@ -18,7 +18,7 @@ inline namespace std_threads_variant {
 class OscarIntegrator {
 public:
 template <typename GeoPoint, typename CellIdsForEdge>
-static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore, CellIdsForEdge edge2CellIds) {
+static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore, CellIdsForEdge edge2CellIds, std::size_t numThreads = 1) {
 	struct State {
 		const CHGraph &graph;
 		CellIdStore &cellIdStore;
@@ -178,10 +178,11 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 			}
 		}
 	};
-	std::cout << "Computing cell ids for regular edges..." << std::flush;
-	if (1) {
+	std::cout << "Computing cell ids for regular edges..." << std::endl;
+	if (numThreads > 1) {
 		std::vector<std::thread> threads;
-		for(std::size_t i(0), s(std::thread::hardware_concurrency()); i < s; ++i) {
+		threads.reserve(numThreads);
+		for(std::size_t i(0); i < numThreads; ++i) {
 			threads.emplace_back(Worker(&state));
 		}
 		for(auto & x : threads) {
@@ -192,8 +193,7 @@ static void writeCellIdsForEdges(const CHGraph &graph, CellIdStore &cellIdStore,
 		Worker w(&state);
 		w();
 	}
-	std::cout << "done" << std::endl;
-	std::cout << "Found " << state.edgeProgress << " regular edges our of a total of " << graph.getNumberOfEdges() << std::endl;
+	std::cout << "\nFound " << state.edgeProgress << " regular edges our of a total of " << graph.getNumberOfEdges() << std::endl;
 	
 	struct PendingEdge {
 		uint8_t pending = 2;
