@@ -7,6 +7,7 @@
 
 namespace pathFinder {
 using NodeId = uint32_t;
+using EdgeId = uint32_t;
 
 using Distance = uint32_t;
 using Level = uint16_t;
