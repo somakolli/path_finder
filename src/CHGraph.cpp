@@ -50,27 +50,43 @@ void pathFinder::CHGraph::randomizeLatLngs() {
   }
 }
 void pathFinder::CHGraph::sortEdges() {
-  std::vector<std::pair<CHEdge, size_t>> indexEdges{};
-  indexEdges.resize(m_numberOfEdges);
-  int i = 0;
-  std::transform(m_edges, m_edges + m_numberOfEdges, indexEdges.begin(),
-                 [&i](auto &&edge) { return std::make_pair(edge, i++); });
-  std::sort(indexEdges.begin(), indexEdges.end(), [](auto edge1, auto edge2) -> bool {
-    return (edge1.first.source == edge2.first.source) ? edge1.first.target <= edge2.first.target
-                                                      : edge1.first.source < edge2.first.source;
-  });
-  std::map<NodeId, NodeId> previousIdToId;
-  for (int j = 0; j < indexEdges.size(); ++j) {
-    previousIdToId[indexEdges[j].second] = j;
+  if (m_numberOfEdges >= std::numeric_limits<EdgeId>::max()) {
+	throw std::runtime_error("Too many edges");
   }
-  int j = 0;
-  for (auto &indexEdge : indexEdges) {
-    auto &edge = indexEdge.first;
-    if (edge.child2.has_value())
-      edge.child2 = std::optional(previousIdToId[edge.child2.value()]);
-    if (edge.child1.has_value())
-      edge.child1 = std::optional(previousIdToId[edge.child1.value()]);
-    m_edges[j++] = edge;
+  std::vector<EdgeId> newEdgeIdToOldId(m_numberOfEdges, std::numeric_limits<EdgeId>::max());
+  for(EdgeId i(0); i < m_numberOfEdges; ++i) {
+	newEdgeIdToOldId[i] = i;
+  }
+  auto compEdge = [](auto const & edge1, auto const & edge2) -> bool {
+	if (edge1.source == edge2.source) {
+		return edge1.target <= edge2.target;
+	}
+	else {
+		return edge1.source < edge2.source;
+	}
+  };
+  //Compute the new ids of the edges
+  std::sort(newEdgeIdToOldId.begin(), newEdgeIdToOldId.end(), [&](EdgeId id1, EdgeId id2) -> bool {
+	  return compEdge(m_edges[id1], m_edges[id2]);
+  });
+  //Compute the actual new edge vector
+  std::sort(m_edges, m_edges+m_numberOfEdges, compEdge);
+  //Invert newEdgeIdToOldId to get oldEdgeIdToNewId
+  std::vector<EdgeId> oldEdgeIdToNewId(m_numberOfEdges, std::numeric_limits<EdgeId>::max());
+  for(EdgeId newEdgeId(0); newEdgeId < m_numberOfEdges; ++newEdgeId) {
+	auto & x = oldEdgeIdToNewId.at( newEdgeIdToOldId.at(newEdgeId) );
+	assert(x = std::numeric_limits<EdgeId>::max());
+	x = newEdgeId;
+  }
+  //Now take care of the short cut children since these still have the old edgeId
+  for(EdgeId edgeId(0); edgeId < m_numberOfEdges; ++edgeId) {
+	auto & edge = m_edges[edgeId];
+	if (edge.child1) {
+		edge.child1 = oldEdgeIdToNewId.at(edge.child1.value());
+	}
+	if (edge.child2) {
+		edge.child2 = oldEdgeIdToNewId.at(edge.child2.value());
+	}
   }
 }
 pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, pathFinder::LatLng other ) const {
