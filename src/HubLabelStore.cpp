@@ -12,8 +12,8 @@
 
 namespace pathFinder {
 HubLabelStore::HubLabelStore(size_t numberOfLabels) {
-  m_forwardOffset = (OffsetElement *)std::calloc(numberOfLabels, sizeof(OffsetElement));
-  m_backwardOffset = (OffsetElement *)std::calloc(numberOfLabels, sizeof(OffsetElement));
+  m_forwardOffset = new OffsetElement[numberOfLabels];
+  m_backwardOffset = new OffsetElement[numberOfLabels];
   m_backwardLabels = nullptr;
   m_forwardLabels = nullptr;
   this->m_numberOfLabels = numberOfLabels;
@@ -24,8 +24,13 @@ void HubLabelStore::store(const std::vector<CostNode> &label, NodeId id, EdgeDir
   auto &offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
   auto &size = direction ? m_forwardLabelSize : m_backwardLabelSize;
   offsetPointer[id] = OffsetElement{size, (uint32_t)label.size()};
-  storePointer = (CostNode *)std::realloc(storePointer, sizeof(CostNode) * (size + label.size()));
-  std::memcpy(storePointer + size, label.data(), sizeof(CostNode) * label.size());
+  {
+	auto * newData = new CostNode[size + label.size()];
+	std::copy(storePointer, storePointer+size, newData);
+	std::copy(label.begin(), label.end(), storePointer+size);
+	std::swap(newData, storePointer);
+	delete[] newData;
+  }
   size += label.size();
 }
 
@@ -37,8 +42,12 @@ void HubLabelStore::store(std::vector<HubLabelStore::IdLabelPair> &idLabels, Edg
   auto &storePointer = direction ? m_forwardLabels : m_backwardLabels;
   auto &offsetPointer = direction ? m_forwardOffset : m_backwardOffset;
   auto &size = direction ? m_forwardLabelSize : m_backwardLabelSize;
-
-  storePointer = (CostNode *)std::realloc(storePointer, sizeof(CostNode) * (size + allocationSize));
+  {
+	CostNode * newData = new CostNode[size + allocationSize];
+	std::copy(storePointer, storePointer+size, newData);
+	std::swap(newData, storePointer);
+	delete[] newData;
+  }
   std::cout << "writing labels: 0/" << idLabels.size() << '\r';
   int i = 0;
   for (auto &&[id, label] : idLabels) {
@@ -88,7 +97,7 @@ void HubLabelStore::retrieve(NodeId id, EdgeDirection direction, CostNode *&stor
     return;
   }
   auto labelEnd = offsetElement.position + offsetElement.size;
-  storeVec = (CostNode *)calloc(offsetElement.size, sizeof(CostNode));
+  storeVec = new CostNode[offsetElement.size];
   size = offsetElement.size;
   const auto storePointer = forward ? m_forwardLabels : m_backwardLabels;
   for (auto i = offsetElement.position, j = (size_t)0; i < labelEnd; ++i, ++j) {
