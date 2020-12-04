@@ -34,9 +34,9 @@ void CellIdStore::storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellT
 	auto oldSize = _reservedSize;
     _reservedSize += cellToAdd.size();
     _reservedSize = _reservedSize * 2;
-	CellId_t * newCellIds = new CellId_t[_reservedSize];
-	std::copy(_cellIds, _cellIds+oldSize, newCellIds);
-	std::swap(newCellIds, _cellIds);
+	CellId_t * newData = new CellId_t[_reservedSize];
+	std::copy(_cellIds, _cellIds+oldSize, newData);
+	std::swap(newData, _cellIds);
 	delete[] newData;
   }
   for (auto cell : cellToAdd) {
