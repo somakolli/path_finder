@@ -42,10 +42,10 @@ void pathFinder::CHGraph::randomizeLatLngs() {
   for (auto i = m_nodes; i < m_nodes + m_numberOfNodes; ++i) {
     auto LOlat = 45;
     auto HIlat = 46;
-    auto lat = LOlat + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HIlat - LOlat)));
+    auto lat = LOlat + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX / (HIlat - LOlat)));
     auto LOlng = 8;
     auto HIlng = 9;
-    auto lng = LOlng + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HIlng - LOlng)));
+    auto lng = LOlng + static_cast<double>(rand()) / (static_cast<double>(RAND_MAX / (HIlng - LOlng)));
     i->latLng = LatLng{lat, lng};
   }
 }
