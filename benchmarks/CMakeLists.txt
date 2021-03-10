@@ -1,2 +1,0 @@
-add_executable(DistanceBenchmark simpleDistanceBenchmark.cpp)
-target_link_libraries(DistanceBenchmark path_finder)

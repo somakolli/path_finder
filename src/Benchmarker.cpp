@@ -52,7 +52,7 @@ auto Benchmarker::benchmarkLevel(HybridPathFinder& pathFinder, uint32_t level, u
 void Benchmarker::dropCaches() {
   sync();
 
-  if(system("sudo /usr/local/bin/drop_caches.sh") != 0) {
+  if(system("echo 1 > /proc/sys/vm/drop_caches") != 0) {
     throw std::runtime_error("could not drop caches!");
   };
 }

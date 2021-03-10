@@ -76,9 +76,7 @@ if(PACKAGE_TESTS)
 endif()
 
 option(PACKAGE_BENCHMARKS "Build benchmark" ON)
-if(PACKAGE_BENCHMARKS)
-    add_subdirectory(benchmarks)
-endif()
+
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE TEST=0)
