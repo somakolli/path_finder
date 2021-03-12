@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <path_finder/graphs/GeometricType.h>
@@ -8,6 +7,7 @@
 
 namespace pathFinder {
 using NodeId = uint32_t;
+using EdgeId = uint32_t;
 
 using Distance = uint32_t;
 using Level = uint16_t;
@@ -40,7 +40,7 @@ void to_json(nlohmann::json &j, LatLng latLng);
 void from_json(const nlohmann::json &j, LatLng &latLng);
 class Node {
 public:
-  NodeId id;
+  NodeId id{std::numeric_limits<NodeId>::max()};
   LatLng latLng;
   [[nodiscard]] auto quickBeeLine(const LatLng &other) const -> double;
   [[nodiscard]] auto quickBeeLine(const Node &other) const -> double;
@@ -48,9 +48,9 @@ public:
 };
 class Edge {
 public:
-  NodeId source;
-  NodeId target;
-  NodeId distance;
+  NodeId source{std::numeric_limits<NodeId>::max()};
+  NodeId target{std::numeric_limits<NodeId>::max()};
+  NodeId distance{std::numeric_limits<NodeId>::max()};
   Edge(NodeId source, NodeId target, Distance distance) : source(source), target(target), distance(distance) {}
   Edge() = default;
   friend auto operator<<(std::ostream &Str, const Edge &edge) -> std::ostream & {
@@ -59,7 +59,7 @@ public:
   }
 };
 struct CHNode : Node {
-  Level level;
+  Level level{std::numeric_limits<Level>::max()};
   auto toNode() -> Node { return Node{id, latLng}; }
 };
 struct CHEdge : Edge {
@@ -98,7 +98,7 @@ struct CalcLabelTimingInfo {
 };
 
 struct RoutingResultTimingInfo {
-  double distanceTime;
+  double distanceTime = 0;
   double pathTime = 0;
   double cellTime = 0;
   double nodeSearchTime = 0;

@@ -2,6 +2,27 @@
 #include <path_finder/routing/CHDijkstra.h>
 #include <path_finder/storage/FileLoader.h>
 namespace pathFinder {
+	
+auto FileLoader::loadHubLabelBundle(const std::string &bundleFolder) -> std::shared_ptr<HybridPathFinderBundle> {
+	auto result = std::make_shared<HybridPathFinderBundle>();
+	//iteratre over all directories in the given directory and try to open these as HybridPathFinder
+	if (!std::filesystem::is_directory(bundleFolder)) {
+		throw std::runtime_error("HybridPathFinderBundle::loadFromDir: given path is not a directory: " + bundleFolder);
+	}
+	for(auto& p: std::filesystem::directory_iterator(bundleFolder)) {
+		if (!std::filesystem::is_directory(p)) {
+			std::cerr << "Skipping " << p.path() << " since it is not a directory " << std::endl;
+			continue;
+		}
+		if (!std::filesystem::is_regular_file(p / std::filesystem::path("config.json"))) {
+			std::cerr << "Skipping " << p.path() << " since it does not contain a config.json file" << std::endl;
+			continue;
+		}
+		result->add(pathFinder::FileLoader::loadHubLabelsShared(p.path().native()));
+	}
+	return result;
+}
+	
 auto
 pathFinder::FileLoader::loadHubLabelsShared(const std::string &configFolder) -> std::shared_ptr<pathFinder::HybridPathFinder> {
 
@@ -130,4 +151,5 @@ auto FileLoader::loadCHDijkstraShared(const std::string &configFolder) -> std::s
   auto graph = loadGraph(configFolder + "/graph/");
   return std::make_shared<CHDijkstra>(graph);
 }
+
 } // namespace pathFinder

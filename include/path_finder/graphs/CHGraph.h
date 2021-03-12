@@ -53,7 +53,7 @@ public:
   [[nodiscard]] auto getNodeIdFor(LatLng latLng, LatLng midPoint = LatLng(0,0)) const -> NodeId;
 
   [[nodiscard]] auto edgesFor(NodeId node, EdgeDirection direction) const -> MyIterator<const CHEdge *>;
-  [[nodiscard]] auto getNode(NodeId id) const -> CHNode;
+  [[nodiscard]] auto getNode(NodeId id) const -> CHNode const &;
   [[nodiscard]] auto getEdgePosition(const CHEdge &edge, EdgeDirection direction) const -> std::optional<size_t>;
   [[nodiscard]] auto getEdgePosition(NodeId source, NodeId target, EdgeDirection direction) const -> std::optional<size_t>;
   [[nodiscard]] auto getPathFromShortcut(CHEdge shortcut, double minLength) const -> std::vector<CHEdge>;

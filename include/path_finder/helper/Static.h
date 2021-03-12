@@ -89,7 +89,7 @@ public:
     std::string path = !folderPrefix.empty() ? folderPrefix + '/' + fileDescription.path : fileDescription.path;
     FILE *file = fopen64(path.c_str(), "r");
 
-    T *buf = (T *)std::calloc(fileDescription.size, sizeof(T));
+    T *buf =  new T[fileDescription.size];
     std::fread(buf, sizeof(T), fileDescription.size, file);
     return buf;
   }
@@ -197,7 +197,13 @@ public:
     ss << num << suffix[place];
     return ss.str();
   }
-
-  static void conditionalFree(void *pointer, bool isMMaped, size_t size);
+    
+  template<typename T>
+  static void conditionalFree(T *pointer, bool isMMaped, std::size_t size) {
+	if (isMMaped)
+		munmap(pointer, size);
+	else
+		delete[] pointer;
+  }
 };
 } // namespace pathFinder

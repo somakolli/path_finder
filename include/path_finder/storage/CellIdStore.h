@@ -24,13 +24,16 @@ private:
   CellId_t *_cellIds;
   OffsetElement *_offsetVector;
 
-  bool _cellIdsMMap = true;
-  bool _offsetMMap = true;
+  bool _cellIdsMMap = false;
+  bool _offsetMMap = false;
 
 public:
+  CellIdStore() = delete;
+  CellIdStore(CellIdStore const &) = delete;
   explicit CellIdStore(size_t numberOfEdges);
   explicit CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo);
   ~CellIdStore();
+  
   void storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd);
   [[nodiscard]] auto offsetSize() const -> size_t;
   [[nodiscard]] auto cellIdSize() const -> size_t;

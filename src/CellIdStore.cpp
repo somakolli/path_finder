@@ -6,20 +6,38 @@
 #include <path_finder/storage/CellIdStore.h>
 namespace pathFinder {
 
-CellIdStore::CellIdStore(size_t numberOfEdges) {
-  _cellIds = (CellId_t *)calloc(_reservedSize, sizeof(CellId_t));
+CellIdStore::CellIdStore(size_t numberOfEdges) : _reservedSize(numberOfEdges) {
+  _cellIds = new CellId_t[_reservedSize];
   _cellIdSize = 0;
-  _offsetVector = (OffsetElement *)calloc(numberOfEdges, sizeof(OffsetElement));
+  _offsetVector = new OffsetElement[numberOfEdges];
   _offsetVectorSize = numberOfEdges;
+}
+
+CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
+  _cellIds = cellIdStoreCreateInfo.cellIds;
+  _cellIdSize = cellIdStoreCreateInfo.cellIdSize;
+  _offsetVector = cellIdStoreCreateInfo.offsetVector;
+  _offsetVectorSize = cellIdStoreCreateInfo.offsetSize;
+  _cellIdsMMap = cellIdStoreCreateInfo.cellIdsMMap;
+  _offsetMMap = cellIdStoreCreateInfo.offsetMMap;
+}
+
+CellIdStore::~CellIdStore() {
+  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
+  Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
 }
 
 void CellIdStore::storeCellIds(size_t edgeId, const std::vector<CellId_t> &cellToAdd) {
   _offsetVector[edgeId].position = _cellIdSize;
   _offsetVector[edgeId].size = cellToAdd.size();
   if (_reservedSize < _cellIdSize + cellToAdd.size()) {
+	auto oldSize = _reservedSize;
     _reservedSize += cellToAdd.size();
     _reservedSize = _reservedSize * 2;
-    _cellIds = (CellId_t *)realloc(_cellIds, sizeof(CellId_t) * (_reservedSize));
+	CellId_t * newData = new CellId_t[_reservedSize];
+	std::copy(_cellIds, _cellIds+oldSize, newData);
+	std::swap(newData, _cellIds);
+	delete[] newData;
   }
   for (auto cell : cellToAdd) {
     _cellIds[_cellIdSize++] = cell;
@@ -40,20 +58,13 @@ auto CellIdStore::cellIdSize() const -> size_t { return _cellIdSize; }
 
 auto CellIdStore::offsetSize() const -> size_t { return _offsetVectorSize; }
 
-CellIdStore::CellIdStore(CellIdStoreCreateInfo cellIdStoreCreateInfo) {
-  _cellIds = cellIdStoreCreateInfo.cellIds;
-  _cellIdSize = cellIdStoreCreateInfo.cellIdSize;
-  _offsetVector = cellIdStoreCreateInfo.offsetVector;
-  _offsetVectorSize = cellIdStoreCreateInfo.offsetSize;
-  _cellIdsMMap = cellIdStoreCreateInfo.cellIdsMMap;
-  _offsetMMap = cellIdStoreCreateInfo.offsetMMap;
+void CellIdStore::shrink_to_fit() {
+	CellId_t * newData = new CellId_t[_cellIdSize];
+	std::copy(_cellIds, _cellIds+_cellIdSize, newData);
+	std::swap(newData, _cellIds);
+	delete[] newData;
+	_reservedSize = _cellIdSize;
 }
-CellIdStore::~CellIdStore() {
-  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
-  Static::conditionalFree(_offsetVector, _offsetMMap, _offsetVectorSize * sizeof(CellId_t));
-  Static::conditionalFree(_cellIds, _cellIdsMMap, _cellIdSize * sizeof(CellId_t));
-}
-void CellIdStore::shrink_to_fit() { _cellIds = (CellId_t *)realloc(_cellIds, sizeof(CellId_t) * (_cellIdSize)); }
 auto CellIdStore::getCellIds(const std::vector<size_t> &edgeIds) const -> std::vector<CellId_t> {
   std::vector<CellId_t> cellIds;
   for (auto edgeId : edgeIds) {
