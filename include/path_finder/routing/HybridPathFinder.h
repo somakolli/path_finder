@@ -53,6 +53,10 @@ public:
       m_cost.push_back(MAX_DISTANCE);
   }
 
+  auto getHubLabelStore() {
+    return this->m_hubLabelStore;
+  }
+
   /**
    * @brief
    * Computes the shortest path and distance from one node id to another.
@@ -87,6 +91,7 @@ public:
   auto getGraph() -> std::shared_ptr<CHGraph>;
   auto getMaxLevel() -> Level;
   void setLabelsUntilLevel(Level level);
+  auto getShortestDistance(NodeId source, NodeId target) -> double;
 
   /**
    * @brief

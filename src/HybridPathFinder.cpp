@@ -215,4 +215,15 @@ auto HybridPathFinder::getGraph() -> std::shared_ptr<CHGraph> { return m_graph; 
 auto HybridPathFinder::getMaxLevel() -> Level { return m_hubLabelStore->maxLevel; }
 
 void HybridPathFinder::setLabelsUntilLevel(Level level) { m_labelsUntilLevel = level; }
+auto HybridPathFinder::getShortestDistance(NodeId source, NodeId target) -> double{
+  CalcLabelTimingInfo calcLabelTimingInfo;
+  auto forwardLabel =
+      calcLabelHybrid(source, EdgeDirection::FORWARD, calcLabelTimingInfo);
+  auto backwardLabel =
+      calcLabelHybrid(target, EdgeDirection::BACKWARD, calcLabelTimingInfo);
+  NodeId topNode;
+  return Static::getShortestDistance(MyIterator(forwardLabel.begin().base(), forwardLabel.end().base()),
+                                  MyIterator(backwardLabel.begin().base(), backwardLabel.end().base()), topNode)
+          .value();
+}
 } // namespace pathFinder
