@@ -8,7 +8,6 @@
 #include <fstream>
 #include <random>
 #include <utility>
-#include <zconf.h>
 
 namespace pathFinder {
 auto Benchmarker::benchmarkAllLevel(HybridPathFinder& pathFinder
