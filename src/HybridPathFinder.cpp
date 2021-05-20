@@ -29,8 +29,14 @@ RoutingResult HybridPathFinder::getShortestPath(NodeId source, NodeId target) {
 
   std::vector<CHEdge> edgePathWithShortcuts = getEdgeVectorFromNodeIdPath(forwardPath, EdgeDirection::FORWARD);
 
-  // unpack edges
   std::vector<CHEdge> edgePathWithoutShortcuts;
+
+  // set routingResultPath
+  for(const auto& edge: edgePathWithoutShortcuts) {
+    routingResult.shortcutEdgeIds.emplace_back(m_graph->getEdgePosition(edge, EdgeDirection::FORWARD).value());
+  }
+
+  // unpack edges
   for (auto edge : edgePathWithShortcuts) {
     for (auto e : m_graph->getPathFromShortcut(edge, 0))
       edgePathWithoutShortcuts.emplace_back(e);

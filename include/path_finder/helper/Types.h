@@ -124,6 +124,7 @@ struct RoutingResultTimingInfo {
 };
 struct RoutingResult {
   std::vector<uint32_t> edgeIds;
+  std::vector<uint32_t> shortcutEdgeIds;
   std::vector<LatLng> path;
   std::vector<CellId_t> cellIds;
   Distance distance;

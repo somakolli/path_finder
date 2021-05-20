@@ -51,51 +51,49 @@ void pathFinder::CHGraph::randomizeLatLngs() {
 }
 void pathFinder::CHGraph::sortEdges() {
   if (m_numberOfEdges >= std::numeric_limits<EdgeId>::max()) {
-	throw std::runtime_error("Too many edges");
+    throw std::runtime_error("Too many edges");
   }
   std::vector<EdgeId> newEdgeIdToOldId(m_numberOfEdges, std::numeric_limits<EdgeId>::max());
-  for(EdgeId i(0); i < m_numberOfEdges; ++i) {
-	newEdgeIdToOldId[i] = i;
+  for (EdgeId i(0); i < m_numberOfEdges; ++i) {
+    newEdgeIdToOldId[i] = i;
   }
-  auto compEdge = [](auto const & edge1, auto const & edge2) -> bool {
-	if (edge1.source == edge2.source) {
-		return edge1.target <= edge2.target;
-	}
-	else {
-		return edge1.source < edge2.source;
-	}
+  auto compEdge = [](auto const &edge1, auto const &edge2) -> bool {
+    if (edge1.source == edge2.source) {
+      return edge1.target <= edge2.target;
+    } else {
+      return edge1.source < edge2.source;
+    }
   };
-  //Compute the new ids of the edges
-  std::sort(newEdgeIdToOldId.begin(), newEdgeIdToOldId.end(), [&](EdgeId id1, EdgeId id2) -> bool {
-	  return compEdge(m_edges[id1], m_edges[id2]);
-  });
-  //Compute the actual new edge vector
-  std::sort(m_edges, m_edges+m_numberOfEdges, compEdge);
-  //Invert newEdgeIdToOldId to get oldEdgeIdToNewId
+  // Compute the new ids of the edges
+  std::sort(newEdgeIdToOldId.begin(), newEdgeIdToOldId.end(),
+            [&](EdgeId id1, EdgeId id2) -> bool { return compEdge(m_edges[id1], m_edges[id2]); });
+  // Compute the actual new edge vector
+  std::sort(m_edges, m_edges + m_numberOfEdges, compEdge);
+  // Invert newEdgeIdToOldId to get oldEdgeIdToNewId
   std::vector<EdgeId> oldEdgeIdToNewId(m_numberOfEdges, std::numeric_limits<EdgeId>::max());
-  for(EdgeId newEdgeId(0); newEdgeId < m_numberOfEdges; ++newEdgeId) {
-	auto & x = oldEdgeIdToNewId.at( newEdgeIdToOldId.at(newEdgeId) );
-	assert(x = std::numeric_limits<EdgeId>::max());
-	x = newEdgeId;
+  for (EdgeId newEdgeId(0); newEdgeId < m_numberOfEdges; ++newEdgeId) {
+    auto &x = oldEdgeIdToNewId.at(newEdgeIdToOldId.at(newEdgeId));
+    assert(x = std::numeric_limits<EdgeId>::max());
+    x = newEdgeId;
   }
-  //Now take care of the short cut children since these still have the old edgeId
-  for(EdgeId edgeId(0); edgeId < m_numberOfEdges; ++edgeId) {
-	auto & edge = m_edges[edgeId];
-	if (edge.child1) {
-		edge.child1 = oldEdgeIdToNewId.at(edge.child1.value());
-	}
-	if (edge.child2) {
-		edge.child2 = oldEdgeIdToNewId.at(edge.child2.value());
-	}
+  // Now take care of the short cut children since these still have the old edgeId
+  for (EdgeId edgeId(0); edgeId < m_numberOfEdges; ++edgeId) {
+    auto &edge = m_edges[edgeId];
+    if (edge.child1) {
+      edge.child1 = oldEdgeIdToNewId.at(edge.child1.value());
+    }
+    if (edge.child2) {
+      edge.child2 = oldEdgeIdToNewId.at(edge.child2.value());
+    }
   }
 }
-pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, pathFinder::LatLng other ) const {
+pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, pathFinder::LatLng other) const {
   double distance = std::numeric_limits<double>::max();
   NodeId position = m_numberOfNodes;
   if (!boundingBox.contains(latLng) && boundingBox.contains(other)) {
     // get point at correct edge of bounding box
     latLng = boundingBox.getIntersectionPoint(other, latLng);
-  } else if(!boundingBox.contains(latLng) && !boundingBox.contains(other)) {
+  } else if (!boundingBox.contains(latLng) && !boundingBox.contains(other)) {
     latLng = boundingBox.getIntersectionPoint(midPoint, latLng);
   }
   auto gridPositions = (*grid)[latLng];
@@ -124,12 +122,12 @@ pathFinder::NodeId pathFinder::CHGraph::getNodeIdFor(pathFinder::LatLng latLng, 
   return position;
 }
 auto pathFinder::CHGraph::getNode(pathFinder::NodeId id) const -> pathFinder::CHNode const & { return m_nodes[id]; }
-auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge,
-                                                           pathFinder::EdgeDirection direction) const -> std::optional<size_t> {
+auto pathFinder::CHGraph::getEdgePosition(const pathFinder::CHEdge &edge, pathFinder::EdgeDirection direction) const
+    -> std::optional<size_t> {
   return getEdgePosition(edge.source, edge.target, direction);
 }
-auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut,
-                                              double minLength) const -> std::vector<pathFinder::CHEdge> {
+auto pathFinder::CHGraph::getPathFromShortcut(pathFinder::CHEdge shortcut, double minLength) const
+    -> std::vector<pathFinder::CHEdge> {
   std::vector<CHEdge> path;
   if (__glibc_unlikely(shortcut.source >= m_numberOfNodes || shortcut.target >= m_numberOfNodes))
     throw std::out_of_range("shortcut out of range");
@@ -165,10 +163,8 @@ auto pathFinder::CHGraph::getNodes() const -> pathFinder::MyIterator<const pathF
 auto pathFinder::CHGraph::getEdges() const -> pathFinder::MyIterator<const pathFinder::CHEdge *> {
   return pathFinder::MyIterator<const pathFinder::CHEdge *>(m_edges, m_edges + m_numberOfEdges);
 }
-auto
-pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const ->
-    pathFinder::MyIterator<const pathFinder::CHEdge *>
-{
+auto pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection direction) const
+    -> pathFinder::MyIterator<const pathFinder::CHEdge *> {
   switch (direction) {
   case FORWARD:
     return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
@@ -177,7 +173,9 @@ pathFinder::CHGraph::edgesFor(pathFinder::NodeId node, pathFinder::EdgeDirection
   }
   return {&m_edges[m_offset[node]], &m_edges[m_offset[node + 1]]};
 }
-auto pathFinder::CHGraph::getLevel(pathFinder::NodeId nodeId) const -> pathFinder::Level { return m_nodes[nodeId].level; }
+auto pathFinder::CHGraph::getLevel(pathFinder::NodeId nodeId) const -> pathFinder::Level {
+  return m_nodes[nodeId].level;
+}
 auto pathFinder::CHGraph::getForwardOffset() const -> pathFinder::MyIterator<const pathFinder::NodeId *> {
   return pathFinder::MyIterator<const pathFinder::NodeId *>(m_offset, m_offset + m_numberOfNodes);
 }
@@ -231,20 +229,59 @@ auto pathFinder::CHGraph::getDepthFirstSearchOrdering(size_t startEdgeId) const 
     auto [source, target] = stack.top();
     stack.pop();
     auto positionOpt = getEdgePosition(source, target, EdgeDirection::FORWARD);
-    if(!positionOpt.has_value())
+    if (!positionOpt.has_value())
       continue;
     auto edgeIdx = positionOpt.value();
     orderingVec.emplace_back(edgeIdx);
     discovered[edgeIdx] = true;
-    for(auto edge: edgesFor(target, EdgeDirection::FORWARD)) {
+    for (auto edge : edgesFor(target, EdgeDirection::FORWARD)) {
       auto edgeId = getEdgePosition(edge, EdgeDirection::FORWARD);
-      if(edgeId.has_value() && !discovered[edgeId.value()])
+      if (edgeId.has_value() && !discovered[edgeId.value()])
         stack.emplace(edge.source, edge.target);
     }
   }
-  for(int i = 0; i < discovered.size(); ++i) {
-    if(!discovered[i])
+  for (int i = 0; i < discovered.size(); ++i) {
+    if (!discovered[i])
       orderingVec.emplace_back(i);
   }
   return orderingVec;
+}
+auto pathFinder::CHGraph::unpack(const std::vector<EdgeId> &edgeIds, double minLength) const -> std::vector<EdgeId> {
+  std::vector<EdgeId> result;
+  auto shortcuts = getEdges(edgeIds);
+  std::vector<Edge> unpackedPath;
+  unpackedPath.reserve(shortcuts.size() * 2);
+  for (auto shortcut : shortcuts) {
+    for (auto edge : this->getPathFromShortcut(shortcut, minLength)) {
+      unpackedPath.emplace_back(edge);
+    }
+  }
+  for (auto edge : unpackedPath) {
+    auto edgePosition = getEdgePosition(edge.source, edge.target, EdgeDirection::FORWARD);
+    if (edgePosition.has_value())
+      result.emplace_back(edgePosition.value());
+  }
+  return result;
+}
+auto pathFinder::CHGraph::getLatLngPath(const std::vector<EdgeId> &edgeIds) const -> std::vector<LatLng> {
+  std::vector<LatLng> result;
+  auto edges = getEdges(edgeIds);
+  bool first = true;
+  for(size_t i = 0; i < edges.size(); ++i) {
+    if(first) {
+      result.emplace_back(m_nodes[edges[i].source].latLng);
+      first = false;
+      ++i;
+    }
+    result.emplace_back(m_nodes[edges[i].target].latLng);
+  }
+  return result;
+}
+auto pathFinder::CHGraph::getEdges(const std::vector<EdgeId>& edgeIds) const -> std::vector<CHEdge> {
+  std::vector<CHEdge> result;
+  result.reserve(edgeIds.size());
+  for(auto edgeId : edgeIds) {
+    result.emplace_back(m_edges[edgeId]);
+  }
+  return result;
 }

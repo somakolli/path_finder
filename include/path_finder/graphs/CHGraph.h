@@ -57,6 +57,7 @@ public:
   [[nodiscard]] auto getEdgePosition(const CHEdge &edge, EdgeDirection direction) const -> std::optional<size_t>;
   [[nodiscard]] auto getEdgePosition(NodeId source, NodeId target, EdgeDirection direction) const -> std::optional<size_t>;
   [[nodiscard]] auto getPathFromShortcut(CHEdge shortcut, double minLength) const -> std::vector<CHEdge>;
+  [[nodiscard]] auto getEdges(const std::vector<EdgeId>& edgeIds) const -> std::vector<CHEdge>;
   [[nodiscard]] auto isValidNodeId(NodeId id) const -> bool;
   [[nodiscard]] auto getNumberOfNodes() const -> size_t;
   [[nodiscard]] auto getNumberOfEdges() const -> size_t;
@@ -66,6 +67,8 @@ public:
   [[nodiscard]] auto getForwardOffset() const -> MyIterator<const NodeId *>;
   [[nodiscard]] auto getBackwardOffset() const -> MyIterator<const NodeId *>;
   [[nodiscard]] auto getDepthFirstSearchOrdering(size_t startEdge) const -> std::vector<size_t >;
+  [[nodiscard]] auto unpack(const std::vector<EdgeId>& edgeIds, double minLength) const -> std::vector<EdgeId>;
+  [[nodiscard]] auto getLatLngPath(const std::vector<EdgeId>&edgeIds) const -> std::vector<LatLng>;
 
   static auto beeLineWithoutSquareRoot(LatLng latLng1, LatLng latLng2) -> double;
 
